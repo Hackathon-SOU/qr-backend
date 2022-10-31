@@ -84,8 +84,27 @@ const singleUserData= async (req, res) => {
   }
 };
 
+const totalAbsent = async(req, res)=>{
+    try {
+    userData.count({
+      present: false
+    }, function (err, numofDocs) {
+      if (err) {
+        res.status(500).send(err);
+        console.log(err);
+      }
+      console.log(numofDocs);
+      res.status(200).send({
+        count: numofDocs
+      });
+    });
+  } catch (err) {
+    console.log(err);
+  }
+}
 module.exports={
     getuserDetails,
     markpresence,
-    singleUserData
+    singleUserData,
+    totalAbsent
 }
