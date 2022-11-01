@@ -1,6 +1,6 @@
 const mongoose =require('mongoose');
 
-const voluneerData= new mongoose.Schema({
+const volunteerData= new mongoose.Schema({
     password: {
     type: String,
     required: true,
@@ -22,4 +22,4 @@ const voluneerData= new mongoose.Schema({
 
 });
 
-module.exports= mongoose.model( "volunteerData", voluneerData);
+module.exports= mongoose.model( "volunteerData", volunteerData);
