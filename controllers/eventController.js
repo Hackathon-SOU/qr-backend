@@ -38,6 +38,24 @@ const createEvent = async (req, res, next) => {
     }
 }
 
+const getEvent= async (req, res, next) =>{
+    const volunteerId= req.volunteerId;
+    let admin= await volunteerData.findOne({_id: volunteerId}, {_id:0});
+
+    if(admin){
+        console.log(admin);
+        const data= await eventData.find({}, {__v:0});
+        if(data){
+            console.log("data==>", data);
+           res.send(data);
+        }else{
+            res.status(401).send("Something is wrong");
+        }
+    }else{
+        res.send(401).send("Oops, your are not part of IEEE");
+    }
+}
 module.exports = {
-    createEvent
+    createEvent,
+    getEvent
 }
