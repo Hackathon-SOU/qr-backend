@@ -33,6 +33,9 @@ const userData= new mongoose.Schema({
     type: Number,
     required: true,
     default:100,
+  },
+  eventId:{
+    type: mongoose.Schema.Types.ObjectId,
   }
 });
 

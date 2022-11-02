@@ -19,7 +19,6 @@ const volunteerData= new mongoose.Schema({
     type: String,
     required: true,
   },
-
 });
 
 module.exports= mongoose.model( "volunteerData", volunteerData);

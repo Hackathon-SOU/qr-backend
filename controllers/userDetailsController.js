@@ -10,18 +10,16 @@ const getuserDetails = async (req, res, next) => {
         const volunteerId = req.volunteerId;
 
         console.log(volunteerId);
-        let admin = volunteerData.findById({
+        let admin = await volunteerData.findOne({
             _id: volunteerId,
         });
 
-        if (admin) {
-            admin.then((user) => {
-                console.log(user);
-                userData.find({
+        admin?
+                userData.findOne({
                     regId: regId
-                }).then((existingUser, err) => {
+                }, {_id:0, __v:0}).then((existingUser, err) => {
                     console.log(existingUser);
-                    if (existingUser[0].present === true) {
+                    if (existingUser.present === true) {
                         // res.send(existingUser);
                         return res
                             .status(500)
@@ -31,17 +29,9 @@ const getuserDetails = async (req, res, next) => {
                     } else {
                         return res.send(existingUser);
                     }
-                });
-            })
-        } else {
-            res.status(500).send("Oops, it seems you are not part of IEEE.");
-        }
+                })
+        : res.status(500).send("Oops, it seems you are not part of IEEE.");
 
-        // if (resJwt === true) {
-        //     //   console.log(decoded.id, "decoded working");
-        //     console.log(regId);
-        //   
-        // }
     } catch (error) {
         console.log(error);
         res
@@ -50,7 +40,34 @@ const getuserDetails = async (req, res, next) => {
                 "There is no such Particpant here. Please check your Registration Id"
             );
     }
-}
+};
+
+const getAllUserDetails= async(req, res, next) => {
+    try {
+        const eventId= req.query.eventId;
+        const volunteerId = req.volunteerId;
+
+        console.log(volunteerId);
+        let admin = await volunteerData.findOne({
+            _id: volunteerId,
+        });
+
+            console.log("admin==>",admin);
+                admin?
+                    userData.find({eventId: eventId},{_id:0, __v:0}).then((data, error)=>{
+                        if(data){
+                        res.send(data);
+                        }else{
+                        console.log("find user error===>", error);
+                        res.status(501).send(error);
+                        }
+                    })
+                    : res.status(500).send("Oops, it seems you are not part of IEEE.");
+    } catch (error){
+        console.log("catch error==>", error);
+    }
+
+};
 
 const markpresence = async (req, res) => {
     const regId = req.body.regId;
@@ -61,13 +78,11 @@ const markpresence = async (req, res) => {
         const volunteerId = req.volunteerId;
 
         console.log(volunteerId);
-        let admin = volunteerData.findById({
+        let admin = volunteerData.findOne({
             _id: volunteerId,
         });
 
         if (admin) {
-            admin.then((user) => {
-                console.log("user===", user);
                 const response = userData.updateOne({
                     regId: regId
                 }, {
@@ -81,7 +96,6 @@ const markpresence = async (req, res) => {
                         res.send("Marked as Present");
                     }
                 })
-            });
         } else {
             res.status(500).send("Oops, it seems you are not part of IEEE.");
         }
@@ -89,7 +103,7 @@ const markpresence = async (req, res) => {
         console.log(err);
         res.status(500).send(err);
     }
-}
+};
 
 const singleUserData = async (req, res) => {
     try {
@@ -101,13 +115,11 @@ const singleUserData = async (req, res) => {
         const volunteerId = req.volunteerId;
 
         console.log(volunteerId);
-        let admin = volunteerData.findById({
+        let admin = volunteerData.findOne({
             _id: volunteerId,
         });
 
         if (admin) {
-            admin.then((user) => {
-                console.log(user);
                 if (!name || !email || !regId) {
                     res.status(404).send("Something is missing");
                 } else {
@@ -128,7 +140,6 @@ const singleUserData = async (req, res) => {
                         }
                     });
                 }
-            });
         } else {
             res.status(500).send("Oops, it seems you are not part of IEEE.");
         }
@@ -145,13 +156,11 @@ const totalAbsent = async (req, res) => {
         const volunteerId = req.volunteerId;
 
         console.log(volunteerId);
-        let admin = volunteerData.findById({
+        let admin = await volunteerData.findOne({
             _id: volunteerId,
         });
 
         if (admin) {
-            admin.then((user) => {
-                console.log(user);
                 userData.count({
                     present: false
                 }, function (err, numofDocs) {
@@ -164,57 +173,51 @@ const totalAbsent = async (req, res) => {
                         count: numofDocs
                     });
                 });
-            })
         } else {
             res.status(500).send("Oops, it seems you are not part of IEEE.");
         }
     } catch (err) {
         console.log(err);
     }
-}
+};
 
-const uploadSheet = async (req, res) => {
+const uploadSheet = async (req, res) => {   
     try {
+        // const eventId= req.body.eventId;
         const volunteerId = req.volunteerId;
-
+        const eventId = req.query.eventId;
         console.log(volunteerId);
-        let admin = volunteerData.findById({
+        console.log(eventId);
+        let admin = volunteerData.findOne({
             _id: volunteerId,
         });
 
-        if (admin) {
-            admin.then((user) => {
-                console.log(user);
-                fs.readdir("./uploads", (err, files) => {
-                    if (err) throw err;
-                    for (const file of files) {
-                        fs.unlinkSync(`./uploads/${file}`, (err) => {
-                            if (err) throw err;
-                        });
-                    }
-                });
-                console.log(req.files);
-                let filename = "";
+        if (admin) {       
+                // Below code is to upload Sheet from 
+                // console.log("files==>", req.files);
+                let fileName = "";
                 let storage = multer.diskStorage({
                     destination: function (req, file, callback) {
                         callback(null, "./uploads");
                     },
                     filename: function (req, file, callback) {
-                        filename = file.fieldname + "-" + Date.now();
-                        console.log(filename);
-                        callback(null, filename);
+                        console.log(eventId);
+                        fileName = file.fieldname + "-" + eventId + Date.now();
+                        console.log(fileName);
+                        callback(null, fileName);
                     },
                 });
-                var upload = multer({
+                
+                // below code is to read the added data to DB from file
+                var upload =  multer({
                     storage: storage
                 }).single("file");
-                // const file = req.body.file;
-                // console.log(filename);
+                
                 upload(req, res, async function (err) {
                     if (err) {
                         return res.status(500).send(err);
                     } else {
-                        var file = render.readFile(`./uploads/${filename}`);
+                        var file = render.readFile(`./uploads/${fileName}`);
                         const sheet = file.SheetNames;
                         // console.log(sheet);
                         // var data = [];
@@ -252,6 +255,7 @@ const uploadSheet = async (req, res) => {
                                             regId: Math.floor(a.regId),
                                             seatNo: a.seatNo,
                                             present: a.present,
+                                            eventId: eventId
                                         });
                                         console.log(a.name);
                                         data.save((err) => {
@@ -264,6 +268,7 @@ const uploadSheet = async (req, res) => {
                                                 console.log(sheetCount);
                                                 if (sheetCount === sheetData.length) {
                                                     console.log("uploaded Successfully");
+                                                    deleteFile(fileName);
                                                     res.status(200).send("Uploaded Successfully");
                                                 }
                                             }
@@ -275,7 +280,23 @@ const uploadSheet = async (req, res) => {
                         }
                     }
                 });
-            })
+                // This below code is to delete All the files in the upload folder
+                function deleteFile(deleteFile){
+                    fs.readdir("./uploads", (err, files) => {
+                        if (err) throw err;
+                        for (const file of files) {
+                            console.log("delete file===>",file);
+                            console.log("delete file2===>",deleteFile);
+                            if(file=== deleteFile){
+                                fs.unlinkSync(`./uploads/${file}`, (err) => {
+                                    if (err) throw err;
+                                });
+                                break;
+                            }
+                        }
+                    });
+                }
+
         } else {
             res.status(500).send("Oops, it seems you are not part of IEEE.");
         }
@@ -286,6 +307,7 @@ const uploadSheet = async (req, res) => {
 
 
 module.exports = {
+    getAllUserDetails,
     getuserDetails,
     markpresence,
     singleUserData,

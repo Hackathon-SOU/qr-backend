@@ -26,7 +26,8 @@ app.use(express.json());
 app.use(cors());
 app.set('view engine', 'ejs');
 app.use("/api", require("./routes/login"));
-app.use("/api/participant", require("./routes/attendance"));
+app.use("/api/event", require("./routes/event"));
+app.use("/api/participant", require("./routes/participant"));
 app.use(bodyParser.urlencoded({ extended: true }));
 app.listen(process.env.port || 4000, () =>{
     console.log("Server is running on port 4000");
