@@ -1,5 +1,4 @@
 const userData = require("../models/user");
-const volunteerData = require("../models/member");
 const render = require("xlsx");
 const multer = require("multer");
 const fs = require("fs");
@@ -7,14 +6,6 @@ const fs = require("fs");
 const getuserDetails = async (req, res, next) => {
     try {
         const regId = req.query.regId;
-        const volunteerId = req.volunteerId;
-
-        console.log(volunteerId);
-        let admin = await volunteerData.findOne({
-            _id: volunteerId,
-        });
-
-        admin?
                 userData.findOne({
                     regId: regId
                 }, {_id:0, __v:0}).then((existingUser, err) => {
@@ -30,7 +21,6 @@ const getuserDetails = async (req, res, next) => {
                         return res.send(existingUser);
                     }
                 })
-        : res.status(500).send("Oops, it seems you are not part of IEEE.");
 
     } catch (error) {
         console.log(error);
@@ -47,13 +37,6 @@ const getAllUserDetails= async(req, res, next) => {
         const eventId= req.query.eventId;
         const volunteerId = req.volunteerId;
 
-        console.log(volunteerId);
-        let admin = await volunteerData.findOne({
-            _id: volunteerId,
-        });
-
-            console.log("admin==>",admin);
-                admin?
                     userData.find({eventId: eventId},{_id:0, __v:0}).then((data, error)=>{
                         if(data){
                         res.send(data);
@@ -62,7 +45,6 @@ const getAllUserDetails= async(req, res, next) => {
                         res.status(501).send(error);
                         }
                     })
-                    : res.status(500).send("Oops, it seems you are not part of IEEE.");
     } catch (error){
         console.log("catch error==>", error);
     }
@@ -75,14 +57,6 @@ const markpresence = async (req, res) => {
     console.log(regId);
     console.log(present);
     try {
-        const volunteerId = req.volunteerId;
-
-        console.log(volunteerId);
-        let admin = volunteerData.findOne({
-            _id: volunteerId,
-        });
-
-        if (admin) {
                 const response = userData.updateOne({
                     regId: regId
                 }, {
@@ -96,9 +70,6 @@ const markpresence = async (req, res) => {
                         res.send("Marked as Present");
                     }
                 })
-        } else {
-            res.status(500).send("Oops, it seems you are not part of IEEE.");
-        }
     } catch (err) {
         console.log(err);
         res.status(500).send(err);
@@ -112,55 +83,39 @@ const singleUserData = async (req, res) => {
         const regId = req.query.regId;
         const seatNo = req.query.seatNo;
         const present = req.query.present;
-        const volunteerId = req.volunteerId;
 
-        console.log(volunteerId);
-        let admin = volunteerData.findOne({
-            _id: volunteerId,
-        });
-
-        if (admin) {
                 if (!name || !email || !regId) {
                     res.status(404).send("Something is missing");
                 } else {
-                    const data = new userData({
+                    const data = await userData.create({
                         name: name,
                         email: email,
                         regId: regId,
                         seatNo: seatNo,
                         present: present,
                     });
-                    data.save().then((data) => {
                         if (data) {
+                            console.log("data==>", data);
                             res.send("User Added Successfully");
                         }
-                    }).catch((error) => {
-                        if (error.code === 11000) {
-                            res.status(409).send("Oops, you are Already a participant");
-                        }
-                    });
                 }
-        } else {
-            res.status(500).send("Oops, it seems you are not part of IEEE.");
-        }
+        
     } catch (error) {
         console.log("errr", error);
-        // if(error.keyPattern== "regId"){
-        res.status(500).send("Duplicate Email Id")
+        error.code==11000?
+         Object.keys(error.keyPattern)== "email"?
+          res.send("You have already registered with this email"):
+            Object.keys(error.keyPattern)== "regId"?
+                res.send("You have already registered with this regId"):
+            Object.keys(error.keyPattern)== "seatNo"&&
+                res.send("Oops this seat already reserved. Please Check your SeatNo"):
+                 res.send(error);
         // }
     }
 };
 
 const totalAbsent = async (req, res) => {
     try {
-        const volunteerId = req.volunteerId;
-
-        console.log(volunteerId);
-        let admin = await volunteerData.findOne({
-            _id: volunteerId,
-        });
-
-        if (admin) {
                 userData.count({
                     present: false
                 }, function (err, numofDocs) {
@@ -173,9 +128,6 @@ const totalAbsent = async (req, res) => {
                         count: numofDocs
                     });
                 });
-        } else {
-            res.status(500).send("Oops, it seems you are not part of IEEE.");
-        }
     } catch (err) {
         console.log(err);
     }
@@ -184,15 +136,8 @@ const totalAbsent = async (req, res) => {
 const uploadSheet = async (req, res) => {   
     try {
         // const eventId= req.body.eventId;
-        const volunteerId = req.volunteerId;
         const eventId = req.query.eventId;
-        console.log(volunteerId);
-        console.log(eventId);
-        let admin = volunteerData.findOne({
-            _id: volunteerId,
-        });
-
-        if (admin) {       
+        console.log(eventId);     
                 // Below code is to upload Sheet from 
                 // console.log("files==>", req.files);
                 let fileName = "";
@@ -296,16 +241,25 @@ const uploadSheet = async (req, res) => {
                         }
                     });
                 }
-
-        } else {
-            res.status(500).send("Oops, it seems you are not part of IEEE.");
-        }
     } catch (error) {
         console.log("err", error);
     }
 };
 
-
+// const getPoints = async(req, res)=>{
+//     try{
+//         const regId = req.query.regId;
+//         let admin = volunteerData.findOne({
+//             _id: volunteerId,
+//         });
+//         if(admin){
+//             res.send(regId);
+//         }
+//     }catch(error){
+//         console.log("catch error==>", error);
+//         res.send(error);
+//     }
+// }
 module.exports = {
     getAllUserDetails,
     getuserDetails,

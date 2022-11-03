@@ -13,6 +13,7 @@ const userData= new mongoose.Schema({
   email: {
     type: String,
     required: true,
+    unique: true,
   },
   seatNo: {
     type: Number,

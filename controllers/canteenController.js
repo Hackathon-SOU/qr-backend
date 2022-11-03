@@ -6,44 +6,35 @@ const mongoose= require("mongoose");
 
 
 const createCanteen = async (req, res, next) => {
-    const volunteerId = req.volunteerId;
+    try{
     const canteenName = req.query.canteenName;
     const ownerName = req.query.ownerName;
-    let admin = await volunteerData.findOne({
-        _id: volunteerId
-    }, {
-        _id: 0
-    });
-
-    if (admin) {
-        console.log(admin);
-        const data = canteenData.create({
+    const phoneNo = req.query.phoneNo;
+        const data = await canteenData.create({
             canteenName: canteenName,
             ownerName: ownerName,
+            phoneNo: phoneNo
         });
+        console.log("data===>", data);
         if (data) {
             res.send("Hurray, your Canteen added in the SOU")
-        } else {
-            res.send("Something is wrong");
         }
-    } else {
-        res.send(401).send("Oops, your are not part of IEEE");
+    }catch(error){
+        console.log("catch error==>", error);
+        error.code==11000? 
+         Object.keys(error.keyPattern)== "canteenName"? res.send(`You have entered Duplicated Canteen Name`):
+          Object.keys(error.keyPattern)== "phoneNo"&& res.send(`You have entered Duplicated No`):
+           error.errors.phoneNo? res.send(error.errors.phoneNo.message):
+          res.send(error);
     }
 }
 
 const createFoodItem = async (req, res, next) => {
-    const volunteerId = req.volunteerId;
+    try{
     const name = req.query.name;
     const price = req.query.price;
     const canteenId = req.query.canteenId;
-    let admin = await volunteerData.findOne({
-        _id: volunteerId
-    }, {
-        _id: 0
-    });
 
-    if (admin) {
-        console.log(admin);
         const data = foodItems.create({
             name: name,
             price: price,
@@ -54,21 +45,15 @@ const createFoodItem = async (req, res, next) => {
         } else {
             res.status(401).send("Something is wrong");
         }
-    } else {
-        res.send(401).send("Oops, your are not part of IEEE");
+    }catch(error){
+        console.log("catch error==>", error);
+        res.send(error);
     }
 }
-const getMenu = async (req, res, next) => {
-    const volunteerId = req.volunteerId;
-    const canteenId = req.query.canteenId;
-    let admin = await volunteerData.findOne({
-        _id: volunteerId
-    }, {
-        _id: 0
-    });
 
-    if (admin) {
-        console.log(admin);
+const getMenu = async (req, res, next) => {
+    try{
+    const canteenId = req.query.canteenId;
         const data = await foodItems.find({
             canteenId: canteenId,
         }, {
@@ -81,21 +66,14 @@ const getMenu = async (req, res, next) => {
         } else {
             res.status(401).send("Something is wrong");
         }
-    } else {
-        res.send(401).send("Oops, your are not part of IEEE");
+    }catch(error){
+        console.log("catch error==>", error);
+        res.send(error);
     }
 }
 
 const getCanteen = async (req, res, next) => {
-    const volunteerId = req.volunteerId;
-    let admin = await volunteerData.findOne({
-        _id: volunteerId
-    }, {
-        _id: 0
-    });
-
-    if (admin) {
-        console.log(admin);
+    try{
         const data = await canteenData.find({}, {
             __v: 0
         });
@@ -105,8 +83,9 @@ const getCanteen = async (req, res, next) => {
         } else {
             res.status(401).send("Something is wrong");
         }
-    } else {
-        res.send(401).send("Oops, your are not part of IEEE");
+    }catch(error){
+        console.log("catch error==>", error);
+        res.send(error);
     }
 }
 
@@ -114,15 +93,6 @@ const orderFood = async (req, res, next) => {
     setTimeout(async ()=>{
         let session = await mongoose.startSession();
     try {
-        const volunteerId = req.volunteerId;
-        let admin = await volunteerData.findOne({
-            _id: volunteerId
-        }, {
-            _id: 0
-        });
-    
-        if (admin) {
-            console.log(admin);
             session.startTransaction();
     
             const opts = {
@@ -167,9 +137,6 @@ const orderFood = async (req, res, next) => {
             }
             await session.commitTransaction();
             session.endSession();
-        } else {
-            res.send(401).send("Oops, your are not part of IEEE");
-        }
     } catch (error) {
         console.log(error);
         session.endSession();

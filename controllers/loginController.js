@@ -1,11 +1,10 @@
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const volunteerData = require("../models/member");
+const userData = require("../models/user");
 
-
-
-// For register Page
-const registerView= async (req, res, next) =>{
+// For Admin register 
+const adminRegister= async (req, res, next) =>{
     try {
       const membershipId = req.body.membershipId;
       let password = await req.body.password;
@@ -45,49 +44,47 @@ const registerView= async (req, res, next) =>{
   }
 }
 
-// For login
+// For Admin login
 
-const loginView= async (req, res) =>{
+const adminLogin= async (req, res) =>{
   try {
     const membershipId = req.query.membershipId;
     const password = req.query.password;
     console.log(membershipId, password, "15");
-    const response = await volunteerData.findOne({
+    const admin = await volunteerData.findOne({
       membershipId: membershipId,
-    }).then((existingUser, err) => {
-      if (existingUser) {
+    });
+      if (admin) {
         bcrypt.compare(
           password,
-          existingUser.password,
-          function (err, isMatch) {
+          admin.password,
+          async function (err, isMatch) {
             if (err) {
               console.log(err, "25");
               res.send(err);
             }
             if (!isMatch) {
-              return res.json({
+              res.json({
                 message: "The password does not match with the Membership Id",
               });
             } else {
-              console.log(existingUser.membershipId);
+              console.log(admin.membershipId);
 
-              jwt.sign({
-                  id: existingUser._id,
-                  role: existingUser.role,
-                  membershipId: existingUser.membershipId,
+              let accessToken=  jwt.sign({
+                  id: admin._id,
+                  role: admin.role,
+                  membershipId: admin.membershipId,
                 },
-                process.env.SECRET, {
+                process.env.ACCESSSECRET, {
                   expiresIn: 60 * 60
+                });
+              let refreshToken= jwt.sign({
+                  membershipId: admin.membershipId,
                 },
-                (err, token) => {
-                  if (err) {
-                    console.log(err, "43");
-                    res.send(err);
-                  }
-                  // console.log(token);
-                  res.status(200).send(token);
-                }
-              );
+                process.env.REFRESHSECRET);
+
+                res.send({ accessToken: accessToken, refreshToken: refreshToken});
+                // res.send(resToken);
             }
           }
         );
@@ -96,14 +93,85 @@ const loginView= async (req, res) =>{
           message: "You have entered wrong Membership Id"
         });
       }
-    });
   } catch (err) {
     console.log("err", err);
     res.send(err);
   }
 }
 
+const participantLogin= async (req, res) =>{
+  try {
+    const email= req.query.email;
+    const regId = req.query.regId;
+    const participant = await userData.findOne({
+      regId: regId,
+    });
+    console.log(participant);
+      if (participant) {
+            if(participant.email== email){
+              let accessToken=  jwt.sign({
+                  id: participant._id,
+                  role: participant.role,
+                  membershipId: participant.membershipId,
+                },
+                process.env.ACCESSSECRET, {
+                  expiresIn: 60 * 60
+                });
+              let refreshToken= jwt.sign({
+                  membershipId: participant.membershipId,
+                },
+                process.env.REFRESHSECRET);
+  
+                res.send({ accessToken: accessToken, refreshToken: refreshToken});
+            }else{
+              res.send("Email does not match, check your email Id")
+            }
+      }else{
+        res.send("Oops, it seems you are not particpant of the Event");
+      }
+  } catch (err) {
+    console.log("err", err);
+    res.send(err);
+  }
+}
+
+const getAdminJwtToken= async(req,res)=>{
+  try{
+    const membershipId= req.query.membershipId;
+    const refreshToken= req.query.refreshToken;
+    jwt.verify(refreshToken, process.env.REFRESHSECRET, async function(error, decoded){
+      if(error){
+
+        console.log("errrr", error);
+        res.status(500).send(error);
+
+      }else{
+        console.log(decoded);
+        if(decoded.membershipId== membershipId){
+          const admin = await volunteerData.findOne({
+            membershipId: membershipId,
+          });
+          let accessToken=  jwt.sign({
+            id: admin._id,
+            role: admin.role,
+            membershipId: admin.membershipId,
+          },
+          process.env.ACCESSSECRET, {
+            expiresIn: 60 * 60
+          });
+          res.send({ accessToken: accessToken, refreshToken: refreshToken});
+        }
+      }
+    })
+  }catch(error){
+    console.log("catch error==>", error);
+    res.send(error);
+  }
+}
+
 module.exports= {
-    registerView,
-    loginView
+    adminRegister,
+    adminLogin,
+    getAdminJwtToken,
+    participantLogin
 }

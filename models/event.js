@@ -6,8 +6,15 @@ const eventData= new mongoose.Schema({
         required: true
     },
     eventDate:{
-        type: Date,
-        requied: true,
+        type: Number,
+        required: true,
+        unique: true,
+        validate:{
+            validator: function(val){
+                return val.toString().length === 10
+            },
+            message: val => `${val.value} has to be 10 digits`
+        }
     },
     eventType:{
         type: String,
