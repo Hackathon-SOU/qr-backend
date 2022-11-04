@@ -1,11 +1,16 @@
 const jwt = require("jsonwebtoken");
 const volunteerData = require("../models/member");
 const userData = require("../models/user");
+const canteenData = require("../models/canteen");
 
 function verifyJwt(req, res, next) {
   try {
-    console.log(req.query.token);
-    jwt.verify(req.query.token, process.env.ACCESSSECRET, function (err, decoded) {
+    console.log(req.headers.authorization);
+    let token;
+    if(req.headers.authorization.split(" ")[0]== "Bearer"){
+      token= req.headers.authorization.split(" ")[1];
+    }
+    jwt.verify(token, process.env.ACCESSSECRET, function (err, decoded) {
       if (err) {
         console.log("errrr", err);
         res.status(500).send(err);
@@ -22,7 +27,7 @@ function verifyJwt(req, res, next) {
 
 async function authorizeAdmin(req, res, next){
   const volunteerId= req.id;
-  console.log(volunteerId);
+  console.log("volunteerId==>", volunteerId);
   let admin = await volunteerData.findOne({
     _id: volunteerId,
   });
@@ -34,15 +39,15 @@ async function authorizeParticpant(req, res, next){
   let user = await userData.findOne({
     _id: participantId,
   });
-  user?  next():  res.status(500).send("Oops, it seems you are not part of IEEE.");
+  user?  next():  res.status(500).send("Oops, it seems you are not participant.");
 }
 
 
 async function authorizeCanteen(req, res, next){
-  const participantId= req.id;
-  let user = await userData.findOne({
-    _id: participantId,
+  const canteenId= req.id;
+  let user = await canteenData.findOne({
+    _id: canteenId,
   });
-  user?  next():  res.status(500).send("Oops, it seems you are not part of IEEE.");
+  user?  next():  res.status(500).send("Oops, it seems you are not a registered Canteen Owner.");
 }
 module.exports = {verifyJwt, authorizeAdmin, authorizeParticpant, authorizeCanteen};

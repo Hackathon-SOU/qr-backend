@@ -3,9 +3,9 @@ const volunteerData = require("../models/member");
 
 const createEvent = async (req, res, next) => {
     try {
-        const eventName = req.query.eventName;
-        const eventDate = req.query.eventDate;
-        const eventType = req.query.eventType;
+        const eventName = req.body.eventName;
+        const eventDate = req.body.eventDate;
+        const eventType = req.body.eventType;
                 // console.log(eventName, eventType, eventDate);
                 const data= await  eventData.create({
                     eventName: eventName,

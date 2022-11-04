@@ -1,11 +1,19 @@
 const mongoose = require("mongoose");
 
 const canteenData= new mongoose.Schema({
+    
     canteenName:{
         type: String,
         required: true,
         unique: true,
     },
+
+    email:{
+        type: String,
+        unique: true,
+        required:true
+    },
+
     phoneNo:{
         type: Number,
         required: true,
@@ -18,10 +26,15 @@ const canteenData= new mongoose.Schema({
         }
 
     },
+
     ownerName:{
         type: String,
         required: true,
     },
+    password:{
+        type: String,
+        required: true,
+    }, 
     points:{
         type: Number,
         default: 0,

@@ -1,41 +1,16 @@
 const canteenData = require("../models/canteen");
 const userData = require("../models/user");
-const volunteerData = require("../models/member");
 const foodItems = require("../models/foodItem");
 const mongoose= require("mongoose");
 
 
-const createCanteen = async (req, res, next) => {
-    try{
-    const canteenName = req.query.canteenName;
-    const ownerName = req.query.ownerName;
-    const phoneNo = req.query.phoneNo;
-        const data = await canteenData.create({
-            canteenName: canteenName,
-            ownerName: ownerName,
-            phoneNo: phoneNo
-        });
-        console.log("data===>", data);
-        if (data) {
-            res.send("Hurray, your Canteen added in the SOU")
-        }
-    }catch(error){
-        console.log("catch error==>", error);
-        error.code==11000? 
-         Object.keys(error.keyPattern)== "canteenName"? res.send(`You have entered Duplicated Canteen Name`):
-          Object.keys(error.keyPattern)== "phoneNo"&& res.send(`You have entered Duplicated No`):
-           error.errors.phoneNo? res.send(error.errors.phoneNo.message):
-          res.send(error);
-    }
-}
-
 const createFoodItem = async (req, res, next) => {
     try{
-    const name = req.query.name;
-    const price = req.query.price;
-    const canteenId = req.query.canteenId;
+    const name = req.body.name;
+    const price = req.body.price;
+    const canteenId = req.body.canteenId;
 
-        const data = foodItems.create({
+        const data = await foodItems.create({
             name: name,
             price: price,
             canteenId: canteenId,
@@ -53,7 +28,7 @@ const createFoodItem = async (req, res, next) => {
 
 const getMenu = async (req, res, next) => {
     try{
-    const canteenId = req.query.canteenId;
+    const canteenId = req.body.canteenId;
         const data = await foodItems.find({
             canteenId: canteenId,
         }, {
@@ -98,10 +73,10 @@ const orderFood = async (req, res, next) => {
             const opts = {
                 session
             };
-            const userId = req.query.userId;
-            const canteenId = req.query.canteenId;
-            const foodItemId = req.query.foodItemId;
-            const quantity = parseInt(req.query.quantity);
+            const userId = req.body.userId;
+            const canteenId = req.body.canteenId;
+            const foodItemId = req.body.foodItemId;
+            const quantity = parseInt(req.body.quantity);
             let calcPrice;
             await foodItems.findById(foodItemId).then((item) => {
                 calcPrice = item.price * quantity;
@@ -145,7 +120,6 @@ const orderFood = async (req, res, next) => {
 }
 
 module.exports = {
-    createCanteen,
     createFoodItem,
     getMenu,
     getCanteen,
