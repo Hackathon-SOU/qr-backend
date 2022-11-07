@@ -292,11 +292,13 @@ const getParticipantJwtToken = async (req, res) => {
       } else {
         console.log(decoded);
         if (decoded.regId == regId) {
-          const participant = await volunteerData.findOne({
+          const participant = await userData.findOne({
             regId: regId,
           });
+          console.log("participant", participant);
           let accessToken = jwt.sign({
-              _id: participant._id,
+              id: participant._id,
+              regId: participant.regId,
             },
             process.env.ACCESSSECRET, {
               expiresIn: 60 * 60

@@ -15,7 +15,7 @@ function verifyJwt(req, res, next) {
         console.log("errrr", err);
         res.status(500).send(err);
       } else {
-        console.log(decoded.id);
+        console.log("decoded", decoded.id);
         req.id= decoded.id;
         return next();
       }
@@ -39,15 +39,18 @@ async function authorizeParticpant(req, res, next){
   let user = await userData.findOne({
     _id: participantId,
   });
+  console.log("userrrr", user);
+  req.body.userId= user._id;
   user?  next():  res.status(500).send("Oops, it seems you are not participant.");
 }
 
 
 async function authorizeCanteen(req, res, next){
   const canteenId= req.id;
-  let user = await canteenData.findOne({
+  let canteen = await canteenData.findOne({
     _id: canteenId,
   });
-  user?  next():  res.status(500).send("Oops, it seems you are not a registered Canteen Owner.");
+  req.body.canteenId= canteen._id;
+  canteen?  next():  res.status(500).send("Oops, it seems you are not a registered Canteen Owner.");
 }
 module.exports = {verifyJwt, authorizeAdmin, authorizeParticpant, authorizeCanteen};

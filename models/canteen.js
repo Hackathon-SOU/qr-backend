@@ -31,10 +31,12 @@ const canteenData= new mongoose.Schema({
         type: String,
         required: true,
     },
+
     password:{
         type: String,
         required: true,
     }, 
+    
     points:{
         type: Number,
         default: 0,
