@@ -10,37 +10,27 @@ const adminRegister = async (req, res, next) => {
     const membershipId = req.body.membershipId;
     let password = await req.body.password;
     const email = req.body.email;
-    const role = req.body.role;
-    //   console.log(req.body);
-    console.log(membershipId, password, role, email);
+    const role = req.body.role;    
+    // console.log(membershipId, password, role, email);
     await bcrypt.hash(password, 10).then((hash) => {
       password = hash;
-    });
-    console.log(password);
-    const data = new volunteerData({
+    });    
+    const data = await  volunteerData.create({
       password: password,
       email: email,
       membershipId: membershipId,
       role: role,
     });
-    const dataToSave = await data.save();
-    console.log(dataToSave);
-    return res.send({
-      message: "Account has been created"
-    });
+    data && res.send("Account has been created");
   } catch (error) {
-    console.log(error, "11");
+    console.log("error===>", error);
     if (error.keyPattern.email) {
-      return res.status(500).send({
-        message: "Duplicate Email was found",
-      });
+       res.status(500).send("Duplicate Email was found");
     } else if (error.keyPattern.membershipId) {
       console.log(error.message);
-      return res.status(500).send({
-        message: "Account for these Membership Id has already been created",
-      });
+       res.status(500).send("Account for these Membership Id has already been created");
     } else {
-      return res.send(error.message);
+       res.send(error.message);
     }
   }
 }
@@ -52,12 +42,10 @@ const canteenRegister = async (req, res, next) => {
     const phoneNo = req.body.phoneNo;
     let email = req.body.email;
     let password = req.body.password;
-    //   console.log(req.body);
-    console.log(password, email);
+    // console.log(password, email);
     await bcrypt.hash(password, 10).then((hash) => {
       password = hash;
     });
-    console.log(password);
     const data = await canteenData.create({
       password: password,
       email: email,
@@ -65,22 +53,14 @@ const canteenRegister = async (req, res, next) => {
       ownerName: ownerName,
       phoneNo: phoneNo
     });
-    const dataToSave = await data.save();
-    console.log(dataToSave);
-    return res.send({
-      message: "Account has been created"
-    });
+    data && res.send("Account has been created");
   } catch (error) {
     console.log(error, "11");
     if (error.keyPattern.email) {
-      return res.status(500).send({
-        message: "Duplicate Email was found",
-      });
+      return res.status(500).send("Duplicate Email was found");
     } else if (error.keyPattern.phonNo) {
       console.log(error.message);
-      return res.status(500).send({
-        message: "Account for these Phone Number has already been created",
-      });
+      return res.status(500).send("Account for these Phone Number has already been created");
     } else {
       return res.send(error.message);
     }
@@ -93,7 +73,7 @@ const adminLogin = async (req, res) => {
   try {
     const membershipId = req.body.membershipId;
     const password = req.body.password;
-    console.log(membershipId, password, "15");
+    // console.log(membershipId, password);
     const admin = await volunteerData.findOne({
       membershipId: membershipId,
     });
