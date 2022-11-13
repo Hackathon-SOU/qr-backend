@@ -7,7 +7,12 @@ function verifyJwt(req, res, next) {
   try {
     console.log(req.headers.authorization);
     let token;
-    if(req.headers.authorization.split(" ")[0]== "Bearer"){
+    if(req.headers.authorization== undefined || null==req.headers.authorization){
+      res.status(404).send({
+        message: "Please enter Access Token"
+      })
+    }
+    else if(req.headers.authorization.split(" ")[0]== "Bearer"){
       token= req.headers.authorization.split(" ")[1];
     }
     jwt.verify(token, process.env.ACCESSSECRET, function (err, decoded) {
@@ -20,8 +25,8 @@ function verifyJwt(req, res, next) {
         return next();
       }
     });
-  } catch (err) {
-    console.log("err", err);
+  } catch (error) {
+    console.log("error===>", error.message);
   }
 };
 
