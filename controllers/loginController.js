@@ -73,25 +73,21 @@ const adminLogin = async (req, res) => {
   try {
     const membershipId = req.body.membershipId;
     const password = req.body.password;
-    // console.log(membershipId, password);
-    const admin = await volunteerData.findOne({
+    const admin = await volunterData.findOne({
       membershipId: membershipId,
     });
     if (admin) {
       bcrypt.compare(
         password,
         admin.password,
-        async function (err, isMatch) {
-          if (err) {
-            console.log(err, "25");
-            res.send(err);
+        async function (error, isMatch) {
+          if (error) {    
+              throw error;
           } else if (!isMatch) {
-            res.json({
+            res.status(401).json({
               message: "The password does not match with the Membership Id",
             });
           } else {
-            console.log(admin.membershipId);
-
             let accessToken = jwt.sign({
                 id: admin._id,
                 role: admin.role,
@@ -105,24 +101,25 @@ const adminLogin = async (req, res) => {
               },
               process.env.REFRESHSECRET);
 
-            res.send({
+            res.status(200).send({
               accessToken: accessToken,
               refreshToken: refreshToken
             });
-            // res.send(resToken);
           }
         }
       );
-    } else {
-      res.json({
+    } else {      
+      res.status(401).json({
         message: "You have entered wrong Membership Id"
       });
     }
-  } catch (err) {
-    console.log("err", err);
-    res.send(err);
+  } catch (error) {
+    console.log("api error===>", error);
+    res.status(400);
+    res.send({message:'server is down'});
   }
 }
+
 const canteenLogin = async (req, res) => {
   try {
     const email = req.body.email;
@@ -296,6 +293,8 @@ const getParticipantJwtToken = async (req, res) => {
     res.send(error);
   }
 }
+
+
 const getCanteenJwtToken = async (req, res) => {
   try {
     const phoneNo = req.body.phoneNo;

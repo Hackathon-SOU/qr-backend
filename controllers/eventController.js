@@ -1,5 +1,4 @@
 const eventData = require("../models/event");
-const volunteerData = require("../models/member");
 
 const createEvent = async (req, res, next) => {
     try {

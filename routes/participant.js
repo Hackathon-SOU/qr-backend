@@ -1,6 +1,4 @@
 const express= require('express');
-const bodyParser= require('body-parser');
-var urlencodedParser = bodyParser.urlencoded({ extended: false });
 const {getuserDetails}= require("../controllers/userDetailsController")
 const {participantLogin, getParticipantJwtToken}= require("../controllers/loginController")
 const {orderFood, getAllTransaction, getCanteen, getMenu}= require("../controllers/canteenController")
@@ -8,20 +6,20 @@ const {verifyJwt, authorizeParticpant}= require("../middleware/verifyJwt");
 const {getEvent}= require("../controllers/eventController")
 const router= express.Router();
 
-router.post('/login', urlencodedParser, participantLogin);
+router.post('/login', participantLogin);
 
-router.get('/getjwttoken', urlencodedParser, getParticipantJwtToken);
+router.get('/getjwttoken', getParticipantJwtToken);
 
-router.get('/getuserdetails',urlencodedParser,verifyJwt, authorizeParticpant, getuserDetails);
+router.get('/getuserdetails',verifyJwt, authorizeParticpant, getuserDetails);
 
-router.get("/getmenu", urlencodedParser, verifyJwt, authorizeParticpant, getMenu);
+router.get("/getmenu", verifyJwt, authorizeParticpant, getMenu);
 
-router.get("/getcanteen", urlencodedParser, verifyJwt, authorizeParticpant, getCanteen);
+router.get("/getcanteen", verifyJwt, authorizeParticpant, getCanteen);
 
-router.post("/orderfood", urlencodedParser, verifyJwt, authorizeParticpant, orderFood);
+router.post("/orderfood", verifyJwt, authorizeParticpant, orderFood);
 
-router.get("/getAllTransactions", urlencodedParser, verifyJwt, authorizeParticpant, getAllTransaction);
+router.get("/getAllTransactions", verifyJwt, authorizeParticpant, getAllTransaction);
 
-router.get("/getevent", urlencodedParser, verifyJwt, authorizeParticpant, getEvent);
+router.get("/getevent", verifyJwt, authorizeParticpant, getEvent);
 
 module.exports = router;

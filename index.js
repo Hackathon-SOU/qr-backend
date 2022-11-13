@@ -1,8 +1,7 @@
 const express = require('express');
-const bodyParser= require('body-parser');
 const mongoose= require('mongoose');
 const cors= require('cors');
-const path = require('path');
+const {notFound, errorHandling}= require('./middleware/errorHandler');
 require("dotenv").config();
 
 
@@ -21,14 +20,16 @@ database.once("connected", () =>{
 
 
 const app= express();
-app.use(bodyParser.json());
 app.use(express.json());
+app.use(express.urlencoded({extended: false}));
 app.use(cors());
-app.set('view engine', 'ejs');
 app.use("/api/admin", require("./routes/admin"));
 app.use("/api/canteen", require("./routes/canteen"));
 app.use("/api/participant", require("./routes/participant"));
-app.use(bodyParser.urlencoded({ extended: true }));
+
+
+app.use(notFound);
+app.use(errorHandling);
 app.listen(process.env.port || 4000, () =>{
     console.log("Server is running on port 4000");
 });

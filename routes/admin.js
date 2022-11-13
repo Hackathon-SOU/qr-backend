@@ -1,6 +1,4 @@
 const express= require('express');
-const bodyParser= require('body-parser');
-var urlencodedParser = bodyParser.urlencoded({ extended: false });
 const {createEvent, getEvent}= require("../controllers/eventController")
 const {getuserDetails,getAllUserDetails, uploadSheet, markpresence, singleUserData, totalAbsent}= require("../controllers/userDetailsController")
 const {adminRegister, canteenRegister, adminLogin, getAdminJwtToken }= require("../controllers/loginController")
@@ -9,32 +7,32 @@ const {verifyJwt, authorizeAdmin}= require("../middleware/verifyJwt");
 const multerUpload = require("../middleware/uploadSheet");
 const router= express.Router();
 
-router.post('/signup',urlencodedParser,  adminRegister);
+router.post('/signup',  adminRegister);
 
-router.post('/login', urlencodedParser, adminLogin);
+router.post('/login', adminLogin);
 
-router.get('/getjwttoken', urlencodedParser, getAdminJwtToken);
+router.get('/getjwttoken', getAdminJwtToken);
 
-router.post('/uploadSheet', urlencodedParser, verifyJwt, authorizeAdmin, multerUpload, uploadSheet);
+router.post('/uploadSheet', verifyJwt, authorizeAdmin, multerUpload, uploadSheet);
 
-router.get('/getalluserdetails',urlencodedParser,verifyJwt, authorizeAdmin,  getAllUserDetails);
+router.get('/getalluserdetails',verifyJwt, authorizeAdmin,  getAllUserDetails);
 
-router.get('/getuserdetails',urlencodedParser,verifyJwt, authorizeAdmin,  getuserDetails);
+router.get('/getuserdetails',verifyJwt, authorizeAdmin,  getuserDetails);
 
-router.post('/singleuserdata', urlencodedParser,verifyJwt, authorizeAdmin, singleUserData);
+router.post('/singleuserdata',verifyJwt, authorizeAdmin, singleUserData);
 
-router.put('/markpresence',urlencodedParser,verifyJwt, authorizeAdmin, markpresence);
+router.put('/markpresence',verifyJwt, authorizeAdmin, markpresence);
 
-router.get('/totalabsent', urlencodedParser, verifyJwt, authorizeAdmin, totalAbsent);
+router.get('/totalabsent', verifyJwt, authorizeAdmin, totalAbsent);
 
-router.post("/createevent", urlencodedParser, verifyJwt, authorizeAdmin, createEvent);
+router.post("/createevent", verifyJwt, authorizeAdmin, createEvent);
 
-router.get("/getevent", urlencodedParser, verifyJwt, authorizeAdmin, getEvent);
+router.get("/getevent", verifyJwt, authorizeAdmin, getEvent);
 
-router.get("/getcanteen", urlencodedParser, verifyJwt, authorizeAdmin, getCanteen);
+router.get("/getcanteen", verifyJwt, authorizeAdmin, getCanteen);
 
-router.post("/createcanteen", urlencodedParser, verifyJwt, authorizeAdmin, canteenRegister);
+router.post("/createcanteen", verifyJwt, authorizeAdmin, canteenRegister);
 
-router.get("/getmenu", urlencodedParser, verifyJwt, authorizeAdmin, getMenu);
+router.get("/getmenu", verifyJwt, authorizeAdmin, getMenu);
 
 module.exports = router;
