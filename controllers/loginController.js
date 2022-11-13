@@ -73,7 +73,7 @@ const adminLogin = async (req, res) => {
   try {
     const membershipId = req.body.membershipId;
     const password = req.body.password;
-    const admin = await volunterData.findOne({
+    const admin = await volunteerData.findOne({
       membershipId: membershipId,
     });
     if (admin) {
