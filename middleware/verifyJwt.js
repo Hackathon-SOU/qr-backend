@@ -15,10 +15,13 @@ function verifyJwt(req, res, next) {
     else if(req.headers.authorization.split(" ")[0]== "Bearer"){
       token= req.headers.authorization.split(" ")[1];
     }
-    jwt.verify(token, process.env.ACCESSSECRET, function (err, decoded) {
-      if (err) {
-        console.log("errrr", err);
-        res.status(500).send(err);
+    jwt.verify(token, process.env.ACCESSSECRET, function (error, decoded) {
+      if (error) {
+        console.log("errrr", error);
+        error.message
+        res.status(401).send({
+          message: error.message
+        });
       } else {
         console.log("decoded", decoded.id);
         req.id= decoded.id;
@@ -26,6 +29,7 @@ function verifyJwt(req, res, next) {
       }
     });
   } catch (error) {
+    console.log(error);
     console.log("error===>", error.message);
   }
 };
@@ -36,7 +40,7 @@ async function authorizeAdmin(req, res, next){
   let admin = await volunteerData.findOne({
     _id: volunteerId,
   });
-  admin?  next():  res.status(500).send("Oops, it seems you are not part of IEEE.");
+  admin?  next():  res.status(403).send("Oops, it seems you are not part of IEEE.");
 }
 
 async function authorizeParticpant(req, res, next){
@@ -46,7 +50,7 @@ async function authorizeParticpant(req, res, next){
   });
   console.log("userrrr", user);
   req.body.userId= user._id;
-  user?  next():  res.status(500).send("Oops, it seems you are not participant.");
+  user?  next():  res.status(403).send("Oops, it seems you are not participant.");
 }
 
 
@@ -56,6 +60,6 @@ async function authorizeCanteen(req, res, next){
     _id: canteenId,
   });
   req.body.canteenId= canteen._id;
-  canteen?  next():  res.status(500).send("Oops, it seems you are not a registered Canteen Owner.");
+  canteen?  next():  res.status(403).send("Oops, it seems you are not a registered Canteen Owner.");
 }
 module.exports = {verifyJwt, authorizeAdmin, authorizeParticpant, authorizeCanteen};
