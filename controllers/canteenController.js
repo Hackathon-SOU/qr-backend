@@ -17,13 +17,19 @@ const createFoodItem = async (req, res, next) => {
             canteenId: canteenId,
         });
         if (data) {
-            res.send("Hurray, your food Item added in your Menu")
+            res.send({
+                message: "Hurray, your food Item added in your Menu"
+            })
         } else {
-            res.status(401).send("Something is wrong");
+            res.status(401).send({
+                message: "Something is wrong"
+            });
         }
     } catch (error) {
         console.log("catch error==>", error);
-        res.send(error);
+        res.send({
+            message: error.message
+        });
     }
 }
 
@@ -40,11 +46,15 @@ const getMenu = async (req, res, next) => {
             // console.log("data==>", data);
             res.send(data);
         } else {
-            res.status(401).send("Something is wrong");
+            res.status(401).send({
+                message: "Something is wrong"
+            });
         }
     } catch (error) {
         console.log("catch error==>", error);
-        res.send(error);
+        res.send({
+            message: error.message
+        });
     }
 }
 
@@ -57,11 +67,15 @@ const getCanteen = async (req, res, next) => {
             // console.log("data==>", data);
             res.send(data);
         } else {
-            res.status(401).send("Something is wrong");
+            res.status(401).send({
+                message: "Something is wrong"
+            });
         }
     } catch (error) {
         console.log("catch error==>", error);
-        res.send(error);
+        res.send({
+            message: error.message
+        });
     }
 }
 
@@ -105,7 +119,9 @@ const orderFood = async (req, res, next) => {
             }, opts);
 
             if (userUpdate.acknowledge == true) {
-                console.log("User point Updated");
+                console.log({
+                    message: "User point Updated"
+                });
             }
 
             const updateCanteen = await canteenData.updateOne({
@@ -117,7 +133,9 @@ const orderFood = async (req, res, next) => {
             }, opts);
 
             if (updateCanteen.acknowledged == true) {
-                console.log("canteenData document updated");
+                console.log({
+                    message: "canteenData document updated"
+                });
             }
             const transactionRef = await transactionData.create([{
                 canteenId: canteenId,
@@ -126,19 +144,25 @@ const orderFood = async (req, res, next) => {
                 price: calcPrice,
             }], opts);
             if (transactionRef) {
-                res.send("Hurray!!!!, your order has been placed. It will take some time. Enjoy your meal");
+                res.send({
+                    message: "Hurray!!!!, your order has been placed. It will take some time. Enjoy your meal"
+                });
             } else {
                 res.send(transactionRef);
             }
         } else {
-            res.send("Oops...., it seems You don't have enough points.")
+            res.send({
+                message: "Oops...., it seems You don't have enough points."
+            });
         }
         await session.commitTransaction();
         session.endSession();
     } catch (error) {
         console.log("error===>", error);
         // console.log(error.message);
-        res.status(500).send("Oops, Your trnsaction was not successful, please try Again")
+        res.status(500).send({
+            message: "Oops, Your trnsaction was not successful, please try Again"
+        })
         session.abortTransaction();
         session.endSession();
     }
@@ -158,10 +182,15 @@ const getAllTransaction = async (req, res, next) => {
         if (transactions[0].price) {
             res.send(transactions);
         } else {
-            res.send(transactions.error);
+            res.send({
+                message: transactions.error.message
+            });
         }
     } catch (error) {
         console.log(error);
+        res.status(501).send({
+            message: error.message
+        });
     }
 }
 

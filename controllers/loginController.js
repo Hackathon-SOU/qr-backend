@@ -40,7 +40,9 @@ const adminRegister = async (req, res, next) => {
         message: "Account for these Membership Id has already been created"
       });
     } else {
-      res.send(error.message);
+      res.send({
+        message: error.message
+      });
     }
   }
 }
@@ -63,16 +65,24 @@ const canteenRegister = async (req, res, next) => {
       ownerName: ownerName,
       phoneNo: phoneNo
     });
-    data && res.send("Account has been created");
+    data && res.send({
+      message: "Account has been created"
+    });
   } catch (error) {
     console.log(error, "11");
     if (error.keyPattern.email) {
-      return res.status(500).send("Duplicate Email was found");
+      return res.status(500).send({
+        message: "Duplicate Email was found"
+      });
     } else if (error.keyPattern.phonNo) {
       console.log(error.message);
-      return res.status(500).send("Account for these Phone Number has already been created");
+      return res.status(500).send({
+        message: "Account for these Phone Number has already been created"
+      });
     } else {
-      return res.send(error.message);
+      return res.send({
+        message: error.message
+      });
     }
   }
 }
@@ -143,56 +153,50 @@ const canteenLogin = async (req, res) => {
     const email = req.body.email;
     const password = req.body.password;
     console.log(email, password, "15");
-    if (email == undefined || email.length == 0 || password == undefined || password.length == 0) {
-      res.status(404).send({
-        message: "Credentials Not Found"
-      });
-    } else {
-      const canteenUser = await canteenData.findOne({
-        email: email,
-      });
-      if (canteenUser) {
-        bcrypt.compare(
-          password,
-          canteenUser.password,
-          async function (err, isMatch) {
-            if (err) {
-              console.log(err, "25");
-              res.status(500).send({
-                message: err.message
-              });
-            } else if (!isMatch) {
-              res.status(401).send({
-                message: "The password does not match with the Email",
-              });
-            } else {
-              console.log(canteenUser.email);
+    const canteenUser = await canteenData.findOne({
+      email: email,
+    });
+    if (canteenUser) {
+      bcrypt.compare(
+        password,
+        canteenUser.password,
+        async function (err, isMatch) {
+          if (err) {
+            console.log(err, "25");
+            res.status(500).send({
+              message: err.message
+            });
+          } else if (!isMatch) {
+            res.status(401).send({
+              message: "The password does not match with the Email",
+            });
+          } else {
+            console.log(canteenUser.email);
 
-              let accessToken = jwt.sign({
-                  id: canteenUser._id,
-                  email: canteenUser.email,
-                },
-                process.env.ACCESSSECRET, {
-                  expiresIn: 60 * 60
-                });
-              let refreshToken = jwt.sign({
-                  phoneNo: canteenUser.phoneNo,
-                },
-                process.env.REFRESHSECRET);
-
-              res.send({
-                accessToken: accessToken,
-                refreshToken: refreshToken
+            let accessToken = jwt.sign({
+                id: canteenUser._id,
+                email: canteenUser.email,
+              },
+              process.env.ACCESSSECRET, {
+                expiresIn: 60 * 60
               });
-              // res.send(resToken);
-            }
+            let refreshToken = jwt.sign({
+                phoneNo: canteenUser.phoneNo,
+              },
+              process.env.REFRESHSECRET);
+
+            res.send({
+              accessToken: accessToken,
+              refreshToken: refreshToken
+            });
+            // res.send(resToken);
           }
-        );
-      } else {
-        res.status(401).send({
-          message: "You have entered wrong Email Id"
-        });
-      }
+        }
+      );
+    } else {
+      res.status(401).send({
+        message: "You have entered wrong Email Id"
+      });
     }
   } catch (err) {
     console.log("error====>", err);
