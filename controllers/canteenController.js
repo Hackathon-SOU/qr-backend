@@ -29,7 +29,7 @@ const createFoodItem = async (req, res, next) => {
 
 const getMenu = async (req, res, next) => {
     try {
-        const canteenId = req.body.canteenId;
+        const canteenId = req.canteenId;
         const data = await foodItems.find({
             canteenId: canteenId,
         }, {
@@ -146,7 +146,7 @@ const orderFood = async (req, res, next) => {
 
 const getAllTransaction = async (req, res, next) => {
     try {
-        const userId = req.body.userId;
+        const userId = req.userId;
         const transactions = await transactionData.find({
             userId: userId
         }, {

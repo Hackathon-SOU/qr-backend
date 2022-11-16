@@ -48,11 +48,16 @@ const getAllUserDetails = async (req, res, next) => {
                 res.send(data);
             } else {
                 console.log("find user error===>", error);
-                res.status(501).send(error);
+                res.status(501).send({
+                    message: error.message
+                });
             }
         })
     } catch (error) {
         console.log("catch error==>", error);
+        res.send({
+            message: error.message
+        })
     }
 
 };
@@ -73,12 +78,16 @@ const markpresence = async (req, res) => {
         // console.log(response);
         response.then((result) => {
             if (result.acknowledged === true) {
-                res.send("Marked as Present");
+                res.send({
+                    message: "Marked as Present"
+                });
             }
         })
-    } catch (err) {
-        console.log(err);
-        res.status(500).send(err);
+    } catch (error) {
+        console.log(error);
+        res.status(500).send({
+            message: error.message
+        });
     }
 };
 
@@ -91,7 +100,9 @@ const singleUserData = async (req, res) => {
         const present = req.body.present;
 
         if (!name || !email || !regId) {
-            res.status(404).send("Something is missing");
+            res.status(404).send({
+                message: "Something is missing"
+            });
         } else {
             const data = await userData.create({
                 name: name,
@@ -102,7 +113,9 @@ const singleUserData = async (req, res) => {
             });
             if (data) {
                 console.log("data==>", data);
-                res.send("User Added Successfully");
+                res.send({
+                    message: "User Added Successfully"
+                });
             }
         }
 
@@ -110,11 +123,17 @@ const singleUserData = async (req, res) => {
         console.log("errr", error);
         error.code == 11000 ?
             Object.keys(error.keyPattern) == "email" ?
-            res.send("You have already registered with this email") :
+            res.send({
+                message: "You have already registered with this email"
+            }) :
             Object.keys(error.keyPattern) == "regId" ?
-            res.send("You have already registered with this regId") :
+            res.send({
+                message: "You have already registered with this regId"
+            }) :
             Object.keys(error.keyPattern) == "seatNo" &&
-            res.send("Oops this seat already reserved. Please Check your SeatNo") :
+            res.send({
+                message: "Oops this seat already reserved. Please Check your SeatNo"
+            }) :
             res.send(error);
         // }
     }
@@ -126,7 +145,9 @@ const totalAbsent = async (req, res) => {
             present: false
         }, function (err, numofDocs) {
             if (err) {
-                res.status(500).send(err);
+                res.status(500).send({
+                    message: err.message
+                });
                 console.log(err);
             }
             console.log(numofDocs);
@@ -135,7 +156,9 @@ const totalAbsent = async (req, res) => {
             });
         });
     } catch (err) {
-        console.log(err);
+        console.log({
+            message: err.message
+        });
     }
 };
 
@@ -168,16 +191,17 @@ const uploadSheet = async (req, res, next) => {
                 }
             });
             // console.log(totalData);
-            userData.remove({eventId: eventId}, async function (err, result) {
+            userData.deleteMany({
+                eventId: eventId
+            }, async function (err, result) {
                 if (err) {
                     console.log(err);
                 } else if (result) {
                     console.log(result.deletedCount);
                     documentCount = result.deletedCount;
-                }
-                console.log(documentCount, "count");
-                console.log(totalData, "totalCount");
-                if (totalData === documentCount) {
+                    console.log(documentCount, "count");
+                    console.log(totalData, "totalCount");
+                    console.log("sheetLength", sheetData.length);
                     sheetData.forEach(async (a) => {
                         // data.push(a);
                         const data = new userData({
@@ -192,6 +216,7 @@ const uploadSheet = async (req, res, next) => {
                         data.save((err) => {
                             if (err) {
                                 console.log(err.message);
+                                sheetCount++;
                                 // res.status(500).send(err.message);
                             } else {
                                 sheetCount++;
@@ -200,7 +225,9 @@ const uploadSheet = async (req, res, next) => {
                                 if (sheetCount == sheetData.length) {
                                     console.log("uploaded Successfully");
                                     deleteFile(fileName);
-                                    res.status(200).send("Uploaded Successfully");
+                                    res.status(200).send({
+                                        message: "Uploaded Successfully"
+                                    });
                                 }
                             }
                         });
@@ -227,23 +254,12 @@ const uploadSheet = async (req, res, next) => {
         }
     } catch (error) {
         console.log("err", error);
+        res.send({
+            message: err.message
+        });
     }
 };
 
-// const getPoints = async(req, res)=>{
-//     try{
-//         const regId = req.query.regId;
-//         let admin = volunteerData.findOne({
-//             _id: volunteerId,
-//         });
-//         if(admin){
-//             res.send(regId);
-//         }
-//     }catch(error){
-//         console.log("catch error==>", error);
-//         res.send(error);
-//     }
-// }
 module.exports = {
     getAllUserDetails,
     getuserDetails,
