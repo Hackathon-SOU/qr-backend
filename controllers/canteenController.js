@@ -9,7 +9,7 @@ const createFoodItem = async (req, res, next) => {
     try {
         const name = req.body.name;
         const price = req.body.price;
-        const canteenId = req.body.canteenId;
+        const canteenId = req.canteenId;
 
         const data = await foodItems.create({
             name: name,
@@ -66,73 +66,82 @@ const getCanteen = async (req, res, next) => {
 }
 
 const orderFood = async (req, res, next) => {
-    setTimeout(async () => {
-        let session = await mongoose.startSession();
-        try {
-            session.startTransaction({ readConcern: { level: "snapshot" }, writeConcern: { w: "majority" } });
-
-            const opts =  { upsert: true, new: true, session: session };
-            const userId = req.body.userId;
-            const canteenId = req.body.canteenId;
-            const foodItemArray = req.body.foodItemArray;
-
-            let calcPrice = 0;
-            await foodItemArray.forEach(async (value) => {
-                await foodItems.findById(value.foodItemId,null, opts).then((item) => {
-                    calcPrice += item.price * value.quantity;
-                });
-            });
-            let userPoints = await userData.findOne({
-                _id: userId
-            });
-            if (userPoints.points >= calcPrice) {
-                const userUpdate= await userData.findOneAndUpdate({
-                    _id: userPoints._id
-                }, {
-                    $inc: {
-                        "points": -calcPrice
-                    }
-                }, opts);
-
-                if(userUpdate.acknowledge== true){
-                    console.log("User point Updated");
-                }
-
-                const updateCanteen= await canteenData.updateOne({}, {
-                    _id: canteenId
-                }, {
-                    $inc: {
-                        "points": +calcPrice
-                    }
-                },null, opts);
-
-                if(updateCanteen.acknowledged== true) {
-                        console.log("canteenData document updated");
-                }
-                const transactionRef = await transactionData.create([{
-                    canteenId: canteenId,
-                    userId: userId,
-                    foodItems: foodItemArray,
-                    price: calcPrice,
-                }], opts);
-                if (transactionRef) {
-                    res.send("Hurray!!!!, your order has been placed. It will take some time. Enjoy your meal");
-                } else {
-                    res.send(transactionRef);
-                }
-            } else {
-                res.send("Oops...., it seems You don't have enough points.")
+    let session = await mongoose.startSession();
+    try {
+        session.startTransaction({
+            readConcern: {
+                level: "snapshot"
+            },
+            writeConcern: {
+                w: "majority"
             }
-            await session.commitTransaction();
-            session.endSession();
-        } catch (error) {
-            console.log("error===>", error);
-            // console.log(error.message);
-            res.statu(500).send("Oops, Your trnsaction was not successful, please try Again")
-            session.abortTransaction();
-            session.endSession();
+        });
+
+        const opts = {
+            upsert: true,
+            new: true,
+            session: session
+        };
+        const userId = req.userId;
+        const canteenId = req.body.canteenId;
+        const foodItemArray = req.body.foodItemArray;
+
+        let calcPrice = 0;
+        await foodItemArray.forEach(async (value) => {
+            await foodItems.findById(value.foodItemId, null, opts).then((item) => {
+                calcPrice += item.price * value.quantity;
+            });
+        });
+        let userPoints = await userData.findOne({
+            _id: userId
+        });
+        if (userPoints.points >= calcPrice) {
+            const userUpdate = await userData.findOneAndUpdate({
+                _id: userPoints._id
+            }, {
+                $inc: {
+                    "points": -calcPrice
+                }
+            }, opts);
+
+            if (userUpdate.acknowledge == true) {
+                console.log("User point Updated");
+            }
+
+            const updateCanteen = await canteenData.updateOne({
+                _id: canteenId
+            }, {
+                $inc: {
+                    "points": +calcPrice
+                }
+            }, opts);
+
+            if (updateCanteen.acknowledged == true) {
+                console.log("canteenData document updated");
+            }
+            const transactionRef = await transactionData.create([{
+                canteenId: canteenId,
+                userId: userId,
+                foodItems: foodItemArray,
+                price: calcPrice,
+            }], opts);
+            if (transactionRef) {
+                res.send("Hurray!!!!, your order has been placed. It will take some time. Enjoy your meal");
+            } else {
+                res.send(transactionRef);
+            }
+        } else {
+            res.send("Oops...., it seems You don't have enough points.")
         }
-    }, 3000)
+        await session.commitTransaction();
+        session.endSession();
+    } catch (error) {
+        console.log("error===>", error);
+        // console.log(error.message);
+        res.status(500).send("Oops, Your trnsaction was not successful, please try Again")
+        session.abortTransaction();
+        session.endSession();
+    }
 }
 
 const getAllTransaction = async (req, res, next) => {

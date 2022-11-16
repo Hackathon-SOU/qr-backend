@@ -7,10 +7,13 @@ const canteenData = require("../models/canteen");
 // For Admin register 
 const adminRegister = async (req, res, next) => {
   try {
-    const membershipId = req.body.membershipId;
-    let password = await req.body.password;
-    const email = req.body.email;
-    const role = req.body.role;
+    const {
+      role,
+      email,
+      password,
+      name,
+      membershipId
+    } = req.body;
     // console.log(membershipId, password, role, email);
     await bcrypt.hash(password, 10).then((hash) => {
       password = hash;
@@ -20,15 +23,22 @@ const adminRegister = async (req, res, next) => {
       email: email,
       membershipId: membershipId,
       role: role,
+      name: name,
     });
-    data && res.send("Account has been created");
+    data && res.send({
+      message: "Account has been created"
+    });
   } catch (error) {
     console.log("error===>", error);
     if (error.keyPattern.email) {
-      res.status(500).send("Duplicate Email was found");
+      res.status(500).send({
+        message: "Duplicate Email was found"
+      });
     } else if (error.keyPattern.membershipId) {
       console.log(error.message);
-      res.status(500).send("Account for these Membership Id has already been created");
+      res.status(500).send({
+        message: "Account for these Membership Id has already been created"
+      });
     } else {
       res.send(error.message);
     }
@@ -75,54 +85,49 @@ const adminLogin = async (req, res) => {
     const password = req.body.password;
     console.log("membershipId====>", membershipId)
     console.log("password====>", typeof (password))
-    if (membershipId == undefined || membershipId == null || membershipId == 0 || password == undefined || password.length == 0) {
-      res.status(404).send({
-        message: "Credentials Not Found"
-      });
-    } else {
-      const admin = await volunteerData.findOne({
-        membershipId: membershipId,
-      });
-      if (admin) {
-        bcrypt.compare(
-          password,
-          admin.password,
-          async function (error, isMatch) {
-            if (error) {
-              console.log("errror====>", error);
-              res.status(500).send({
-                message: error.message
+    const admin = await volunteerData.findOne({
+      membershipId: membershipId,
+    });
+    if ((admin)) {
+      console.log("found admin in DB");
+      bcrypt.compare(
+        password,
+        admin.password,
+        async function (error, isMatch) {
+          if (error) {
+            console.log("errror====>", error);
+            res.status(500).send({
+              message: error.message
+            });
+          } else if (!isMatch) {
+            res.status(401).json({
+              message: "The password does not match with the Membership Id",
+            });
+          } else {
+            let accessToken = jwt.sign({
+                id: admin._id,
+                role: admin.role,
+                membershipId: admin.membershipId,
+              },
+              process.env.ACCESSSECRET, {
+                expiresIn: 60 * 60
               });
-            } else if (!isMatch) {
-              res.status(401).json({
-                message: "The password does not match with the Membership Id",
-              });
-            } else {
-              let accessToken = jwt.sign({
-                  id: admin._id,
-                  role: admin.role,
-                  membershipId: admin.membershipId,
-                },
-                process.env.ACCESSSECRET, {
-                  expiresIn: 60 * 60
-                });
-              let refreshToken = jwt.sign({
-                  membershipId: admin.membershipId,
-                },
-                process.env.REFRESHSECRET);
+            let refreshToken = jwt.sign({
+                membershipId: admin.membershipId,
+              },
+              process.env.REFRESHSECRET);
 
-              res.status(200).send({
-                accessToken: accessToken,
-                refreshToken: refreshToken
-              });
-            }
+            res.status(200).send({
+              accessToken: accessToken,
+              refreshToken: refreshToken
+            });
           }
-        );
-      } else {
-        res.status(401).json({
-          message: "You have entered wrong Membership Id"
-        });
-      }
+        }
+      );
+    } else {
+      res.status(401).json({
+        message: "You have entered wrong Membership Id"
+      });
     }
   } catch (error) {
     console.log("api error===>", error);
@@ -199,45 +204,43 @@ const canteenLogin = async (req, res) => {
 
 const participantLogin = async (req, res) => {
   try {
-    const email = req.body.email;
-    const regId = req.body.regId;
-    if (email == undefined || email.length == 0 || regId == undefined || regId.length == 0 || regId == 0) {
-      res.status(404).send({
-        message: "Credentials Not Found"
-      });
-    } else {
-      const participant = await userData.findOne({
-        regId: regId,
-      });
-      console.log(participant);
-      if (participant) {
-        if (participant.email == email) {
-          let accessToken = jwt.sign({
-              id: participant._id,
-              regId: participant.regId,
-            },
-            process.env.ACCESSSECRET, {
-              expiresIn: 60 * 60
-            });
-          let refreshToken = jwt.sign({
-              regId: participant.regId,
-            },
-            process.env.REFRESHSECRET);
+    const {
+      email,
+      regId
+    } = req.body;
 
-          res.send({
-            accessToken: accessToken,
-            refreshToken: refreshToken
+    const participant = await userData.findOne({
+      regId: regId,
+    });
+    // console.log(participant);
+    if (participant) {
+      console.log("found participant in DB");
+      if (participant.email == email) {
+        let accessToken = jwt.sign({
+            id: participant._id,
+            regId: participant.regId,
+          },
+          process.env.ACCESSSECRET, {
+            expiresIn: 60 * 60
           });
-        } else {
-          res.status(401).send({
-            message: "Email does not match, check your email Id"
-          })
-        }
+        let refreshToken = jwt.sign({
+            regId: participant.regId,
+          },
+          process.env.REFRESHSECRET);
+
+        res.send({
+          accessToken: accessToken,
+          refreshToken: refreshToken
+        });
       } else {
         res.status(401).send({
-          message: "Oops, it seems you are not particpant of the Event"
-        });
+          message: "Email does not match, check your email Id"
+        })
       }
+    } else {
+      res.status(401).send({
+        message: "Oops, it seems you are not particpant of the Event"
+      });
     }
   } catch (err) {
     console.log("err", err);
@@ -258,7 +261,7 @@ const getAdminJwtToken = async (req, res) => {
     } else if (req.headers.authorization && req.headers.authorization.split(" ")[0] === "Bearer") {
       refreshToken = req.headers.authorization.split(" ")[1];
       console.log("refreshToken==>", refreshToken);
-      if (membershipId == undefined || membershipId== 0 || membershipId.length ==0 ) {
+      if (membershipId == undefined || membershipId == 0 || membershipId.length == 0) {
         res.status(404).send({
           message: "Credentials Not Found"
         });
@@ -316,7 +319,7 @@ const getParticipantJwtToken = async (req, res) => {
     } else if (req.headers.authorization && req.headers.authorization.split(" ")[0] === "Bearer") {
       refreshToken = req.headers.authorization.split(" ")[1];
       console.log("refreshToken==>", refreshToken);
-      if (regId == undefined || regId.length==0 || regId==0) {
+      if (regId == undefined || regId.length == 0 || regId == 0) {
         res.status(404).send({
           message: "Credentials Not Found"
         });

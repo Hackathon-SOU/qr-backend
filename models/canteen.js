@@ -1,25 +1,25 @@
 const mongoose = require("mongoose");
 
-const canteenData= new mongoose.Schema({
-    
-    canteenName:{
+const canteenData = new mongoose.Schema({
+
+    canteenName: {
         type: String,
         required: true,
         unique: true,
     },
 
-    email:{
+    email: {
         type: String,
         unique: true,
-        required:true
+        required: true
     },
 
-    phoneNo:{
+    phoneNo: {
         type: Number,
         required: true,
         unique: true,
         validate: {
-            validator: function(val) {
+            validator: function (val) {
                 return val.toString().length === 10
             },
             message: val => `${val.value} has to be 10 digits`
@@ -27,21 +27,21 @@ const canteenData= new mongoose.Schema({
 
     },
 
-    ownerName:{
+    ownerName: {
         type: String,
         required: true,
     },
 
-    password:{
+    password: {
         type: String,
         required: true,
-    }, 
-    
-    points:{
+    },
+
+    points: {
         type: Number,
         default: 0,
         required: true,
     },
 });
 
-module.exports= mongoose.model('canteenData', canteenData);
+module.exports = mongoose.model('canteenData', canteenData);

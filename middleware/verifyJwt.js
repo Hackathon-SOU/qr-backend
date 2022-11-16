@@ -7,13 +7,12 @@ function verifyJwt(req, res, next) {
   try {
     console.log(req.headers.authorization);
     let token;
-    if(req.headers.authorization== undefined || null==req.headers.authorization){
+    if (req.headers.authorization == undefined || null == req.headers.authorization) {
       res.status(404).send({
         message: "Please enter Access Token"
       })
-    }
-    else if(req.headers.authorization.split(" ")[0]== "Bearer"){
-      token= req.headers.authorization.split(" ")[1];
+    } else if (req.headers.authorization.split(" ")[0] == "Bearer") {
+      token = req.headers.authorization.split(" ")[1];
     }
     jwt.verify(token, process.env.ACCESSSECRET, function (error, decoded) {
       if (error) {
@@ -24,7 +23,7 @@ function verifyJwt(req, res, next) {
         });
       } else {
         console.log("decoded", decoded.id);
-        req.id= decoded.id;
+        req.id = decoded.id;
         return next();
       }
     });
@@ -34,32 +33,37 @@ function verifyJwt(req, res, next) {
   }
 };
 
-async function authorizeAdmin(req, res, next){
-  const volunteerId= req.id;
+async function authorizeAdmin(req, res, next) {
+  const volunteerId = req.id;
   console.log("volunteerId==>", volunteerId);
   let admin = await volunteerData.findOne({
     _id: volunteerId,
   });
-  admin?  next():  res.status(403).send("Oops, it seems you are not part of IEEE.");
+  admin ? next() : res.status(403).send("Oops, it seems you are not part of IEEE.");
 }
 
-async function authorizeParticpant(req, res, next){
-  const participantId= req.id;
+async function authorizeParticpant(req, res, next) {
+  const participantId = req.id;
   let user = await userData.findOne({
     _id: participantId,
   });
   console.log("userrrr", user);
-  req.body.userId= user._id;
-  user?  next():  res.status(403).send("Oops, it seems you are not participant.");
+  req.userId = user._id;
+  user ? next() : res.status(403).send("Oops, it seems you are not participant.");
 }
 
 
-async function authorizeCanteen(req, res, next){
-  const canteenId= req.id;
+async function authorizeCanteen(req, res, next) {
+  const canteenId = req.id;
   let canteen = await canteenData.findOne({
     _id: canteenId,
   });
-  req.body.canteenId= canteen._id;
-  canteen?  next():  res.status(403).send("Oops, it seems you are not a registered Canteen Owner.");
+  req.canteenId = canteen._id;
+  canteen ? next() : res.status(403).send("Oops, it seems you are not a registered Canteen Owner.");
 }
-module.exports = {verifyJwt, authorizeAdmin, authorizeParticpant, authorizeCanteen};
+module.exports = {
+  verifyJwt,
+  authorizeAdmin,
+  authorizeParticpant,
+  authorizeCanteen
+};

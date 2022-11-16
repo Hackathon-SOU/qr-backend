@@ -1,12 +1,12 @@
-const mongoose= require("mongoose");
+const mongoose = require("mongoose");
 
-const userData= new mongoose.Schema({
+const userData = new mongoose.Schema({
 
-    name: {
+  name: {
     type: String,
     required: true,
   },
- 
+
   regId: {
     type: Number,
     required: true,
@@ -36,15 +36,15 @@ const userData= new mongoose.Schema({
     required: true,
   },
 
-  points:{
+  points: {
     type: Number,
     required: true,
-    default:100,
+    default: 100,
   },
 
-  eventId:{
+  eventId: {
     type: mongoose.Schema.Types.ObjectId,
   }
 });
 
-module.exports= mongoose.model("userData", userData)
+module.exports = mongoose.model("userData", userData)
