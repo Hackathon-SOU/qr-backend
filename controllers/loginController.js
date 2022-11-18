@@ -120,7 +120,7 @@ const adminLogin = async (req, res) => {
                 membershipId: admin.membershipId,
               },
               process.env.ACCESSSECRET, {
-                expiresIn: 60 * 60
+                expiresIn: 14400000
               });
             let refreshToken = jwt.sign({
                 membershipId: admin.membershipId,
@@ -177,7 +177,7 @@ const canteenLogin = async (req, res) => {
                 email: canteenUser.email,
               },
               process.env.ACCESSSECRET, {
-                expiresIn: 60 * 60
+                expiresIn: 14400000
               });
             let refreshToken = jwt.sign({
                 phoneNo: canteenUser.phoneNo,
@@ -223,7 +223,7 @@ const participantLogin = async (req, res) => {
             regId: participant.regId,
           },
           process.env.ACCESSSECRET, {
-            expiresIn: 60 * 60
+            expiresIn: 14400000
           });
         let refreshToken = jwt.sign({
             regId: participant.regId,
