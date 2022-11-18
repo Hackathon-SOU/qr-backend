@@ -8,7 +8,7 @@ function verifyJwt(req, res, next) {
     console.log(req.headers.authorization);
     let token;
     if (req.headers.authorization == undefined || null == req.headers.authorization) {
-      res.status(404).send({
+      res.status(401).send({
         message: "Please enter Access Token"
       })
     } else if (req.headers.authorization.split(" ")[0] == "Bearer") {
@@ -39,7 +39,9 @@ async function authorizeAdmin(req, res, next) {
   let admin = await volunteerData.findOne({
     _id: volunteerId,
   });
-  admin ? next() : res.status(403).send("Oops, it seems you are not part of IEEE.");
+  admin ? next() : res.status(403).send({
+    message: "Oops, it seems you are not part of IEEE."
+  });
 }
 
 async function authorizeParticpant(req, res, next) {
@@ -49,7 +51,9 @@ async function authorizeParticpant(req, res, next) {
   });
   console.log("userrrr", user);
   req.userId = user._id;
-  user ? next() : res.status(403).send("Oops, it seems you are not participant.");
+  user ? next() : res.status(403).send({
+    message: "Oops, it seems you are not participant."
+  });
 }
 
 
@@ -59,7 +63,9 @@ async function authorizeCanteen(req, res, next) {
     _id: canteenId,
   });
   req.canteenId = canteen._id;
-  canteen ? next() : res.status(403).send("Oops, it seems you are not a registered Canteen Owner.");
+  canteen ? next() : res.status(403).send({
+    message: "Oops, it seems you are not a registered Canteen Owner."
+  });
 }
 module.exports = {
   verifyJwt,

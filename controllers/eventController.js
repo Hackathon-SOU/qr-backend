@@ -13,19 +13,20 @@ const createEvent = async (req, res, next) => {
         });
         if (data) {
             res.status(200).send({
-                message: "Event Created Successfully"
+                message: "Event Created Successfully",
+                data: data
             });
         }
     } catch (error) {
         console.log("errrr===>", error);
         error.code == 11000 ?
-            Object.keys(error.keyPattern) == "eventDate" && res.send({
+            Object.keys(error.keyPattern) == "eventDate" && res.status(409).send({
                 message: "You have entered Duplicated Event"
             }) :
-            error.errors.eventDate ? res.send({
+            error.errors.eventDate ? res.status(409).send({
                 message: error.errors.eventDate.message
             }) :
-            res.send({
+            res.status(500).send({
                 message: error.message
             });
     }
@@ -38,13 +39,13 @@ const getEvent = async (req, res, next) => {
         });
         if (data) {
             console.log("data==>", data);
-            res.send(data);
+            res.status(200).send(data);
         } else {
             res.status(401).send("Something is wrong");
         }
     } catch (error) {
         console.log("catch error==>", error);
-        res.send({
+        res.status(500).send({
             message: error.message
         });
     }

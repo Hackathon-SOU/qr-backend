@@ -20,7 +20,7 @@ const validate = (schema) => (req, res, next) => {
 
     if (error) {
         console.log(error);
-        res.status(401).send({
+        res.status(403).send({
             message: error.message
         });
     } else {

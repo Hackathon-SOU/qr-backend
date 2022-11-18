@@ -17,17 +17,13 @@ const createFoodItem = async (req, res, next) => {
             canteenId: canteenId,
         });
         if (data) {
-            res.send({
+            res.status(200).send({
                 message: "Hurray, your food Item added in your Menu"
             })
-        } else {
-            res.status(401).send({
-                message: "Something is wrong"
-            });
         }
     } catch (error) {
         console.log("catch error==>", error);
-        res.send({
+        res.status(500).send({
             message: error.message
         });
     }
@@ -44,15 +40,11 @@ const getMenu = async (req, res, next) => {
         });
         if (data) {
             // console.log("data==>", data);
-            res.send(data);
-        } else {
-            res.status(401).send({
-                message: "Something is wrong"
-            });
+            res.status(200).send(data);
         }
     } catch (error) {
         console.log("catch error==>", error);
-        res.send({
+        res.status(500).send({
             message: error.message
         });
     }
@@ -65,15 +57,11 @@ const getCanteen = async (req, res, next) => {
         });
         if (data) {
             // console.log("data==>", data);
-            res.send(data);
-        } else {
-            res.status(401).send({
-                message: "Something is wrong"
-            });
+            res.status(200).send(data);
         }
     } catch (error) {
         console.log("catch error==>", error);
-        res.send({
+        res.status(500).send({
             message: error.message
         });
     }
@@ -144,14 +132,13 @@ const orderFood = async (req, res, next) => {
                 price: calcPrice,
             }], opts);
             if (transactionRef) {
-                res.send({
-                    message: "Hurray!!!!, your order has been placed. It will take some time. Enjoy your meal"
+                res.status(200).send({
+                    message: "Hurray!!!!, your order has been placed. It will take some time. Enjoy your meal",
+                    transaction: transactionRef
                 });
-            } else {
-                res.send(transactionRef);
             }
         } else {
-            res.send({
+            res.status(403).send({
                 message: "Oops...., it seems You don't have enough points."
             });
         }
@@ -161,7 +148,7 @@ const orderFood = async (req, res, next) => {
         console.log("error===>", error);
         // console.log(error.message);
         res.status(500).send({
-            message: "Oops, Your trnsaction was not successful, please try Again"
+            message: "Oops, Your transaction was not successful, please try Again"
         })
         session.abortTransaction();
         session.endSession();
@@ -180,15 +167,15 @@ const getAllTransaction = async (req, res, next) => {
             canteenName: 1
         });
         if (transactions[0].price) {
-            res.send(transactions);
+            res.status(200).send(transactions);
         } else {
-            res.send({
+            res.status(500).send({
                 message: transactions.error.message
             });
         }
     } catch (error) {
         console.log(error);
-        res.status(501).send({
+        res.status(500).send({
             message: error.message
         });
     }

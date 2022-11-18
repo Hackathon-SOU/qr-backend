@@ -1,5 +1,6 @@
 const userData = require("../models/user");
 const render = require("xlsx");
+// const mongoose = require("mongoose");
 const fs = require("fs");
 
 const getuserDetails = async (req, res, next) => {
@@ -12,50 +13,53 @@ const getuserDetails = async (req, res, next) => {
             _id: 0,
             __v: 0
         });
-        console.log(resultUser);
-        if (resultUser.present === true) {
+        console.log("resultUser===>", resultUser);
+        if (!resultUser) {
+            res.status(403).send({
+                message: "Oops, you registration Id does not match. Please check your registration Id."
+            })
+        } else if (resultUser.present === true) {
             return res
-                .status(500)
-                .send(
-                    "The person is already marked present. Please check your Registration Id."
-                );
+                .status(403)
+                .send({
+                    message: "The person is already marked present. Please check your Registration Id."
+                });
         } else {
-            return res.send(resultUser);
+            return res.status(200).send(resultUser);
         }
 
     } catch (error) {
         console.log(error);
         res
             .status(500)
-            .send(
-                "There is no such Particpant here. Please check your Registration Id"
-            );
+            .send({
+                message: error.message
+            });
     }
 };
 
 const getAllUserDetails = async (req, res, next) => {
     try {
-        const eventId = req.query.eventId;
+        const eventId = req.body.eventId;
         const volunteerId = req.volunteerId;
-
-        userData.find({
+        console.log("eventId===>", eventId);
+        const resultUsers = await userData.find({
             eventId: eventId
         }, {
             _id: 0,
             __v: 0
-        }).then((data, error) => {
-            if (data) {
-                res.send(data);
-            } else {
-                console.log("find user error===>", error);
-                res.status(501).send({
-                    message: error.message
-                });
-            }
-        })
+        });
+        // console.log(resultUsers);
+        if (!resultUsers) {
+            res.status(404).send({
+                message: "No participant found. Please add participant in your event",
+            })
+        } else if (resultUsers) {
+            res.status(200).send(resultUsers);
+        }
     } catch (error) {
         console.log("catch error==>", error);
-        res.send({
+        res.status(500).send({
             message: error.message
         })
     }
@@ -68,21 +72,30 @@ const markpresence = async (req, res) => {
     console.log(regId);
     console.log(present);
     try {
-        const response = userData.updateOne({
+        const response = await userData.updateOne({
             regId: regId
         }, {
             $set: {
                 present: present,
             },
         });
-        // console.log(response);
-        response.then((result) => {
-            if (result.acknowledged === true) {
-                res.send({
+        console.log(response);
+        if (response.matchedCount == 1) {
+            res.status(404).send({
+                message: "Participant not found"
+            });
+        }
+        if (response.modifiedCount == 1) {
+            if (response.acknowledged === true) {
+                res.status(200).send({
                     message: "Marked as Present"
                 });
             }
-        })
+        } else {
+            res.status(403).send({
+                message: "Participant already present"
+            })
+        }
     } catch (error) {
         console.log(error);
         res.status(500).send({
@@ -93,48 +106,46 @@ const markpresence = async (req, res) => {
 
 const singleUserData = async (req, res) => {
     try {
-        const name = req.body.name;
-        const email = req.body.email;
-        const regId = req.body.regId;
-        const seatNo = req.body.seatNo;
-        const present = req.body.present;
+        const {
+            name,
+            email,
+            regId,
+            seatNo,
+            present,
+            eventId
+        } = req.body;
 
-        if (!name || !email || !regId) {
-            res.status(404).send({
-                message: "Something is missing"
+        const data = await userData.create({
+            name: name,
+            email: email,
+            regId: regId,
+            seatNo: seatNo,
+            present: present,
+            eventId: eventId,
+        });
+
+        if (data) {
+            console.log("data==>", data);
+            res.status(200).send({
+                message: "User Added Successfully"
             });
-        } else {
-            const data = await userData.create({
-                name: name,
-                email: email,
-                regId: regId,
-                seatNo: seatNo,
-                present: present,
-            });
-            if (data) {
-                console.log("data==>", data);
-                res.send({
-                    message: "User Added Successfully"
-                });
-            }
         }
-
     } catch (error) {
         console.log("errr", error);
         error.code == 11000 ?
             Object.keys(error.keyPattern) == "email" ?
-            res.send({
+            res.status(409).send({
                 message: "You have already registered with this email"
             }) :
             Object.keys(error.keyPattern) == "regId" ?
-            res.send({
+            res.status(409).send({
                 message: "You have already registered with this regId"
             }) :
             Object.keys(error.keyPattern) == "seatNo" &&
-            res.send({
+            res.status(409).send({
                 message: "Oops this seat already reserved. Please Check your SeatNo"
             }) :
-            res.send(error);
+            res.status(500).send(error);
         // }
     }
 };
@@ -159,22 +170,21 @@ const totalAbsent = async (req, res) => {
         console.log({
             message: err.message
         });
+        res.status(500).send({
+            message: err.message
+        })
     }
 };
 
 const uploadSheet = async (req, res, next) => {
     try {
-        // const eventId= req.body.eventId;
         // Below code is to upload Sheet from    
-        const eventId = req.body.eventId;
-        console.log("body===>", req.body)
+        const eventId = req.query.eventId;
         console.log("eventId", eventId);
         let fileName = req.fileName;
         console.log("fileName===>", fileName)
         var file = render.readFile(`./uploads/${fileName}`);
         const sheet = file.SheetNames;
-        // console.log(sheet);
-        // var data = [];
         for (var i = 0; i < sheet.length; i++) {
             var sheetName = sheet[i];
             const sheetData = render.utils.sheet_to_json(file.Sheets[sheetName]);
@@ -217,7 +227,6 @@ const uploadSheet = async (req, res, next) => {
                             if (err) {
                                 console.log(err.message);
                                 sheetCount++;
-                                // res.status(500).send(err.message);
                             } else {
                                 sheetCount++;
                                 // console.log(count);
@@ -254,7 +263,7 @@ const uploadSheet = async (req, res, next) => {
         }
     } catch (error) {
         console.log("err", error);
-        res.send({
+        res.status(500).send({
             message: err.message
         });
     }

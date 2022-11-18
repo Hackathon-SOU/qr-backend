@@ -25,22 +25,22 @@ const adminRegister = async (req, res, next) => {
       role: role,
       name: name,
     });
-    data && res.send({
+    data && res.status(200).send({
       message: "Account has been created"
     });
   } catch (error) {
     console.log("error===>", error);
     if (error.keyPattern.email) {
-      res.status(500).send({
+      res.status(409).send({
         message: "Duplicate Email was found"
       });
     } else if (error.keyPattern.membershipId) {
       console.log(error.message);
-      res.status(500).send({
+      res.status(409).send({
         message: "Account for these Membership Id has already been created"
       });
     } else {
-      res.send({
+      res.status(500).send({
         message: error.message
       });
     }
@@ -71,16 +71,16 @@ const canteenRegister = async (req, res, next) => {
   } catch (error) {
     console.log(error, "11");
     if (error.keyPattern.email) {
-      return res.status(500).send({
+      return res.status(409).send({
         message: "Duplicate Email was found"
       });
     } else if (error.keyPattern.phonNo) {
       console.log(error.message);
-      return res.status(500).send({
+      return res.status(409).send({
         message: "Account for these Phone Number has already been created"
       });
     } else {
-      return res.send({
+      return res.status(500).send({
         message: error.message
       });
     }
@@ -110,7 +110,7 @@ const adminLogin = async (req, res) => {
               message: error.message
             });
           } else if (!isMatch) {
-            res.status(401).json({
+            res.status(403).json({
               message: "The password does not match with the Membership Id",
             });
           } else {
@@ -135,14 +135,13 @@ const adminLogin = async (req, res) => {
         }
       );
     } else {
-      res.status(401).json({
+      res.status(403).json({
         message: "You have entered wrong Membership Id"
       });
     }
   } catch (error) {
     console.log("api error===>", error);
-    res.status(400);
-    res.send({
+    res.status(400).send({
       message: 'You made a BAD request'
     });
   }
@@ -167,7 +166,7 @@ const canteenLogin = async (req, res) => {
               message: err.message
             });
           } else if (!isMatch) {
-            res.status(401).send({
+            res.status(403).send({
               message: "The password does not match with the Email",
             });
           } else {
@@ -185,11 +184,10 @@ const canteenLogin = async (req, res) => {
               },
               process.env.REFRESHSECRET);
 
-            res.send({
+            res.status(200).send({
               accessToken: accessToken,
               refreshToken: refreshToken
             });
-            // res.send(resToken);
           }
         }
       );
@@ -232,17 +230,17 @@ const participantLogin = async (req, res) => {
           },
           process.env.REFRESHSECRET);
 
-        res.send({
+        res.status(200).send({
           accessToken: accessToken,
           refreshToken: refreshToken
         });
       } else {
-        res.status(401).send({
+        res.status(403).send({
           message: "Email does not match, check your email Id"
         })
       }
     } else {
-      res.status(401).send({
+      res.status(403).send({
         message: "Oops, it seems you are not particpant of the Event"
       });
     }
@@ -290,7 +288,7 @@ const getAdminJwtToken = async (req, res) => {
                 process.env.ACCESSSECRET, {
                   expiresIn: 60 * 60
                 });
-              res.send({
+              res.status(200).send({
                 accessToken: accessToken,
                 refreshToken: refreshToken
               });
@@ -348,7 +346,7 @@ const getParticipantJwtToken = async (req, res) => {
                 process.env.ACCESSSECRET, {
                   expiresIn: 60 * 60
                 });
-              res.send({
+              res.status(200).send({
                 accessToken: accessToken,
                 refreshToken: refreshToken
               });
@@ -407,7 +405,7 @@ const getCanteenJwtToken = async (req, res) => {
                 process.env.ACCESSSECRET, {
                   expiresIn: 60 * 60
                 });
-              res.send({
+              res.status(200).send({
                 accessToken: accessToken,
                 refreshToken: refreshToken
               });
