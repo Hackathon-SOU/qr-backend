@@ -27,9 +27,9 @@ database.once("connected", () => {
 });
 
 
-const options = {
-    customCss: '.swagger-ui .topbar { display: none }',
-};
+// const options = {
+//     customCss: '.swagger-ui .topbar { display: none }',
+// };
 const swaggerDocument = YAML.load(path.join(path.resolve(), './docs/swagger.yml'));
 
 const app = express();
@@ -41,7 +41,7 @@ app.use(cors());
 app.use(
     '/api/api-docs',
     swaggerUi.serve,
-    swaggerUi.setup(swaggerDocument, options)
+    swaggerUi.setup(swaggerDocument)
 );
 app.use("/api/admin", require("./routes/admin"));
 app.use("/api/canteen", require("./routes/canteen"));
