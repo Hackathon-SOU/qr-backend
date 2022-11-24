@@ -19,17 +19,17 @@ const getuserDetails = async (req, res, next) => {
             if (resultUser.present === true) {
                 logger.info("The participant is already mark present");
                 return res
-                    .sendStatus(403)
+                    .status(403)
                     .send({
                         message: "The person is already marked present. Please check your Registration Id."
                     });
             } else {
                 logger.info("The particpant value fetched successfully");
-                return res.sendStatus(200).send(resultUser);
+                return res.status(200).send(resultUser);
             }
         } else {
             logger.info("No participant found with this regId");
-            res.sendStatus(404).send({
+            res.status(404).send({
                 message: "Oops, No participant found with this regId"
             });
         }
@@ -37,7 +37,7 @@ const getuserDetails = async (req, res, next) => {
     } catch (error) {
         logger.error("Get user details catch error====> %o", error);
         res
-            .sendStatus(500)
+            .status(500)
             .send({
                 message: "Can not fetch user at the moment. Please try again later.",
                 errorMessage: error.message
@@ -64,24 +64,24 @@ const getAllUserDetails = async (req, res, next) => {
             if (Boolean(resultUsers)) {
                 if (resultUsers.length == 0) {
                     logger.info("No participant found with this event Id");
-                    return res.sendStatus(404).send({
+                    return res.status(404).send({
                         message: "No participant found. Please add participant in your event",
                     })
                 } else {
                     logger.info("Users fetched Succesfully");
-                    return res.sendStatus(200).send(resultUsers);
+                    return res.status(200).send(resultUsers);
                 }
             }
         } else {
             logger.info("No participant found with event Id");
-            return res.sendStatus(404).send({
+            return res.status(404).send({
                 message: "No event is found with this eventId",
                 errorMessage: error.message
             });
         }
     } catch (error) {
         logger.error("Get all participant catch error==> %o", error);
-        res.sendStatus(500).send({
+        res.status(500).send({
             message: "Oops we can not fetch data at the moment. Please try again later",
             errorMessage: error.message
         })
@@ -101,20 +101,20 @@ const markpresence = async (req, res) => {
             },
         });
         if (response.matchedCount == 1) {
-            res.sendStatus(404).send({
+            res.status(404).send({
                 message: "Participant not found"
             });
             logger.error("In Mark presence, Participant not found");
         }
         if (response.modifiedCount == 1) {
             if (response.acknowledged === true) {
-                res.sendStatus(200).send({
+                res.status(200).send({
                     message: "Marked as Present"
                 });
                 logger.info("In Mark presence, Participant is marked present Succesfully")
             }
         } else {
-            res.sendStatus(403).send({
+            res.status(403).send({
                 message: "Participant already present"
             });
             logger.error("In Mark presence, Participant is already marked present.")
@@ -122,7 +122,7 @@ const markpresence = async (req, res) => {
     } catch (error) {
         logger.error("mark presence catch error ===>",
             error);
-        res.sendStatus(500).send({
+        res.status(500).send({
             message: "You have made a BAD request",
             errorMessage: error.message
         });
@@ -150,7 +150,7 @@ const singleUserData = async (req, res) => {
         });
 
         if (Boolean(data)) {
-            res.sendStatus(200).send({
+            res.status(200).send({
                 message: "User Added Successfully"
             });
             logger.info("Participant account created Successfully");
@@ -158,22 +158,22 @@ const singleUserData = async (req, res) => {
     } catch (error) {
         if (error.code == 11000) {
             if (Object.keys(error.keyPattern) == "email") {
-                res.sendStatus(409).send({
+                res.status(409).send({
                     message: "You have already registered with this email"
                 })
                 logger.error("Participant,  Duplicate Email found")
             } else if (Object.keys(error.keyPattern) == "regId") {
-                res.sendStatus(409).send({
+                res.status(409).send({
                     message: "You have already registered with this regId"
                 });
                 logger.error("Participant,  Duplicate Reg. Id found");
             } else if (Object.keys(error.keyPattern) == "seatNo") {
-                res.sendStatus(409).send({
+                res.status(409).send({
                     message: "Oops this seat already reserved. Please Check your SeatNo"
                 });
                 logger.error("Participant,  This %s Seat Number is reserved ");
             } else {
-                res.sendStatus(500).send({
+                res.status(500).send({
                     message: "You have a BAD request",
                     errorMessage: error.message
                 });
@@ -189,19 +189,19 @@ const totalAbsent = async (req, res) => {
             present: false
         }, function (err, numofDocs) {
             if (err) {
-                res.sendStatus(500).send({
+                res.status(500).send({
                     message: err.message
                 });
                 logger.error("count total absent error==> %o", err);
             }
             logger.info("%d", numofDocs);
-            res.sendStatus(200).send({
+            res.status(200).send({
                 count: numofDocs
             });
         });
     } catch (err) {
         logger.error("total absent count catch error ====> %o", err);
-        res.sendStatus(500).send({
+        res.status(500).send({
             message: "You have made a BAD request",
             errorMessage: err.message
         })
@@ -274,7 +274,7 @@ const uploadSheet = async (req, res, next) => {
                             if (sheetCount == sheetData.length) {
                                 logger.info("ulpoadSheet, uploaded Successfully");
                                 deleteFile(fileName);
-                                res.sendStatus(200).send({
+                                res.status(200).send({
                                     message: "Sheet Uploaded Successfully, and Participants added in the Event",
                                     error: errorArray
                                 });
@@ -302,7 +302,7 @@ const uploadSheet = async (req, res, next) => {
         }
     } catch (error) {
         logger.error("upload sheet catch err===> %o", error);
-        res.sendStatus(500).send({
+        res.status(500).send({
             messaage: "You have made a BAD request",
             errorMessage: err.message
         });

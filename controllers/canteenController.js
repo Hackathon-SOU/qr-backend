@@ -19,14 +19,14 @@ const createFoodItem = async (req, res, next) => {
             canteenId: canteenId,
         });
         if (Boolean(data)) {
-            res.sendStatus(200).send({
+            res.status(200).send({
                 message: "Hurray, your food Item added in your Menu"
             });
             logger.info("Food Item Created Successfully");
         }
     } catch (error) {
         logger.error("Create Food item, catch error==> %o", error);
-        res.sendStatus(500).send({
+        res.status(500).send({
             message: error.message
         });
     }
@@ -42,12 +42,12 @@ const getMenu = async (req, res, next) => {
             __v: 0
         });
         if (data) {
-            res.sendStatus(200).send(data);
+            res.status(200).send(data);
             logger.info("Menu of the canteen Fetched Successfully");
         }
     } catch (error) {
         logger.error("get Menu catch error==> %o", error);
-        res.sendStatus(500).send({
+        res.status(500).send({
             message: error.message
         });
     }
@@ -59,12 +59,12 @@ const getCanteen = async (req, res, next) => {
             __v: 0
         });
         if (data) {
-            res.sendStatus(200).send(data);
+            res.status(200).send(data);
             logger.info("Canteen List fetched Succesfully");
         }
     } catch (error) {
         logger.error("Get Canteen List, catch error==> %o", error);
-        res.sendStatus(500).send({
+        res.status(500).send({
             message: error.message
         });
     }
@@ -133,14 +133,14 @@ const orderFood = async (req, res, next) => {
                 price: calcPrice,
             }], opts);
             if (transactionRef) {
-                res.sendStatus(200).send({
+                res.status(200).send({
                     message: "Hurray!!!!, your order has been placed. It will take some time. Enjoy your meal",
                     transaction: transactionRef
                 });
                 logger.info("Transaction of the order completed Succesfully");
             }
         } else {
-            res.sendStatus(403).send({
+            res.status(403).send({
                 message: "Oops...., it seems You don't have enough points."
             });
             logger.error("User do not have enough points");
@@ -149,7 +149,7 @@ const orderFood = async (req, res, next) => {
         session.endSession();
     } catch (error) {
         logger.error("transaction order catch error===> %o", error);
-        res.sendStatus(500).send({
+        res.status(500).send({
             message: "Oops, Your transaction was not successful, please try Again"
         });
         session.abortTransaction();
@@ -169,17 +169,17 @@ const getAllTransaction = async (req, res, next) => {
             canteenName: 1
         });
         if (Boolean(transactions)) {
-            res.sendStatus(200).send(transactions);
+            res.status(200).send(transactions);
             logger.info("Transactions fetched succesfully");
         } else {
-            res.sendStatus(500).send({
+            res.status(500).send({
                 message: transactions.error.message
             });
             logger.info("there is some problem in fetching transaction.")
         }
     } catch (error) {
         logger.error("get all transaction catch error ===> %o", error);
-        res.sendStatus(500).send({
+        res.status(500).send({
             message: error.message
         });
     }

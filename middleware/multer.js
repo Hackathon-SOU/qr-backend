@@ -23,7 +23,7 @@ const multerUpload = async (req, res, next) => {
     }).single("sheet");
     upload(req, res, async function (err) {
         if (err) {
-            return res.sendStatus(500).send({
+            return res.status(500).send({
                 message: err
             });
         } else {

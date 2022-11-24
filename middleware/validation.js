@@ -21,11 +21,11 @@ const validate = (schema) => (req, res, next) => {
     if (error) {
         logger.error("JOI validation error===> %o", error);
         if (error.details[0].type == "any.required") {
-            res.sendStatus(404).send({
+            res.status(404).send({
                 message: error.message
             });
         } else {
-            res.sendStatus(400).send({
+            res.status(400).send({
                 message: error.message
             });
         }

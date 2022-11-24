@@ -8,7 +8,7 @@ function verifyJwt(req, res, next) {
   try {
     let token;
     if (req.headers.authorization == undefined || null == req.headers.authorization) {
-      res.sendStatus(401).send({
+      res.status(401).send({
         message: "Please enter Access Token"
       });
       logger.error("Token is undefined or null");
@@ -19,7 +19,7 @@ function verifyJwt(req, res, next) {
     jwt.verify(token, process.env.ACCESSSECRET, function (error, decoded) {
       if (error) {
         logger.error("JWT verify error===> %o", error);
-        res.sendStatus(401).send({
+        res.status(401).send({
           message: error.message
         });
       } else {
@@ -47,7 +47,7 @@ async function authorizeAdmin(req, res, next) {
     logger.error("authorizeAdmin, Admin found succesfully");
     next();
   } else {
-    res.sendStatus(403).send({
+    res.status(403).send({
       message: "Oops, it seems you are not part of IEEE."
     });
     logger.error("authorizeAdmin, Admin does not found");
@@ -64,7 +64,7 @@ async function authorizeParticpant(req, res, next) {
     logger.error("authorizeParticipant, Particpant found succesfully");
     next();
   } else {
-    res.sendStatus(403).send({
+    res.status(403).send({
       message: "Oops, it seems you are not participant."
     });
     logger.error("authorizeParticipant, Particpant does not found");
@@ -82,7 +82,7 @@ async function authorizeCanteen(req, res, next) {
     logger.info("authorizeCanteen, Canteen found successfully");
     next();
   } else {
-    res.sendStatus(403).send({
+    res.status(403).send({
       message: "Oops, it seems you are not part of IEEE."
     });
     logger.error("authorizeCanteen, Canteen does not found");

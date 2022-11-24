@@ -27,25 +27,25 @@ const adminRegister = async (req, res, next) => {
     });
     logger.debug("%s", Boolean(data));
     if (Boolean(data)) {
-      res.sendStatus(200).send({
+      res.status(200).send({
         message: "Account has been created"
       });
       logger.info("Admin account created Successfully");
     }
   } catch (error) {
     if (error.keyPattern.email) {
-      res.sendStatus(409).send({
+      res.status(409).send({
         message: "Duplicate Email was found"
       });
       logger.error("Admin,  Duplicate Email found");
     } else if (error.keyPattern.membershipId) {
-      res.sendStatus(409).send({
+      res.status(409).send({
         message: "Account for these Membership Id has already been created"
       });
       logger.error("Admin,  Duplicate MembershipId found");
     } else {
       logger.error("Admin,  register catch error===> %o", error);
-      res.sendStatus(500).send({
+      res.status(500).send({
         message: error.message
       });
     }
@@ -80,22 +80,22 @@ const canteenRegister = async (req, res, next) => {
   } catch (error) {
     if (error.keyPattern.canteenName) {
       logger.error("Canteen,  Duplicate canteen Name found");
-      return res.sendStatus(409).send({
+      return res.status(409).send({
         message: "Duplicate Canteen name was found"
       });
     } else if (error.keyPattern.email) {
       logger.error("Canteen,  Duplicate Email found");
-      return res.sendStatus(409).send({
+      return res.status(409).send({
         message: "Duplicate Email was found"
       });
     } else if (error.keyPattern.phoneNo) {
       logger.error("Canteen,  Duplicate Phone Number found");
-      return res.sendStatus(409).send({
+      return res.status(409).send({
         message: "Account for these Phone Number has already been created"
       });
     } else {
       logger.error("Canteen,  register catch error===> %o", error);
-      return res.sendStatus(500).send({
+      return res.status(500).send({
         message: error.message
       });
     }
@@ -119,11 +119,11 @@ const adminLogin = async (req, res) => {
         async function (error, isMatch) {
           if (error) {
             logger.error("admin login password match errror====> %o", error);
-            res.sendStatus(500).send({
+            res.status(500).send({
               message: error.message
             });
           } else if (!isMatch) {
-            res.sendStatus(403).json({
+            res.status(403).json({
               message: "The password does not match with the Membership Id",
             });
             logger.error("The password does not match with the Membership Id");
@@ -142,7 +142,7 @@ const adminLogin = async (req, res) => {
               },
               process.env.REFRESHSECRET);
 
-            res.sendStatus(200).send({
+            res.status(200).send({
               accessToken: accessToken,
               refreshToken: refreshToken
             });
@@ -151,7 +151,7 @@ const adminLogin = async (req, res) => {
         }
       );
     } else {
-      res.sendStatus(403).json({
+      res.status(403).json({
         message: "You have entered wrong Membership Id"
       });
       logger.error("Admin have entered wrong Membership Id");
@@ -159,7 +159,7 @@ const adminLogin = async (req, res) => {
     }
   } catch (error) {
     logger.error("Admin login catch error===> %o", error);
-    res.sendStatus(400).send({
+    res.status(400).send({
       message: 'You made a BAD request',
       errorMessage: error.message,
     });
@@ -180,11 +180,11 @@ const canteenLogin = async (req, res) => {
         async function (err, isMatch) {
           if (err) {
             logger.error("Canteen password bycrypt error====> %o", err);
-            res.sendStatus(500).send({
+            res.status(500).send({
               message: err.message
             });
           } else if (!isMatch) {
-            res.sendStatus(403).send({
+            res.status(403).send({
               message: "The password does not match with the Email",
             });
             logger.error("The password does not match with the Email");
@@ -201,7 +201,7 @@ const canteenLogin = async (req, res) => {
               },
               process.env.REFRESHSECRET);
 
-            res.sendStatus(200).send({
+            res.status(200).send({
               accessToken: accessToken,
               refreshToken: refreshToken
             });
@@ -211,14 +211,14 @@ const canteenLogin = async (req, res) => {
         }
       );
     } else {
-      res.sendStatus(401).send({
+      res.status(401).send({
         message: "You have entered wrong Email Id"
       });
       logger.error("You have entered wrong Email Id");
     }
   } catch (err) {
     logger.error("Canteen login catch error====> %o", err);
-    res.sendStatus(400).send({
+    res.status(400).send({
       message: "You have made a BAD request",
       errorMessage: error.message
     });
@@ -256,13 +256,13 @@ const participantLogin = async (req, res) => {
           refreshToken: refreshToken
         });
       } else {
-        res.sendStatus(403).send({
+        res.status(403).send({
           message: "Email does not match, check your email Id"
         })
         logger.error("Email does not match, check your email Id");
       }
     } else {
-      res.sendStatus(403).send({
+      res.status(403).send({
         message: "Oops, it seems you are not particpant of the Event"
       });
       logger.error("Participant's regId not found in the Event");
@@ -270,7 +270,7 @@ const participantLogin = async (req, res) => {
     }
   } catch (err) {
     logger.error("participant login error in catch ===> %o", err);
-    res.sendStatus(400).send({
+    res.status(400).send({
       message: "You have made a BAD request",
       errorMessage: err.message,
     });
@@ -285,7 +285,7 @@ const getAdminJwtToken = async (req, res) => {
     const membershipId = req.body.membershipId;
     let refreshToken;
     if (req.headers.authorization == undefined || null == req.headers.authorization) {
-      res.sendStatus(404).send({
+      res.status(404).send({
         message: "Please enter refresh Token"
       });
       logger.error("RefreshToken, Admin Token undefined or null ");
@@ -294,7 +294,7 @@ const getAdminJwtToken = async (req, res) => {
       refreshToken = req.headers.authorization.split(" ")[1];
       logger.debug("RefreshToken, Admin refreshToken found successfully");
       if (membershipId == undefined || membershipId == 0 || membershipId.length == 0) {
-        res.sendStatus(404).send({
+        res.status(404).send({
           message: "MembershipId are undefined or null"
         });
         logger.error("RefreshToken, Admin  Membership Id is undefined or null");
@@ -302,7 +302,7 @@ const getAdminJwtToken = async (req, res) => {
         jwt.verify(refreshToken, process.env.REFRESHSECRET, async function (error, decoded) {
           if (error) {
             logger.error("RefreshToken, Admin refresh token jwt verify errrr===> %o", error);
-            res.sendStatus(500).send({
+            res.status(500).send({
               message: error.message
             });
           } else {
@@ -319,13 +319,13 @@ const getAdminJwtToken = async (req, res) => {
                 process.env.ACCESSSECRET, {
                   expiresIn: 60 * 60
                 });
-              res.sendStatus(200).send({
+              res.status(200).send({
                 accessToken: accessToken,
                 refreshToken: refreshToken
               });
               logger.info("Admin Refresh token generated Successfully");
             } else {
-              res.sendStatus(403).send({
+              res.status(403).send({
                 message: "You membership Id does not matched with token"
               })
               logger.error("RefreshToken, Admin Membership Id does not match with token.");
@@ -337,7 +337,7 @@ const getAdminJwtToken = async (req, res) => {
     }
   } catch (error) {
     logger.error("Admin refresh jwt token catch error==> %o", error);
-    res.sendStatus(400).send({
+    res.status(400).send({
       message: "You have made a BAD request.",
       errorMessage: error.message
     });
@@ -349,7 +349,7 @@ const getParticipantJwtToken = async (req, res) => {
     const regId = req.body.regId;
     let refreshToken;
     if (req.headers.authorization == undefined || null == req.headers.authorization) {
-      res.sendStatus(404).send({
+      res.status(404).send({
         message: "Please enter Refresh Token"
       })
       logger.error("RefreshToken, Participant refresh Token undefined or null ");
@@ -357,7 +357,7 @@ const getParticipantJwtToken = async (req, res) => {
       refreshToken = req.headers.authorization.split(" ")[1];
       logger.debug("RefreshToken participant found");
       if (regId == undefined || regId.length == 0 || regId == 0) {
-        res.sendStatus(404).send({
+        res.status(404).send({
           message: "Registration is undefined or null"
         });
         logger.error("Refresh Token, Participant Reg. Id is undefined or null");
@@ -366,7 +366,7 @@ const getParticipantJwtToken = async (req, res) => {
         jwt.verify(refreshToken, process.env.REFRESHSECRET, async function (error, decoded) {
           if (error) {
             logger.error("Refresh Token, Participant refreshtoken jwt verify errrr===> %o", error);
-            res.sendStatus(401).send({
+            res.status(401).send({
               message: error.message
             });
           } else {
@@ -382,13 +382,13 @@ const getParticipantJwtToken = async (req, res) => {
                 process.env.ACCESSSECRET, {
                   expiresIn: 60 * 60
                 });
-              res.sendStatus(200).send({
+              res.status(200).send({
                 accessToken: accessToken,
                 refreshToken: refreshToken
               });
               logger.info("Participant Refresh token generated Successfully");
             } else {
-              res.sendStatus(403).send({
+              res.status(403).send({
                 message: "You reg Id does not matched."
               })
               logger.error("Refresh token, Participant  Reg. Id does not match with token.");
@@ -400,7 +400,7 @@ const getParticipantJwtToken = async (req, res) => {
     }
   } catch (error) {
     logger.error("Refresh token, Participant jwt token catch error==> %o", error);
-    res.sendStatus(400).send({
+    res.status(400).send({
       message: "you have made a BAD request"
     });
   }
@@ -413,7 +413,7 @@ const getCanteenJwtToken = async (req, res) => {
     let refreshToken;
 
     if (req.headers.authorization == undefined || null == req.headers.authorization) {
-      res.sendStatus(404).send({
+      res.status(404).send({
         message: "Please enter Refresh Token"
       });
       logger.error("Refresh token, Canteen refresh Token undefined or null ");
@@ -421,12 +421,12 @@ const getCanteenJwtToken = async (req, res) => {
       refreshToken = req.headers.authorization.split(" ")[1];
       logger.debug("RefreshToken Canteen found");
       if (phoneNo == undefined || phoneNo == 0 || phoneNo.toString().length == 0) {
-        res.sendStatus(404).send({
+        res.status(404).send({
           message: "Phone Number is undefined or null"
         });
         logger.error("Canteen phoneNo is undefined or null");
       } else if (phoneNo.toString().length !== 10) {
-        res.sendStatus(400).send({
+        res.status(400).send({
           message: "Please Enter phone Number of 10 digits"
         });
         logger.info("Phone number is not of 10 digits");
@@ -434,7 +434,7 @@ const getCanteenJwtToken = async (req, res) => {
         jwt.verify(refreshToken, process.env.REFRESHSECRET, async function (error, decoded) {
           if (error) {
             logger.error("refresh token, Canteen jwt verify errrr===> %o", error);
-            res.sendStatus(401).send({
+            res.status(401).send({
               message: error.message
             });
           } else {
@@ -450,13 +450,13 @@ const getCanteenJwtToken = async (req, res) => {
                 process.env.ACCESSSECRET, {
                   expiresIn: 60 * 60
                 });
-              res.sendStatus(200).send({
+              res.status(200).send({
                 accessToken: accessToken,
                 refreshToken: refreshToken
               });
               logger.info("Canteen Refresh token generated Successfully");
             } else {
-              res.sendStatus(403).send({
+              res.status(403).send({
                 message: "Your phone Number does not matched."
               })
               logger.error("Refresh token, Canteen  phoneNo does not match with token.");
@@ -469,7 +469,7 @@ const getCanteenJwtToken = async (req, res) => {
     }
   } catch (error) {
     logger.error("Refresh token, Canteen jwt token catch error==> %o", error);
-    res.sendStatus(400).send("you have made a BAD request");
+    res.status(400).send("you have made a BAD request");
   }
 }
 
