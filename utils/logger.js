@@ -68,9 +68,9 @@ const logger = new createLogger({
         }),
         customLog),
     transports: [
-        new transports.File(options.info),
-        new transports.File(options.error),
-        new transports.Console(options.debug)
+        new transports.Console(options.debug),
+        new transports.Console(options.info),
+        new transports.Console(options.error)
     ],
     exitOnError: false
 });
