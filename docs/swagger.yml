@@ -3,7 +3,7 @@ info:
   title: qr-app-deployed
   version: 1.0.0
 servers:
-  - url: https://qr-backend-alpha.vercel.app
+  - url: https://qr-backend-bhanudatsinhjhala.vercel.app/
   - url: http://localhost:4000
 components:
   securitySchemes:
@@ -28,6 +28,8 @@ paths:
       tags:
         - canteenApi > authenticateApi
       summary: login
+      security:
+        - noauthAuth: []
       requestBody:
         content:
           application/json:
@@ -36,8 +38,6 @@ paths:
               example:
                 email: midhunnair@gmail.com
                 password: '134'
-      security:
-        - noauthAuth: []
       responses:
         '200':
           description: OK
@@ -374,6 +374,8 @@ paths:
       tags:
         - canteenApi > canteen
       summary: addFoodItem
+      security:
+        - bearerAuth: []
       requestBody:
         content:
           application/json:
@@ -570,6 +572,8 @@ paths:
       tags:
         - canteenApi > canteen
       summary: getMenu
+      security:
+        - bearerAuth: []
       responses:
         '200':
           description: OK

@@ -4,6 +4,7 @@ const cors = require('cors');
 const YAML = require('yamljs');
 require("dotenv").config();
 const logger = require('./utils/logger');
+const path = require('path');
 const swaggerUi = require('swagger-ui-express');
 
 
@@ -29,7 +30,7 @@ database.once("connected", () => {
 const options = {
     customCss: '.swagger-ui .topbar { display: none }',
 };
-const swaggerDocument = YAML.load("./docs/swagger.yml");
+const swaggerDocument = YAML.load(path.join(path.resolve(), './docs/swagger.yml'));
 
 const app = express();
 app.use(express.json());
