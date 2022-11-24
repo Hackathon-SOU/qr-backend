@@ -1,0 +1,1445 @@
+openapi: 3.0.0
+info:
+  title: qr-app-deployed
+  version: 1.0.0
+servers:
+  - url: https://qr-backend-alpha.vercel.app
+  - url: http://localhost:4000
+components:
+  securitySchemes:
+    noauthAuth:
+      type: http
+      scheme: noauth
+    bearerAuth:
+      type: http
+      scheme: bearer
+tags:
+  - name: canteenApi > authenticateApi
+  - name: canteenApi > canteen
+  - name: Admin > authenticationApi
+  - name: Admin > participantApi
+  - name: Admin > eventApi
+  - name: Admin > canteen  
+  - name: participant > authenticateApi
+  - name: participant > canteenApi
+paths:
+  /api/canteen/login:
+    post:
+      tags:
+        - canteenApi > authenticateApi
+      summary: login
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                email: midhunnair@gmail.com
+                password: '134'
+      security:
+        - noauthAuth: []
+      responses:
+        '200':
+          description: OK
+          headers:
+            X-Powered-By:
+              schema:
+                type: string
+                example: Express
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+                example: '*'
+            Content-Type:
+              schema:
+                type: string
+                example: application/json; charset=utf-8
+            Content-Length:
+              schema:
+                type: integer
+                example: '381'
+            ETag:
+              schema:
+                type: string
+                example: W/"17d-UoQJOEF4kcHbwWPKIbxxDJjEYhc"
+            Date:
+              schema:
+                type: string
+                example: Wed, 23 Nov 2022 05:45:20 GMT
+            Connection:
+              schema:
+                type: string
+                example: keep-alive
+            Keep-Alive:
+              schema:
+                type: string
+                example: timeout=5
+          content:
+            application/json:
+              schema:
+                type: object
+              example:
+                accessToken: >-
+                  eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjYzNjhjYzgwNjVhZTQyYjA5MGFiYTczOCIsImVtYWlsIjoibWlkaHVubmFpckBnbWFpbC5jb20iLCJpYXQiOjE2NjkxODIzMjAsImV4cCI6MTY4MzU4MjMyMH0.H31CSh09IO70zyqUmFWmUUuSLzerjOlQCnL_l4dfTNg
+                refreshToken: >-
+                  eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJwaG9uZU5vIjoxMjM0NTY3ODkxLCJpYXQiOjE2NjkxODIzMjB9.LCb0p-n5p6XDe40c3hpoYZdxhwE4Xn7Fpj62g6VOgQM
+        '400':
+          description: Bad Request
+          headers:
+            X-Powered-By:
+              schema:
+                type: string
+                example: Express
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+                example: '*'
+            Content-Type:
+              schema:
+                type: string
+                example: application/json; charset=utf-8
+            Content-Length:
+              schema:
+                type: integer
+                example: '48'
+            ETag:
+              schema:
+                type: string
+                example: W/"30-c9IdOZOn2U6WogIRHXEkTdl5xRc"
+            Date:
+              schema:
+                type: string
+                example: Wed, 23 Nov 2022 06:09:11 GMT
+            Connection:
+              schema:
+                type: string
+                example: keep-alive
+            Keep-Alive:
+              schema:
+                type: string
+                example: timeout=5
+          content:
+            application/json:
+              schema:
+                type: object
+              examples:
+                example-0:
+                  summary: 400 Bad Request
+                  value:
+                    message: Email should be a type of 'string'
+                example-1:
+                  summary: 400 Bad Request
+                  value:
+                    message: Email should be a valid email format
+                example-2:
+                  summary: 400 Bad Request
+                  value:
+                    message: Password cannot be less than 3 charachters
+                example-3:
+                  summary: 400 BAD Request
+                  value:
+                    message: Password cannot be an empty field
+        '404':
+          description: Not Found
+          headers:
+            X-Powered-By:
+              schema:
+                type: string
+                example: Express
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+                example: '*'
+            Content-Type:
+              schema:
+                type: string
+                example: application/json; charset=utf-8
+            Content-Length:
+              schema:
+                type: integer
+                example: '39'
+            ETag:
+              schema:
+                type: string
+                example: W/"27-TYdaL3EdXiSyx3pC2Fc84tW1oFA"
+            Date:
+              schema:
+                type: string
+                example: Wed, 23 Nov 2022 06:16:26 GMT
+            Connection:
+              schema:
+                type: string
+                example: keep-alive
+            Keep-Alive:
+              schema:
+                type: string
+                example: timeout=5
+          content:
+            application/json:
+              schema:
+                type: object
+              example:
+                message: Email is a required field
+  /api/canteen/getjwttoken:
+    get:
+      tags:
+        - canteenApi > authenticateApi
+      summary: refreshToken
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: OK
+          headers:
+            X-Powered-By:
+              schema:
+                type: string
+                example: Express
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+                example: '*'
+            Content-Type:
+              schema:
+                type: string
+                example: application/json; charset=utf-8
+            Content-Length:
+              schema:
+                type: integer
+                example: '382'
+            ETag:
+              schema:
+                type: string
+                example: W/"17e-jR85cdQuT+Nc+VqwjnE5DnsQ1Zw"
+            Date:
+              schema:
+                type: string
+                example: Wed, 23 Nov 2022 06:28:16 GMT
+            Connection:
+              schema:
+                type: string
+                example: keep-alive
+            Keep-Alive:
+              schema:
+                type: string
+                example: timeout=5
+          content:
+            application/json:
+              schema:
+                type: object
+              example:
+                accessToken: >-
+                  eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2MzY4Y2M4MDY1YWU0MmIwOTBhYmE3MzgiLCJlbWFpbCI6Im1pZGh1bm5haXJAZ21haWwuY29tIiwiaWF0IjoxNjY5MTg0ODk2LCJleHAiOjE2NjkxODg0OTZ9.mO87Ikeh4h87BE_oj5d7wvUaYU0A36IlOxKKhOtVngo
+                refreshToken: >-
+                  eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJwaG9uZU5vIjoxMjM0NTY3ODkxLCJpYXQiOjE2NjkxODIwMjB9.XT3TABzUOeY_88-PfayQv-HmfluQ-74T-3qqzdFrd4U
+        '400':
+          description: Bad Request
+          headers:
+            X-Powered-By:
+              schema:
+                type: string
+                example: Express
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+                example: '*'
+            Content-Type:
+              schema:
+                type: string
+                example: application/json; charset=utf-8
+            Content-Length:
+              schema:
+                type: integer
+                example: '52'
+            ETag:
+              schema:
+                type: string
+                example: W/"34-Be0WnBYhyAbAzJfI3lds1GYiGSc"
+            Date:
+              schema:
+                type: string
+                example: Wed, 23 Nov 2022 07:03:53 GMT
+            Connection:
+              schema:
+                type: string
+                example: keep-alive
+            Keep-Alive:
+              schema:
+                type: string
+                example: timeout=5
+          content:
+            application/json:
+              schema:
+                type: object
+              example:
+                message: Please Enter phone Number of 10 digits
+        '401':
+          description: Unauthorized
+          headers:
+            X-Powered-By:
+              schema:
+                type: string
+                example: Express
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+                example: '*'
+            Content-Type:
+              schema:
+                type: string
+                example: application/json; charset=utf-8
+            Content-Length:
+              schema:
+                type: integer
+                example: '27'
+            ETag:
+              schema:
+                type: string
+                example: W/"1b-CgdsrqtkLn0qBSLU/p4pPCfLVik"
+            Date:
+              schema:
+                type: string
+                example: Wed, 23 Nov 2022 06:27:18 GMT
+            Connection:
+              schema:
+                type: string
+                example: keep-alive
+            Keep-Alive:
+              schema:
+                type: string
+                example: timeout=5
+          content:
+            application/json:
+              schema:
+                type: object
+              examples:
+                example-0:
+                  summary: 401 Unauthorized
+                  value:
+                    message: jwt malformed
+                example-1:
+                  summary: 401 Unauthorized
+                  value:
+                    message: invalid token
+        '404':
+          description: Not Found
+          headers:
+            X-Powered-By:
+              schema:
+                type: string
+                example: Express
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+                example: '*'
+            Content-Type:
+              schema:
+                type: string
+                example: application/json; charset=utf-8
+            Content-Length:
+              schema:
+                type: integer
+                example: '40'
+            ETag:
+              schema:
+                type: string
+                example: W/"28-HZh7DDKOmljUWlSHsbXuu9BvOj0"
+            Date:
+              schema:
+                type: string
+                example: Wed, 23 Nov 2022 06:21:23 GMT
+            Connection:
+              schema:
+                type: string
+                example: keep-alive
+            Keep-Alive:
+              schema:
+                type: string
+                example: timeout=5
+          content:
+            application/json:
+              schema:
+                type: object
+              examples:
+                example-0:
+                  summary: 404 Not Found
+                  value:
+                    message: Please enter Refresh Token
+                example-1:
+                  summary: 404 Not Found
+                  value:
+                    message: Phone Number is undefined or null
+  /api/canteen/createfooditem:
+    post:
+      tags:
+        - canteenApi > canteen
+      summary: addFoodItem
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                price: 5
+                name: Poha Indori
+      responses:
+        '200':
+          description: OK
+          headers:
+            X-Powered-By:
+              schema:
+                type: string
+                example: Express
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+                example: '*'
+            Content-Type:
+              schema:
+                type: string
+                example: application/json; charset=utf-8
+            Content-Length:
+              schema:
+                type: integer
+                example: '55'
+            ETag:
+              schema:
+                type: string
+                example: W/"37-e6KZs2uppTLGARxul9P8FMxyUoA"
+            Date:
+              schema:
+                type: string
+                example: Wed, 23 Nov 2022 07:06:19 GMT
+            Connection:
+              schema:
+                type: string
+                example: keep-alive
+            Keep-Alive:
+              schema:
+                type: string
+                example: timeout=5
+          content:
+            application/json:
+              schema:
+                type: object
+              example:
+                message: Hurray, your food Item added in your Menu
+        '400':
+          description: Bad Request
+          headers:
+            X-Powered-By:
+              schema:
+                type: string
+                example: Express
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+                example: '*'
+            Content-Type:
+              schema:
+                type: string
+                example: application/json; charset=utf-8
+            Content-Length:
+              schema:
+                type: integer
+                example: '46'
+            ETag:
+              schema:
+                type: string
+                example: W/"2e-GVJY2TCDCypHC1+1U4Znn2efkKA"
+            Date:
+              schema:
+                type: string
+                example: Wed, 23 Nov 2022 12:38:55 GMT
+            Connection:
+              schema:
+                type: string
+                example: keep-alive
+            Keep-Alive:
+              schema:
+                type: string
+                example: timeout=5
+          content:
+            application/json:
+              schema:
+                type: object
+              examples:
+                example-0:
+                  summary: 400 Bad Request
+                  value:
+                    message: price minimum value should be 5.
+                example-1:
+                  summary: 400 Bad Request
+                  value:
+                    message: Name cannot be an empty field
+        '401':
+          description: Unauthorized
+          headers:
+            X-Powered-By:
+              schema:
+                type: string
+                example: Express
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+                example: '*'
+            Content-Type:
+              schema:
+                type: string
+                example: application/json; charset=utf-8
+            Content-Length:
+              schema:
+                type: integer
+                example: '39'
+            ETag:
+              schema:
+                type: string
+                example: W/"27-mWnhFX03PKp9LOL9kFpee5ivHVg"
+            Date:
+              schema:
+                type: string
+                example: Wed, 23 Nov 2022 12:41:04 GMT
+            Connection:
+              schema:
+                type: string
+                example: keep-alive
+            Keep-Alive:
+              schema:
+                type: string
+                example: timeout=5
+          content:
+            application/json:
+              schema:
+                type: object
+              examples:
+                example-0:
+                  summary: 401 Unauthorized
+                  value:
+                    message: Please enter Access Token
+                example-1:
+                  summary: 401 Unauthorized
+                  value:
+                    message: invalid token
+                example-2:
+                  summary: 401 Unauthorized
+                  value:
+                    message: jwt malformed
+        '404':
+          description: Not Found
+          headers:
+            X-Powered-By:
+              schema:
+                type: string
+                example: Express
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+                example: '*'
+            Content-Type:
+              schema:
+                type: string
+                example: application/json; charset=utf-8
+            Content-Length:
+              schema:
+                type: integer
+                example: '65'
+            ETag:
+              schema:
+                type: string
+                example: W/"41-qVb5p4CkL2+/T8Qn5E2yhx2AYEE"
+            Date:
+              schema:
+                type: string
+                example: Wed, 23 Nov 2022 12:40:41 GMT
+            Connection:
+              schema:
+                type: string
+                example: keep-alive
+            Keep-Alive:
+              schema:
+                type: string
+                example: timeout=5
+          content:
+            application/json:
+              schema:
+                type: object
+              example:
+                message: Name is a required field. price is a required field
+  /api/canteen/getMenu:
+    get:
+      tags:
+        - canteenApi > canteen
+      summary: getMenu
+      responses:
+        '200':
+          description: OK
+          headers:
+            X-Powered-By:
+              schema:
+                type: string
+                example: Express
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+                example: '*'
+            Content-Type:
+              schema:
+                type: string
+                example: application/json; charset=utf-8
+            Content-Length:
+              schema:
+                type: integer
+                example: '769'
+            ETag:
+              schema:
+                type: string
+                example: W/"301-rBtx61GVVmYRh2DskPQx6CQ4KX8"
+            Date:
+              schema:
+                type: string
+                example: Wed, 23 Nov 2022 12:44:35 GMT
+            Connection:
+              schema:
+                type: string
+                example: keep-alive
+            Keep-Alive:
+              schema:
+                type: string
+                example: timeout=5
+          content:
+            application/json:
+              schema:
+                type: object
+              example:
+                - name: Sandwich
+                  price: 5
+                  canteenId: 6368cc8065ae42b090aba738
+                - name: Coffe
+                  price: 5
+                  canteenId: 6368cc8065ae42b090aba738
+                - name: Samosa
+                  price: 5
+                  canteenId: 6368cc8065ae42b090aba738
+                - name: Crossiant
+                  price: 5
+                  canteenId: 6368cc8065ae42b090aba738
+                - name: Black Tea
+                  price: 5
+                  canteenId: 6368cc8065ae42b090aba738
+                - name: Black Tea
+                  price: 5
+                  canteenId: 6368cc8065ae42b090aba738
+                - name: Black Tea
+                  price: 5
+                  canteenId: 6368cc8065ae42b090aba738
+                - name: Black Tea
+                  price: 5
+                  canteenId: 6368cc8065ae42b090aba738
+                - name: Poha Indori
+                  price: 5
+                  canteenId: 6368cc8065ae42b090aba738
+                - name: Poha Indori
+                  price: 5
+                  canteenId: 6368cc8065ae42b090aba738
+                - name: Poha Indori
+                  price: 5
+                  canteenId: 6368cc8065ae42b090aba738
+        '401':
+          description: Unauthorized
+          headers:
+            X-Powered-By:
+              schema:
+                type: string
+                example: Express
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+                example: '*'
+            Content-Type:
+              schema:
+                type: string
+                example: application/json; charset=utf-8
+            Content-Length:
+              schema:
+                type: integer
+                example: '27'
+            ETag:
+              schema:
+                type: string
+                example: W/"1b-CgdsrqtkLn0qBSLU/p4pPCfLVik"
+            Date:
+              schema:
+                type: string
+                example: Wed, 23 Nov 2022 12:43:25 GMT
+            Connection:
+              schema:
+                type: string
+                example: keep-alive
+            Keep-Alive:
+              schema:
+                type: string
+                example: timeout=5
+          content:
+            application/json:
+              schema:
+                type: object
+              examples:
+                example-0:
+                  summary: 401 Unauthorized
+                  value:
+                    message: jwt malformed
+                example-1:
+                  summary: 401 Unauthorized
+                  value:
+                    message: invalid token
+  /api/admin/login:
+    post:
+      tags:
+        - Admin > authenticationApi
+      summary: login
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                membershipId: 96970879
+                password: '123'
+      security:
+        - noauthAuth: []
+      responses:
+        '200':
+          description: OK
+          headers:
+            X-Powered-By:
+              schema:
+                type: string
+                example: Express
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+                example: '*'
+            Content-Type:
+              schema:
+                type: string
+                example: application/json; charset=utf-8
+            Content-Length:
+              schema:
+                type: integer
+                example: '396'
+            ETag:
+              schema:
+                type: string
+                example: W/"18c-gfmVeHjdA5A0dBdcaIZVo3LT/0w"
+            Date:
+              schema:
+                type: string
+                example: Wed, 16 Nov 2022 13:49:02 GMT
+            Connection:
+              schema:
+                type: string
+                example: keep-alive
+            Keep-Alive:
+              schema:
+                type: string
+                example: timeout=5
+          content:
+            application/json:
+              schema:
+                type: object
+              example:
+                accessToken: >-
+                  eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjYzNWZiMGIxZGJkOTMyYTdhMzMyYmM3ZSIsInJvbGUiOiJBZG1pbiIsIm1lbWJlcnNoaXBJZCI6OTY5NzA4NzksImlhdCI6MTY2ODYwNjU0MiwiZXhwIjoxNjY4NjEwMTQyfQ.PaoQ6-8WmF-CiP2BpOiCmRW7sMRBKiXrRTeuyU1LwJQ
+                refreshToken: >-
+                  eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJtZW1iZXJzaGlwSWQiOjk2OTcwODc5LCJpYXQiOjE2Njg2MDY1NDJ9.Q-fSteoH1AMovOsP0JWTnlEQ76UaKB0UAkiu5ncmg94
+        '401':
+          description: Unauthorized
+          headers:
+            X-Powered-By:
+              schema:
+                type: string
+                example: Express
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+                example: '*'
+            Content-Type:
+              schema:
+                type: string
+                example: application/json; charset=utf-8
+            Content-Length:
+              schema:
+                type: integer
+                example: '42'
+            ETag:
+              schema:
+                type: string
+                example: W/"2a-JzIvxQy+TmLLvKwC+cmEnHkaFbo"
+            Date:
+              schema:
+                type: string
+                example: Wed, 16 Nov 2022 13:49:34 GMT
+            Connection:
+              schema:
+                type: string
+                example: keep-alive
+            Keep-Alive:
+              schema:
+                type: string
+                example: timeout=5
+          content:
+            application/json:
+              schema:
+                type: object
+              examples:
+                example-0:
+                  summary: '404'
+                  value:
+                    message: '"membershipId" is required'
+                example-1:
+                  summary: '404'
+                  value:
+                    message: '"password" is required'
+  /api/admin/signup:
+    post:
+      tags:
+        - Admin > authenticationApi
+      summary: signup
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                membershipId: 96970932
+                password: '123'
+                email: divyhaa123@gmail.com
+                role: Admin
+                name: divwqeyashah
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /api/admin/getjwttoken:
+    get:
+      tags:
+        - Admin > authenticationApi
+      summary: refreshToken
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /api/admin/singleuserdata:
+    post:
+      tags:
+        - Admin > participantApi
+      summary: createUser
+      security:
+        - bearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                name: Bhaumik Joshi
+                email: bhaukioasd@gmail.com
+                regId: 20230201954
+                seatNo: 90
+                present: false
+                eventId: 6364a00e3632aad75d0626c0
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /api/admin/uploadsheet:
+    post:
+      tags:
+        - Admin > participantApi
+      summary: upload Sheet
+      security:
+        - bearerAuth: []
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                sheet:
+                  type: string
+                  format: binary
+      parameters:
+        - name: eventId
+          in: query
+          schema:
+            type: string
+          example: 6364a00e3632aad75d0626c0
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /api/admin/getuserdetails:
+    get:
+      tags:
+        - Admin > participantApi
+      summary: getuserdetails
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: OK
+          headers:
+            X-Powered-By:
+              schema:
+                type: string
+                example: Express
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+                example: '*'
+            Content-Type:
+              schema:
+                type: string
+                example: application/json; charset=utf-8
+            Content-Length:
+              schema:
+                type: integer
+                example: '90'
+            ETag:
+              schema:
+                type: string
+                example: W/"5a-GmYBx6uS4novjgaO87YBxZlBWDc"
+            Date:
+              schema:
+                type: string
+                example: Thu, 17 Nov 2022 06:08:21 GMT
+            Connection:
+              schema:
+                type: string
+                example: keep-alive
+            Keep-Alive:
+              schema:
+                type: string
+                example: timeout=5
+          content:
+            application/json:
+              schema:
+                type: object
+              examples:
+                example-0:
+                  summary: id not match
+                  value:
+                    message: >-
+                      Oops, you registration Id does not match. Please check
+                      your registration Id.
+                example-1:
+                  summary: Successful
+                  value:
+                    name: 'Manav Mangukiya '
+                    regId: 20220701003
+                    email: manav.mbm.mm@gmail.com
+                    present: false
+                    points: 100
+                    eventId: 6364a00e3632aad75d0626c0
+        '400':
+          description: Bad Request
+          headers:
+            X-Powered-By:
+              schema:
+                type: string
+                example: Express
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+                example: '*'
+            Content-Type:
+              schema:
+                type: string
+                example: application/json; charset=utf-8
+            Content-Length:
+              schema:
+                type: integer
+                example: '35'
+            ETag:
+              schema:
+                type: string
+                example: W/"23-/p9PSNPac9pWgQ4UCMT70WFnTO8"
+            Date:
+              schema:
+                type: string
+                example: Thu, 17 Nov 2022 06:09:13 GMT
+            Connection:
+              schema:
+                type: string
+                example: keep-alive
+            Keep-Alive:
+              schema:
+                type: string
+                example: timeout=5
+          content:
+            application/json:
+              schema:
+                type: object
+              examples:
+                example-0:
+                  summary: regId required
+                  value:
+                    message: '"regId" is required'
+                example-1:
+                  summary: regId length
+                  value:
+                    message: '"regId" must be greater than or equal to 10000000000'
+  /api/admin/getalluserdetails:
+    get:
+      tags:
+        - Admin > participantApi
+      summary: getalluserdetails
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: OK
+          headers:
+            X-Powered-By:
+              schema:
+                type: string
+                example: Express
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+                example: '*'
+            Content-Type:
+              schema:
+                type: string
+                example: application/json; charset=utf-8
+            Content-Length:
+              schema:
+                type: integer
+                example: '3292'
+            ETag:
+              schema:
+                type: string
+                example: W/"cdc-x8wB8BRTUxF6fzGsM78nh0Edcd0"
+            Date:
+              schema:
+                type: string
+                example: Thu, 17 Nov 2022 06:20:18 GMT
+            Connection:
+              schema:
+                type: string
+                example: keep-alive
+            Keep-Alive:
+              schema:
+                type: string
+                example: timeout=5
+          content:
+            application/json:
+              schema:
+                type: object
+              example:
+                - name: Vrushti Shah
+                  regId: 20220701001
+                  email: 190770107624@socet.edu.in
+                  present: false
+                  points: 100
+                  eventId: 6364a00e3632aad75d0626c0
+                - name: Bhanudatsinh Jhala
+                  regId: 20220701002
+                  email: 190770107061@socet.edu.in
+                  present: false
+                  points: 100
+                  eventId: 6364a00e3632aad75d0626c0
+                - name: 'Manav Mangukiya '
+                  regId: 20220701003
+                  email: manav.mbm.mm@gmail.com
+                  present: false
+                  points: 100
+                  eventId: 6364a00e3632aad75d0626c0
+                - name: Sama Mohd Mustufa
+                  regId: 20220701007
+                  email: samamustufa9824@gmail.com
+                  present: false
+                  points: 100
+                  eventId: 6364a00e3632aad75d0626c0
+                - name: 'Meet Kuntalbhai Suthar '
+                  regId: 20220701006
+                  email: meetsuthar350@gmail.com
+                  present: false
+                  points: 100
+                  eventId: 6364a00e3632aad75d0626c0
+                - name: 'Soumojay Karmakar '
+                  regId: 20220701008
+                  email: ronnie220902@gmail.com
+                  present: false
+                  points: 100
+                  eventId: 6364a00e3632aad75d0626c0
+                - name: 'Dev Shinde '
+                  regId: 20220701009
+                  email: shindedev123@gmail.com
+                  present: false
+                  points: 100
+                  eventId: 6364a00e3632aad75d0626c0
+                - name: Amaan Hamid
+                  regId: 20220701010
+                  email: 200103042109@silveroakuni.ac.in
+                  present: false
+                  points: 100
+                  eventId: 6364a00e3632aad75d0626c0
+                - name: Kiri Aniket Hareshbhai
+                  regId: 20220701011
+                  email: 200103062017@silveroakuni.ac.in
+                  present: false
+                  points: 100
+                  eventId: 6364a00e3632aad75d0626c0
+                - name: 'Urja Mehta '
+                  regId: 20220701012
+                  email: 190770107094@socet.edu.in
+                  present: false
+                  points: 100
+                  eventId: 6364a00e3632aad75d0626c0
+                - name: 'Abhay Pisharodi '
+                  regId: 20220701013
+                  email: abhayvg.2904@gmail.com
+                  present: false
+                  points: 100
+                  eventId: 6364a00e3632aad75d0626c0
+                - name: 'Siddh Aimishkumar Bhavsar '
+                  regId: 20220701014
+                  email: siddhbhavsar3u@gmail.com
+                  present: false
+                  points: 100
+                  eventId: 6364a00e3632aad75d0626c0
+                - name: Hotri Trivedi
+                  regId: 20220701015
+                  email: trivedihh2@gmail.com
+                  present: false
+                  points: 100
+                  eventId: 6364a00e3632aad75d0626c0
+                - name: Harshit Garg
+                  regId: 20220701016
+                  email: alwaysharshgarg@gmail.com
+                  present: false
+                  points: 100
+                  eventId: 6364a00e3632aad75d0626c0
+                - name: Abhi Patel
+                  regId: 20220701017
+                  email: abhipatel@ieee.org
+                  present: false
+                  points: 100
+                  eventId: 6364a00e3632aad75d0626c0
+                - name: 'Aryan Anandprakash Acharya '
+                  regId: 20220701018
+                  email: 200103068034@silveroakuni.ac.in
+                  present: false
+                  points: 100
+                  eventId: 6364a00e3632aad75d0626c0
+                - name: Devansh Patel
+                  regId: 20220701019
+                  email: 200103072040@silveroakuni.ac.in
+                  present: false
+                  points: 100
+                  eventId: 6364a00e3632aad75d0626c0
+                - name: Divya Shah
+                  regId: 20220701020
+                  email: divyashah00068@gmail.com
+                  present: false
+                  points: 100
+                  eventId: 6364a00e3632aad75d0626c0
+                - name: Aryan khunt
+                  regId: 20220701004
+                  email: aryandipakbhai@gmail.com
+                  present: false
+                  points: 100
+                  eventId: 6364a00e3632aad75d0626c0
+                - name: Patel Om Ashokkumar
+                  regId: 20220701022
+                  email: ompatel.81103@gmail.com
+                  present: false
+                  points: 100
+                  eventId: 6364a00e3632aad75d0626c0
+                - name: RUSHI HITESH PRAJAPATI
+                  regId: 20220701005
+                  email: prajapatirushih@gmail.com
+                  present: false
+                  points: 100
+                  eventId: 6364a00e3632aad75d0626c0
+                - name: Yukta Suthar
+                  regId: 20220701021
+                  email: yuktasuthar2001@gmail.com
+                  present: false
+                  points: 100
+                  eventId: 6364a00e3632aad75d0626c0
+        '400':
+          description: Bad Request
+          headers:
+            X-Powered-By:
+              schema:
+                type: string
+                example: Express
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+                example: '*'
+            Content-Type:
+              schema:
+                type: string
+                example: application/json; charset=utf-8
+            Content-Length:
+              schema:
+                type: integer
+                example: '59'
+            ETag:
+              schema:
+                type: string
+                example: W/"3b-bb6AJsSI83FA2Dc9NIaK62Eje8o"
+            Date:
+              schema:
+                type: string
+                example: Thu, 17 Nov 2022 06:20:56 GMT
+            Connection:
+              schema:
+                type: string
+                example: keep-alive
+            Keep-Alive:
+              schema:
+                type: string
+                example: timeout=5
+          content:
+            application/json:
+              schema:
+                type: object
+              examples:
+                example-0:
+                  summary: id length
+                  value:
+                    message: '"eventId" length must be 24 characters long'
+                example-1:
+                  summary: event is required
+                  value:
+                    message: '"eventId" is required'
+                example-2:
+                  summary: id empty
+                  value:
+                    message: '"eventId" is not allowed to be empty'
+  /api/admin/markpresence:
+    put:
+      tags:
+        - Admin > participantApi
+      summary: markpresence
+      security:
+        - bearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                present: true
+                regId: 20220701002
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /api/admin/totalabsent:
+    get:
+      tags:
+        - Admin > participantApi
+      summary: totalabsent
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /api/generateqr/96970879:
+    get:
+      tags:
+        - Admin > participantApi
+      summary: generateQR
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /api/admin/createevent:
+    post:
+      tags:
+        - Admin > eventApi
+      summary: createEvent
+      security:
+        - bearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                eventName: Nodejs
+                eventDate: 1673456189
+                eventType: Technical
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /api/admin/getevent:
+    get:
+      tags:
+        - Admin > eventApi
+      summary: getEvent
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /api/admin/createcanteen:
+    post:
+      tags:
+        - Admin > canteen
+      summary: createCanteen
+      security:
+        - bearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                phoneNo: 1247645916
+                canteenName: la
+                email: midh12wnewiwr@gmail.com
+                password: '1234'
+                ownerName: Midhun Nair
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /api/admin/getcanteen:
+    get:
+      tags:
+        - Admin > canteen
+      summary: getCanteen
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /api/admin/getMenu:
+    get:
+      tags:
+        - Admin > canteen
+      summary: getMenu
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /api/participant/login:
+    post:
+      tags:
+        - participant > authenticateApi
+      summary: login
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                email: 190770107061@socet.edu.in
+                regId: 20220701002
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /api/participant/getjwttoken:
+    get:
+      tags:
+        - participant > authenticateApi
+      summary: refreshToken Copy
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /api/participant/orderfood:
+    post:
+      tags:
+        - participant > canteenApi
+      summary: transactionFoodOrder
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                foodItemArray:
+                  - foodItemId: 6368f8b98809d172e9ed1b1f
+                    quantity: 2
+                canteenId: 6368cc8065ae42b090aba738
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /api/participant/getcanteen:
+    get:
+      tags:
+        - participant > canteenApi
+      summary: getCanteen
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /api/participant/getMenu:
+    get:
+      tags:
+        - participant > canteenApi
+      summary: getMenu
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /api/participant/getAllTransactions:
+    get:
+      tags:
+        - participant > canteenApi
+      summary: getAllTransaction
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}

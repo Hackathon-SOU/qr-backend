@@ -1,9 +1,12 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
+const YAML = require('yamljs');
 require("dotenv").config();
-
 const logger = require('./utils/logger');
+const swaggerUi = require('swagger-ui-express');
+
+
 const {
     notFound,
     errorHandling
@@ -23,6 +26,10 @@ database.once("connected", () => {
 });
 
 
+const options = {
+    customCss: '.swagger-ui .topbar { display: none }',
+};
+const swaggerDocument = YAML.load("./docs/swagger.yml");
 
 const app = express();
 app.use(express.json());
@@ -30,6 +37,11 @@ app.use(express.urlencoded({
     extended: false
 }));
 app.use(cors());
+app.use(
+    '/api/api-docs',
+    swaggerUi.serve,
+    swaggerUi.setup(swaggerDocument, options)
+);
 app.use("/api/admin", require("./routes/admin"));
 app.use("/api/canteen", require("./routes/canteen"));
 app.use("/api/participant", require("./routes/participant"));
