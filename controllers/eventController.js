@@ -29,7 +29,7 @@ const createEvent = async (req, res, next) => {
                 })
                 logger.error("Event,  Duplicate Event found");
             } else {
-                logger.error("Event,  register catch error===> ", error);
+                logger.error("Event,  register catch error===> %o", error);
                 res.sendStatus(500).send({
                     message: error.message
                 });
@@ -49,7 +49,7 @@ const getEvent = async (req, res, next) => {
             res.sendStatus(401).send("Something is wrong");
         }
     } catch (error) {
-        logger.error("Get event catch error==>", error);
+        logger.error("Get event catch error==> %o", error);
         res.sendStatus(500).send({
             message: error.message
         });

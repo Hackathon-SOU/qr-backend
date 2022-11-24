@@ -25,7 +25,7 @@ const createFoodItem = async (req, res, next) => {
             logger.info("Food Item Created Successfully");
         }
     } catch (error) {
-        logger.error("Create Food item, catch error==>", error);
+        logger.error("Create Food item, catch error==> %o", error);
         res.sendStatus(500).send({
             message: error.message
         });
@@ -46,7 +46,7 @@ const getMenu = async (req, res, next) => {
             logger.info("Menu of the canteen Fetched Successfully");
         }
     } catch (error) {
-        logger.error("get Menu catch error==>", error);
+        logger.error("get Menu catch error==> %o", error);
         res.sendStatus(500).send({
             message: error.message
         });
@@ -63,7 +63,7 @@ const getCanteen = async (req, res, next) => {
             logger.info("Canteen List fetched Succesfully");
         }
     } catch (error) {
-        logger.error("Get Canteen List, catch error==>", error);
+        logger.error("Get Canteen List, catch error==> %o", error);
         res.sendStatus(500).send({
             message: error.message
         });
@@ -148,7 +148,7 @@ const orderFood = async (req, res, next) => {
         await session.commitTransaction();
         session.endSession();
     } catch (error) {
-        logger.error("transaction order catch error===>", error);
+        logger.error("transaction order catch error===> %o", error);
         res.sendStatus(500).send({
             message: "Oops, Your transaction was not successful, please try Again"
         });
@@ -178,7 +178,7 @@ const getAllTransaction = async (req, res, next) => {
             logger.info("there is some problem in fetching transaction.")
         }
     } catch (error) {
-        logger.error("get all transaction catch error ===> ", error);
+        logger.error("get all transaction catch error ===> %o", error);
         res.sendStatus(500).send({
             message: error.message
         });

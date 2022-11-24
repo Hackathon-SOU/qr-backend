@@ -15,7 +15,7 @@ mongoose.connect(mongodbString);
 const database = mongoose.connection;
 
 database.on("error", (error) => {
-    logger.error("Database is not connected==>", error);
+    logger.error("Database is not connected==> %o", error);
 });
 
 database.once("connected", () => {
