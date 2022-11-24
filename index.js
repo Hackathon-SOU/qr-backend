@@ -9,7 +9,8 @@ const app = express();
 
 const swaggerUi = require('swagger-ui-express');
 
-
+const ROOT_FOLDER = path.join(__dirname, '..');
+const SRC_FOLDER = path.join(ROOT_FOLDER, 'src');
 const {
     notFound,
     errorHandling
@@ -35,9 +36,15 @@ const mongodbString = process.env.DATABASE_URL;
 mongoose.connect(mongodbString);
 const database = mongoose.connection;
 
-database.on("error", (error) => {
-    logger.error("Database is not connected==> %o", error);
-});
+const options = {
+    customCssUrl: '/public/swagger-ui.css',
+    customSiteTitle: "The Words That I Know API - Swagger"
+};
+
+app.use('/public', express.static(path.join(SRC_FOLDER, 'public')));
+app.use('/', swaggerUi.serve);
+app.get('/', swaggerUi.setup(swaggerDocument, options));
+
 
 database.once("connected", () => {
     logger.info("Database is connected");
