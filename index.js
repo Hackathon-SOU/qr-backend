@@ -19,16 +19,13 @@ const {
 
 
 
-// const options = {
-//     customCss: '.swagger-ui .topbar { display: none }',
-// };
 const swaggerDocument = YAML.load(path.join(path.resolve(), './docs/swagger.yml'));
-
-app.use(
-    '/api/api-docs',
-    swaggerUi.serve,
-    swaggerUi.setup(swaggerDocument)
-);
+// const options = {
+//     customCssUrl: path.join(path.resolve(), './public/swagger-ui-dist/swagger-ui.css'),
+// }
+// app.use('/public', express.static(path.join(path.resolve(), './public')));
+app.use('/api/api-docs', swaggerUi.serve);
+app.get('/api/api-docs', swaggerUi.setup(swaggerDocument));
 app.use(express.json());
 app.use(express.urlencoded({
     extended: false
