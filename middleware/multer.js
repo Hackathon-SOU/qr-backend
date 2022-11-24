@@ -1,17 +1,18 @@
 const multer = require("multer");
 const path = require("path");
 
-const multerUpload = async (req, res, next) => {
-    console.log("request", req);
 
+const logger = require("../utils/logger");
+
+const multerUpload = async (req, res, next) => {
     let fileName = "";
     let storage = multer.diskStorage({
         destination: function (req, file, callback) {
             callback(null, "./uploads");
         },
         filename: function (req, file, callback) {
-            console.log("filename", file);
             fileName = file.fieldname + "-" + req.query.eventId + Date.now() + path.extname(file.originalname);
+            logger.info("filename of uploadSheet===> %s", fileName);
             callback(null, fileName);
         },
     });
@@ -19,10 +20,10 @@ const multerUpload = async (req, res, next) => {
     // below code is to read the added data to DB from file
     var upload = multer({
         storage: storage
-    }).single("image");
+    }).single("sheet");
     upload(req, res, async function (err) {
         if (err) {
-            return res.status(500).send({
+            return res.sendStatus(500).send({
                 message: err
             });
         } else {

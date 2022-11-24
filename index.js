@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 require("dotenv").config();
 
+const logger = require('./utils/logger');
 const {
     notFound,
     errorHandling
@@ -14,11 +15,11 @@ mongoose.connect(mongodbString);
 const database = mongoose.connection;
 
 database.on("error", (error) => {
-    console.log("Database is not connected", error);
+    logger.error("Database is not connected==>", error);
 });
 
 database.once("connected", () => {
-    console.log("Database is connected");
+    logger.info("Database is connected");
 });
 
 
@@ -36,6 +37,7 @@ app.use("/api/participant", require("./routes/participant"));
 
 app.use(notFound);
 app.use(errorHandling);
-app.listen(process.env.port || 4000, () => {
-    console.log("Server is running on port 4000");
+let port = process.env.port || 4000;
+app.listen(port, () => {
+    logger.debug(`Server is running on port ${port}`);
 });

@@ -31,7 +31,7 @@ const {
     verifyJwt,
     authorizeAdmin
 } = require("../middleware/verifyJwt");
-const multerUpload = require("../middleware/uploadSheet");
+const multerUpload = require("../middleware/multer");
 
 
 const router = express.Router();

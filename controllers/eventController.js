@@ -1,51 +1,56 @@
 const eventData = require("../models/event");
+const logger = require("../utils/logger");
 
 const createEvent = async (req, res, next) => {
     try {
-        const eventName = req.body.eventName;
-        const eventDate = req.body.eventDate;
-        const eventType = req.body.eventType;
-        // console.log(eventName, eventType, eventDate);
+        const {
+            eventType,
+            eventDate,
+            eventName
+        } = req.body;
+        // logger.info(eventName, eventType, eventDate);
         const data = await eventData.create({
-            eventName: eventName,
-            eventDate: eventDate,
-            eventType: eventType,
+            eventName,
+            eventDate,
+            eventType,
         });
-        if (data) {
-            res.status(200).send({
+        if (Boolean(data)) {
+            res.sendStatus(200).send({
                 message: "Event Created Successfully",
                 data: data
             });
+            logger.info("Event created Successfully", );
         }
     } catch (error) {
-        console.log("errrr===>", error);
-        error.code == 11000 ?
-            Object.keys(error.keyPattern) == "eventDate" && res.status(409).send({
-                message: "You have entered Duplicated Event"
-            }) :
-            error.errors.eventDate ? res.status(409).send({
-                message: error.errors.eventDate.message
-            }) :
-            res.status(500).send({
-                message: error.message
-            });
+        if (error.code == 11000) {
+            if (Object.keys(error.keyPattern) == "eventDate") {
+                res.sendStatus(409).send({
+                    message: "You have entered Duplicated Event"
+                })
+                logger.error("Event,  Duplicate Event found");
+            } else {
+                logger.error("Event,  register catch error===> ", error);
+                res.sendStatus(500).send({
+                    message: error.message
+                });
+            }
+        }
     }
 }
-
 const getEvent = async (req, res, next) => {
     try {
         const data = await eventData.find({}, {
             __v: 0
         });
         if (data) {
-            console.log("data==>", data);
-            res.status(200).send(data);
+            res.sendStatus(200).send(data);
+            logger.info("Get Event List fetched successfully");
         } else {
-            res.status(401).send("Something is wrong");
+            res.sendStatus(401).send("Something is wrong");
         }
     } catch (error) {
-        console.log("catch error==>", error);
-        res.status(500).send({
+        logger.error("Get event catch error==>", error);
+        res.sendStatus(500).send({
             message: error.message
         });
     }

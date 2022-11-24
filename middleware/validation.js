@@ -1,12 +1,12 @@
 const joi = require('joi');
 
 
+const logger = require('../utils/logger');
 const pick = require('../utils/pick');
 
 const validate = (schema) => (req, res, next) => {
     const validSchema = pick(schema, ['query', 'params', 'body']);
     const object = pick(req, Object.keys(validSchema));
-    // console.log(validSchema)
     const {
         value,
         error
@@ -19,12 +19,18 @@ const validate = (schema) => (req, res, next) => {
         }).validate(object);
 
     if (error) {
-        console.log(error);
-        res.status(403).send({
-            message: error.message
-        });
+        logger.error("JOI validation error===> %o", error);
+        if (error.details[0].type == "any.required") {
+            res.sendStatus(404).send({
+                message: error.message
+            });
+        } else {
+            res.sendStatus(400).send({
+                message: error.message
+            });
+        }
     } else {
-        console.log("Joi Validation Successful");
+        logger.debug("Joi Validation Successful");
         Object.assign(req, value);
         next();
     }

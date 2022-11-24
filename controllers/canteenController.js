@@ -1,8 +1,10 @@
+const mongoose = require("mongoose");
+
 const canteenData = require("../models/canteen");
 const userData = require("../models/user");
 const transactionData = require("../models/transaction");
 const foodItems = require("../models/foodItem");
-const mongoose = require("mongoose");
+const logger = require("../utils/logger");
 
 
 const createFoodItem = async (req, res, next) => {
@@ -16,14 +18,15 @@ const createFoodItem = async (req, res, next) => {
             price: price,
             canteenId: canteenId,
         });
-        if (data) {
-            res.status(200).send({
+        if (Boolean(data)) {
+            res.sendStatus(200).send({
                 message: "Hurray, your food Item added in your Menu"
-            })
+            });
+            logger.info("Food Item Created Successfully");
         }
     } catch (error) {
-        console.log("catch error==>", error);
-        res.status(500).send({
+        logger.error("Create Food item, catch error==>", error);
+        res.sendStatus(500).send({
             message: error.message
         });
     }
@@ -39,12 +42,12 @@ const getMenu = async (req, res, next) => {
             __v: 0
         });
         if (data) {
-            // console.log("data==>", data);
-            res.status(200).send(data);
+            res.sendStatus(200).send(data);
+            logger.info("Menu of the canteen Fetched Successfully");
         }
     } catch (error) {
-        console.log("catch error==>", error);
-        res.status(500).send({
+        logger.error("get Menu catch error==>", error);
+        res.sendStatus(500).send({
             message: error.message
         });
     }
@@ -56,12 +59,12 @@ const getCanteen = async (req, res, next) => {
             __v: 0
         });
         if (data) {
-            // console.log("data==>", data);
-            res.status(200).send(data);
+            res.sendStatus(200).send(data);
+            logger.info("Canteen List fetched Succesfully");
         }
     } catch (error) {
-        console.log("catch error==>", error);
-        res.status(500).send({
+        logger.error("Get Canteen List, catch error==>", error);
+        res.sendStatus(500).send({
             message: error.message
         });
     }
@@ -94,10 +97,12 @@ const orderFood = async (req, res, next) => {
                 calcPrice += item.price * value.quantity;
             });
         });
+        logger.debug("Calculated Total Price of the order Succesfully");
         let userPoints = await userData.findOne({
             _id: userId
         });
         if (userPoints.points >= calcPrice) {
+            logger.info("User has points greater than order points");
             const userUpdate = await userData.findOneAndUpdate({
                 _id: userPoints._id
             }, {
@@ -107,9 +112,7 @@ const orderFood = async (req, res, next) => {
             }, opts);
 
             if (userUpdate.acknowledge == true) {
-                console.log({
-                    message: "User point Updated"
-                });
+                logger.debug("User points Updated");
             }
 
             const updateCanteen = await canteenData.updateOne({
@@ -121,9 +124,7 @@ const orderFood = async (req, res, next) => {
             }, opts);
 
             if (updateCanteen.acknowledged == true) {
-                console.log({
-                    message: "canteenData document updated"
-                });
+                logger.debug("CanteenData document updated");
             }
             const transactionRef = await transactionData.create([{
                 canteenId: canteenId,
@@ -132,24 +133,25 @@ const orderFood = async (req, res, next) => {
                 price: calcPrice,
             }], opts);
             if (transactionRef) {
-                res.status(200).send({
+                res.sendStatus(200).send({
                     message: "Hurray!!!!, your order has been placed. It will take some time. Enjoy your meal",
                     transaction: transactionRef
                 });
+                logger.info("Transaction of the order completed Succesfully");
             }
         } else {
-            res.status(403).send({
+            res.sendStatus(403).send({
                 message: "Oops...., it seems You don't have enough points."
             });
+            logger.error("User do not have enough points");
         }
         await session.commitTransaction();
         session.endSession();
     } catch (error) {
-        console.log("error===>", error);
-        // console.log(error.message);
-        res.status(500).send({
+        logger.error("transaction order catch error===>", error);
+        res.sendStatus(500).send({
             message: "Oops, Your transaction was not successful, please try Again"
-        })
+        });
         session.abortTransaction();
         session.endSession();
     }
@@ -166,16 +168,18 @@ const getAllTransaction = async (req, res, next) => {
         }).populate("canteenId", {
             canteenName: 1
         });
-        if (transactions[0].price) {
-            res.status(200).send(transactions);
+        if (Boolean(transactions)) {
+            res.sendStatus(200).send(transactions);
+            logger.info("Transactions fetched succesfully");
         } else {
-            res.status(500).send({
+            res.sendStatus(500).send({
                 message: transactions.error.message
             });
+            logger.info("there is some problem in fetching transaction.")
         }
     } catch (error) {
-        console.log(error);
-        res.status(500).send({
+        logger.error("get all transaction catch error ===> ", error);
+        res.sendStatus(500).send({
             message: error.message
         });
     }
