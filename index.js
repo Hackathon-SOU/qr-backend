@@ -21,13 +21,6 @@ const {
 
 
 const swaggerDocument = YAML.load(path.join(path.resolve(), './docs/swagger.yml'));
-// const options = {
-//     customCssUrl: path.join(path.resolve(), './public/swagger-ui-dist/swagger-ui.css'),
-// }
-// app.use('/public', express.static(path.join(path.resolve(), './public')));
-app.use('/api/api-docs', swaggerUi.serve);
-app.get('/api/api-docs', swaggerUi.setup(swaggerDocument));
-app.use(express.json());
 app.use(express.urlencoded({
     extended: false
 }));
@@ -35,6 +28,13 @@ app.use(cors());
 const mongodbString = process.env.DATABASE_URL;
 mongoose.connect(mongodbString);
 const database = mongoose.connection;
+
+
+
+database.once("connected", () => {
+    logger.info("Database is connected");
+});
+
 
 const options = {
     customCssUrl: '/public/swagger-ui.css',
@@ -46,9 +46,7 @@ app.use('/', swaggerUi.serve);
 app.get('/', swaggerUi.setup(swaggerDocument, options));
 
 
-database.once("connected", () => {
-    logger.info("Database is connected");
-});
+
 app.use("/api/admin", require("./routes/admin"));
 app.use("/api/canteen", require("./routes/canteen"));
 app.use("/api/participant", require("./routes/participant"));
