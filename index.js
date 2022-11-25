@@ -40,7 +40,7 @@ const options = {
     customSiteTitle: "The Words That I Know API - Swagger"
 };
 
-app.use(express.static('public'));
+app.use("/bhanu", express.static('./public/index.html'));
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument, {
     customCssUrl: '/swagger-ui.css'
 }));
