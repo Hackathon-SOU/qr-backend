@@ -36,13 +36,15 @@ database.once("connected", () => {
 const swaggerDocument = YAML.load(path.join(path.resolve(), './docs/swagger.yml'));
 
 const options = {
-    customCssUrl: '/public/swagger-ui.css',
+    // customCssUrl: './public/swagger-ui.css',
     customSiteTitle: "The Words That I Know API - Swagger"
 };
 
+
 app.use('/public', express.static(path.join(ROOT_FOLDER, 'public')));
-app.use('/api-docs', swaggerUi.serve);
-app.get('/api-docs', swaggerUi.setup(swaggerDocument, options));
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+// app.use('/api-docs', swaggerUi.serve);
+// app.get('/api-docs', swaggerUi.setup(swaggerDocument, options));
 
 
 
