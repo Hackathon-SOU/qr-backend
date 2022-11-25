@@ -10,7 +10,6 @@ const app = express();
 const swaggerUi = require('swagger-ui-express');
 
 const ROOT_FOLDER = path.join(__dirname, '..');
-const SRC_FOLDER = path.join(ROOT_FOLDER, 'src');
 const {
     notFound,
     errorHandling
@@ -20,7 +19,6 @@ const {
 
 
 
-const swaggerDocument = YAML.load(path.join(path.resolve(), './docs/swagger.yml'));
 app.use(express.urlencoded({
     extended: false
 }));
@@ -35,13 +33,14 @@ database.once("connected", () => {
     logger.info("Database is connected");
 });
 
+const swaggerDocument = YAML.load(path.join(path.resolve(), './docs/swagger.yml'));
 
 const options = {
     customCssUrl: '/public/swagger-ui.css',
     customSiteTitle: "The Words That I Know API - Swagger"
 };
 
-app.use('/public', express.static(path.join(SRC_FOLDER, 'public')));
+app.use('/public', express.static(path.join(ROOT_FOLDER, 'public')));
 app.use('/', swaggerUi.serve);
 app.get('/', swaggerUi.setup(swaggerDocument, options));
 
