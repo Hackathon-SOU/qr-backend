@@ -40,9 +40,10 @@ const options = {
     customSiteTitle: "The Words That I Know API - Swagger"
 };
 
-
-app.use('/public', express.static(path.join(ROOT_FOLDER, 'public')));
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+app.use(express.static('public'));
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument, {
+    customCssUrl: '/swagger-ui.css'
+}));
 // app.use('/api-docs', swaggerUi.serve);
 // app.get('/api-docs', swaggerUi.setup(swaggerDocument, options));
 
