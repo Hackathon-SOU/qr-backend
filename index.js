@@ -41,8 +41,8 @@ const options = {
 };
 
 app.use('/public', express.static(path.join(ROOT_FOLDER, 'public')));
-app.use('/', swaggerUi.serve);
-app.get('/', swaggerUi.setup(swaggerDocument, options));
+app.use('/api-docs', swaggerUi.serve);
+app.get('/api-docs', swaggerUi.setup(swaggerDocument, options));
 
 
 
