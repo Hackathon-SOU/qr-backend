@@ -9,13 +9,6 @@
     }
     ],
     "routes": [
-      { "src": "/(.*)", "dest": "/index.js" },
-      {
-        "src": "/api-docs/swagger-ui.css",
-        "dest": "./public/swagger-ui.css"
-    },{
-      "src":"/bhanu",
-      "dest":"./public/index.html"
-    }
+      { "src": "/(.*)", "dest": "/index.js" }
     ]
   }
