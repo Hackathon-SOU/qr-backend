@@ -3,7 +3,7 @@ info:
   title: qr-app-deployed
   version: 1.0.0
 servers:
-  - url: https://qr-backend-bhanudatsinhjhala.vercel.app/
+  - url: https://qr-backend-alpha.vercel.app
   - url: http://localhost:4000
 components:
   securitySchemes:
