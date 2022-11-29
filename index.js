@@ -41,7 +41,7 @@ const options = {
 logger.debug(path.join(ROOT_FOLDER, 'public'));
 
 app.use("/bhanu", express.static('./public/index.html'));
-app.use('/public/swagger-ui.css', express.static(path.join(ROOT_FOLDER, 'public/swagger-ui.css')));
+app.use('/api-docs/swagger-ui.css', express.static(path.join(ROOT_FOLDER, 'public/swagger-ui.css')));
 app.use('/api-docs', swaggerUi.serve);
 app.use('/api-docs', swaggerUi.setup(swaggerDocument, options));
 // app.use('/api-docs', swaggerUi.serve);
