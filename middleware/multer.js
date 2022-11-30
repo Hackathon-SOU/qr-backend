@@ -10,7 +10,7 @@ const multerUpload = async (req, res, next) => {
         destination: function (req, file, callback) {
             console.log(path.join(path.resolve(), "./uploads/"));
             fs.mkdir('./uploads/', (err) => {
-                cb(null, './uploads/');
+                callback(null, './uploads/');
             });
         },
         filename: function (req, file, callback) {
