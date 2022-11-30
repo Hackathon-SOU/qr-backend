@@ -213,7 +213,7 @@ const uploadSheet = async (req, res, next) => {
         // Below code is to upload Sheet from    
         const eventId = req.query.eventId;
         let fileName = req.fileName;
-        var file = render.readFile(`./uploads/${fileName}`);
+        var file = render.readFile(`${process.cwd()}/uploads/${fileName}`);
         const sheet = file.SheetNames;
         for (var i = 0; i < sheet.length; i++) {
             var sheetName = sheet[i];
