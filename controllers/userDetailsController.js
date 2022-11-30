@@ -214,7 +214,7 @@ const uploadSheet = async (req, res, next) => {
         const eventId = req.query.eventId;
         let fileName = req.fileName;
         logger.info("%s", req.fileName);
-        var file = render.readFile(`./uploads/${fileName}`);
+        var file = render.readFile(path.join(path.resolve(), `/uploads/${fileName}`));
         logger.info("file========>%o", file);
         const sheet = file.SheetNames;
         for (var i = 0; i < sheet.length; i++) {
