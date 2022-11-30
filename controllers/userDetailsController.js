@@ -213,7 +213,7 @@
             // Below code is to upload Sheet from    
             const eventId = req.query.eventId;
             let fileName = req.fileName;
-            logger.info("%s", req.fileName);
+            logger.info("req.fileName");
             let filePath = path.join(path.resolve(), `uploads/${fileName}`);
             var file = render.readFile(filePath);
             logger.info("file========>%o", file);
