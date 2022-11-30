@@ -40,7 +40,6 @@ const options = {
     customSiteTitle: "Qr Server API - Swagger"
 };
 
-app.use("/uploads", express.static(path.join(ROOT_FOLDER, 'uploads')));
 app.use('/api/api-docs/swagger-ui.css', express.static(path.join(ROOT_FOLDER, 'public/swagger-ui.css')));
 app.use('/api/api-docs', swaggerUi.serve);
 app.use('/api/api-docs', swaggerUi.setup(swaggerDocument, options));
