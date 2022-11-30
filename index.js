@@ -20,8 +20,9 @@ const {
 
 
 app.use(express.urlencoded({
-    extended: false
+    extended: true
 }));
+app.use(express.json());
 app.use(cors());
 const mongodbString = process.env.DATABASE_URL;
 mongoose.connect(mongodbString);
