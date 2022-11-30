@@ -23,6 +23,7 @@ const multerUpload = async (req, res, next) => {
     }).single("sheet");
     upload(req, res, async function (err) {
         if (err) {
+            logger.error("upload multer error =====> %o", error)
             return res.status(500).send({
                 message: err
             });
