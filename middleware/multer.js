@@ -8,13 +8,12 @@ const multerUpload = async (req, res, next) => {
     let fileName = "";
     let storage = multer.diskStorage({
         destination: function (req, file, callback) {
-            callback(null, `./uploads`);
+            callback(null, path.join(path.resolve(), "/uploads"));
         },
         filename: function (req, file, callback) {
             fileName = file.fieldname + "-" + req.query.eventId + Date.now() + path.extname(file.originalname);
             logger.info("filename of uploadSheet===> %s", fileName);
             callback(null, fileName);
-            logger.info("dummy");
         },
     });
 
@@ -24,12 +23,10 @@ const multerUpload = async (req, res, next) => {
     }).single("sheet");
     upload(req, res, async function (err) {
         if (err) {
-            logger.error("upload multer error =====> %o", error)
             return res.status(500).send({
                 message: err
             });
         } else {
-            logger.info("upload multer next");
             req.fileName = fileName;
             next();
         }
