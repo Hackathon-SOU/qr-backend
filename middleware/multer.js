@@ -14,6 +14,7 @@ const multerUpload = async (req, res, next) => {
             fileName = file.fieldname + "-" + req.query.eventId + Date.now() + path.extname(file.originalname);
             logger.info("filename of uploadSheet===> %s", fileName);
             callback(null, fileName);
+            logger.info("dummy");
         },
     });
 
@@ -28,6 +29,7 @@ const multerUpload = async (req, res, next) => {
                 message: err
             });
         } else {
+            logger.info("upload multer next");
             req.fileName = fileName;
             next();
         }
