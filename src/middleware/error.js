@@ -1,19 +1,37 @@
-const logger = require("../utils/logger");
+const httpStatus = require("http-status");
 
-const notFound = (req, res, next) => {
-    const error = new Error(`Not FOUND - ${req.originalUrl}`);
-    res.status(404);
+const logger = require("../utils/logger");
+const ApiError = require("../utils/ApiError");
+
+const errorConverter = (error, req, res, next) => {
+    if (!(error instanceof ApiError)) {
+        logger.error("errorConvertorIf===>%o", error);
+        const statusCode = error.statusCode || error instanceof mongoose.Error ? httpStatus.BAD_REQUEST : httpStatus.INTERNAL_SERVER_ERROR;
+        const message = error.message || httpStatus[statusCode];
+        error = new ApiError(statusCode, message, false, error.stack)
+    }
+    logger.error("errorConvertor===>%s", error);
     next(error);
 }
 
-const errorHandling = (error, req, res, next) => {
-    logger.error("%o", error);
-    res.status(500).send({
-        message: "Something is wrong"
-    });
+const errorHandler = (error, req, res, next) => {
+    let {
+        statusCode,
+        message,
+    } = error;
+    if (!error.isOperational) {
+        statusCode = httpStatus.INTERNAL_SERVER_ERROR;
+        message = httpStatus[httpStatus.INTERNAL_SERVER_ERROR];
+    }
+
+    const response = {
+        code: statusCode,
+        message,
+    }
+    res.status(statusCode).send(response);
 }
 
 module.exports = {
-    notFound,
-    errorHandling
+    errorConverter,
+    errorHandler
 };

@@ -21,10 +21,11 @@ const adminRegisterSchema = {
             'string.min': `Password cannot be less than 3 charachters`,
             'any.required': `Password is a required field`
         }),
-        role: joi.string().required().messages({
+        role: joi.string().required().valid('admin', 'volunteer', 'execom').messages({
             'string.base': `role should be a type of 'string'`,
             'string.empty': `role cannot be an empty field`,
-            'any.required': `role is a required field`
+            'any.required': `role is a required field`,
+            'any.only': `role must be one of [admin, volunteer, execom]`
         }),
         name: joi.string().alphanum().trim().min(2).required().messages({
             'string.base': `name should be a type of 'string'`,
@@ -187,10 +188,10 @@ const userLoginSchema = {
             'any.required': `regId is a required field`
         }),
         email: joi.string().email().trim(true).required().messages({
-            'string.base': `Password should be a type of 'string'`,
-            'string.empty': `Password cannot be an empty field`,
-            'string.min': `Password cannot be less than 3 charachters`,
-            'any.required': `Password is a required field`
+            'string.base': `Email should be a type of 'string'`,
+            'string.empty': `Email cannot be an empty field`,
+            'string.min': `Email cannot be less than 3 charachters`,
+            'any.required': `Email is a required field`
         }),
     })
 };

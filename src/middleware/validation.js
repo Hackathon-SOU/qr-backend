@@ -1,8 +1,9 @@
 const joi = require('joi');
-
+const httpStatus = require('http-status');
 
 const logger = require('../utils/logger');
 const pick = require('../utils/pick');
+const ApiError = require("../utils/ApiError");
 
 const validate = (schema) => (req, res, next) => {
     const validSchema = pick(schema, ['query', 'params', 'body']);
@@ -21,13 +22,10 @@ const validate = (schema) => (req, res, next) => {
     if (error) {
         logger.error("JOI validation error===> %o", error);
         if (error.details[0].type == "any.required") {
-            res.status(404).send({
-                message: error.message
-            });
+            throw new ApiError(httpStatus.NOT_FOUND, error.message)
         } else {
-            res.status(400).send({
-                message: error.message
-            });
+            logger.error("It works here in error");
+            throw new ApiError(httpStatus.BAD_REQUEST, error.message);
         }
     } else {
         logger.debug("Joi Validation Successful");
