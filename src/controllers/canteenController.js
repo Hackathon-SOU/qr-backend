@@ -26,9 +26,7 @@ const createFoodItem = async (req, res, next) => {
         }
     } catch (error) {
         logger.error("Create Food item, catch error==> %o", error);
-        res.status(500).send({
-            message: error.message
-        });
+        next(error);
     }
 }
 
@@ -47,9 +45,7 @@ const getMenu = async (req, res, next) => {
         }
     } catch (error) {
         logger.error("get Menu catch error==> %o", error);
-        res.status(500).send({
-            message: error.message
-        });
+        next(error);
     }
 }
 
@@ -64,9 +60,7 @@ const getCanteen = async (req, res, next) => {
         }
     } catch (error) {
         logger.error("Get Canteen List, catch error==> %o", error);
-        res.status(500).send({
-            message: error.message
-        });
+        next(error);
     }
 }
 
@@ -140,20 +134,16 @@ const orderFood = async (req, res, next) => {
                 logger.info("Transaction of the order completed Succesfully");
             }
         } else {
-            res.status(403).send({
-                message: "Oops...., it seems You don't have enough points."
-            });
             logger.error("User do not have enough points");
+            throw new ApiError(httpStatus.FORBIDDEN, "Oops...., it seems You don't have enough points.");
         }
         await session.commitTransaction();
         session.endSession();
     } catch (error) {
         logger.error("transaction order catch error===> %o", error);
-        res.status(500).send({
-            message: "Oops, Your transaction was not successful, please try Again"
-        });
         session.abortTransaction();
         session.endSession();
+        next(error);
     }
 }
 
@@ -171,17 +161,10 @@ const getAllTransaction = async (req, res, next) => {
         if (Boolean(transactions)) {
             res.status(200).send(transactions);
             logger.info("Transactions fetched succesfully");
-        } else {
-            res.status(500).send({
-                message: transactions.error.message
-            });
-            logger.info("there is some problem in fetching transaction.")
         }
     } catch (error) {
         logger.error("get all transaction catch error ===> %o", error);
-        res.status(500).send({
-            message: error.message
-        });
+        next(error);
     }
 }
 

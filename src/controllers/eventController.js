@@ -1,3 +1,6 @@
+const httpStatus = require('http-status');
+
+const ApiError = require('../utils/ApiError');
 const eventData = require("../models/event");
 const logger = require("../utils/logger");
 
@@ -8,7 +11,6 @@ const createEvent = async (req, res, next) => {
             eventDate,
             eventName
         } = req.body;
-        // logger.info(eventName, eventType, eventDate);
         const data = await eventData.create({
             eventName,
             eventDate,
@@ -22,19 +24,14 @@ const createEvent = async (req, res, next) => {
             logger.info("Event created Successfully", );
         }
     } catch (error) {
+        logger.error("Event,  register catch error===> %o", error);
         if (error.code == 11000) {
             if (Object.keys(error.keyPattern) == "eventDate") {
-                res.status(409).send({
-                    message: "You have entered Duplicated Event"
-                })
                 logger.error("Event,  Duplicate Event found");
-            } else {
-                logger.error("Event,  register catch error===> %o", error);
-                res.status(500).send({
-                    message: error.message
-                });
+                error = new ApiError(httpStatus.CONFLICT, 'You have entered Duplicated Event');
             }
         }
+        next(error);
     }
 }
 const getEvent = async (req, res, next) => {
@@ -45,14 +42,10 @@ const getEvent = async (req, res, next) => {
         if (data) {
             res.status(200).send(data);
             logger.info("Get Event List fetched successfully");
-        } else {
-            res.status(401).send("Something is wrong");
         }
     } catch (error) {
         logger.error("Get event catch error==> %o", error);
-        res.status(500).send({
-            message: error.message
-        });
+        next(error);
     }
 }
 module.exports = {

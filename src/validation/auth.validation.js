@@ -121,7 +121,7 @@ const canteenRegisterSchema = {
 
 const eventRegisterSchema = {
     body: joi.object().keys({
-        eventType: joi.string().required().messages({
+        eventType: joi.string().required().valid('technical', 'non-technical').messages({
             'string.base': `Event Type should be a type of 'string'`,
             'string.empty': `Event Type cannot be an empty field`,
             'any.required': `Event Type is a required field`
@@ -129,14 +129,14 @@ const eventRegisterSchema = {
         eventName: joi.string().min(2).required().messages({
             'string.base': `Event Name should be a type of 'string'`,
             'string.empty': `Event Name cannot be an empty field`,
-            'string.min': `Please enter Event Name with more than 2 charachters`,
+            'string.min': `Event Name should be more than 2 charachters`,
             'any.required': `Event Name is a required field`
         }),
         eventDate: joi.number().integer().min(10 ** 9).max(10 ** 10 - 1).required().messages({
             'number.base': `Event Date should be a type of 'string'`,
             'number.empty': `Event Date cannot be an empty field`,
-            'number.min': `Please enter Event Date should be equal to 10 digit`,
-            'number.max': `Please enter Event Date should be equal to 10 digit`,
+            'number.min': `Event Date should be equal to 10 digit`,
+            'number.max': `Event Date should be equal to 10 digit`,
             'any.required': `Event Date is a required field`
         }),
     })
