@@ -1,13 +1,13 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
-const YAML = require('yamljs');
+// const YAML = require('yamljs');
 require("dotenv").config();
 const logger = require('./utils/logger');
 const path = require('path');
 const app = express();
 
-const swaggerUi = require('swagger-ui-express');
+// const swaggerUi = require('swagger-ui-express');
 
 const ApiError = require('../src/utils/ApiError')
 
@@ -36,15 +36,15 @@ database.once("connected", () => {
     logger.info("Database is connected");
 });
 
-const swaggerDocument = YAML.load(path.join(path.resolve(), './src/docs/swagger.yml'));
-const options = {
-    customCssUrl: './public/swagger-ui.css',
-    customSiteTitle: "Qr Server API - Swagger"
-};
-app.use('/uploads', express.static(path.join(ROOT_FOLDER, 'uploads')));
-app.use('/api/api-docs/swagger-ui.css', express.static(path.join(ROOT_FOLDER, 'public/swagger-ui.css')));
-app.use('/api/api-docs', swaggerUi.serve);
-app.use('/api/api-docs', swaggerUi.setup(swaggerDocument, options));
+// const swaggerDocument = YAML.load(path.join(path.resolve(), './src/docs/swagger.yml'));
+// const options = {
+//     customCssUrl: './public/swagger-ui.css',
+//     customSiteTitle: "Qr Server API - Swagger"
+// };
+// app.use('/uploads', express.static(path.join(ROOT_FOLDER, 'uploads')));
+// app.use('/api/api-docs/swagger-ui.css', express.static(path.join(ROOT_FOLDER, 'public/swagger-ui.css')));
+// app.use('/api/api-docs', swaggerUi.serve);
+// app.use('/api/api-docs', swaggerUi.setup(swaggerDocument, options));
 
 
 
