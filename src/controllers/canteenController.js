@@ -1,5 +1,7 @@
 const mongoose = require("mongoose");
+const httpStatus = require("http-status");
 
+const ApiError = require("../utils/ApiError");
 const canteenData = require("../models/canteen");
 const userData = require("../models/user");
 const transactionData = require("../models/transaction");
@@ -32,7 +34,7 @@ const createFoodItem = async (req, res, next) => {
 
 const getMenu = async (req, res, next) => {
     try {
-        const canteenId = req.canteenId;
+        const canteenId = req.body.canteenId || req.canteenId;
         const data = await foodItems.find({
             canteenId: canteenId,
         }, {
@@ -40,6 +42,7 @@ const getMenu = async (req, res, next) => {
             __v: 0
         });
         if (data) {
+            logger.debug("data menu food===>%o", data);
             res.status(200).send(data);
             logger.info("Menu of the canteen Fetched Successfully");
         }
@@ -52,7 +55,8 @@ const getMenu = async (req, res, next) => {
 const getCanteen = async (req, res, next) => {
     try {
         const data = await canteenData.find({}, {
-            __v: 0
+            canteenName: 1,
+            ownerName: 1,
         });
         if (data) {
             res.status(200).send(data);
@@ -86,15 +90,17 @@ const orderFood = async (req, res, next) => {
         const foodItemArray = req.body.foodItemArray;
 
         let calcPrice = 0;
-        await foodItemArray.forEach(async (value) => {
-            await foodItems.findById(value.foodItemId, null, opts).then((item) => {
-                calcPrice += item.price * value.quantity;
+        for (const value of foodItemArray) {
+            await foodItems.findById(value.foodItemId, null, opts).then(async (item) => {
+                calcPrice += await item.price * value.quantity;
+                logger.debug("calcPrice=====>%s", calcPrice);
             });
-        });
-        logger.debug("Calculated Total Price of the order Succesfully");
+        };
+        logger.debug("Calculated Total Price of the order Succesfully %s", calcPrice);
         let userPoints = await userData.findOne({
             _id: userId
         });
+        logger.debug("userPoints==> %s, calcPrice===> %s", userPoints.points, calcPrice);
         if (userPoints.points >= calcPrice) {
             logger.info("User has points greater than order points");
             const userUpdate = await userData.findOneAndUpdate({
@@ -131,17 +137,20 @@ const orderFood = async (req, res, next) => {
                     message: "Hurray!!!!, your order has been placed. It will take some time. Enjoy your meal",
                     transaction: transactionRef
                 });
+                logger.debug("session state==>%s", session.transaction.state);
+                await session.commitTransaction();
+                session.endSession();
                 logger.info("Transaction of the order completed Succesfully");
             }
         } else {
             logger.error("User do not have enough points");
+            logger.debug("session state==>%s", session.transaction.state);
             throw new ApiError(httpStatus.FORBIDDEN, "Oops...., it seems You don't have enough points.");
         }
-        await session.commitTransaction();
-        session.endSession();
     } catch (error) {
         logger.error("transaction order catch error===> %o", error);
-        session.abortTransaction();
+        logger.debug("session state==>%s", session.transaction.state);
+        await session.abortTransaction();
         session.endSession();
         next(error);
     }
@@ -149,15 +158,32 @@ const orderFood = async (req, res, next) => {
 
 const getAllTransaction = async (req, res, next) => {
     try {
-        const userId = req.userId;
-        const transactions = await transactionData.find({
-            userId: userId
-        }, {
-            userId: 0,
-            __v: 0
-        }).populate("canteenId", {
-            canteenName: 1
-        });
+        const {
+            userId,
+            canteenId
+        } = req;
+        let transactions;
+        if (userId) {
+            transactions = await transactionData.find({
+                userId: userId
+            }, {
+                userId: 0,
+                canteenId: 0,
+                __v: 0
+            }).populate("canteenId", {
+                canteenName: 1
+            });
+        } else {
+            transactions = await transactionData.find({
+                canteenId: canteenId
+            }, {
+                canteenName: 0,
+                userId: 0,
+                __v: 0
+            }).populate("userId", {
+                name: 1
+            });
+        }
         if (Boolean(transactions)) {
             res.status(200).send(transactions);
             logger.info("Transactions fetched succesfully");

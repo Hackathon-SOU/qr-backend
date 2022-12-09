@@ -4,7 +4,8 @@ const express = require('express');
 const {
     createFoodItem,
     getMenu,
-    getCanteen
+    getCanteen,
+    getAllTransaction
 } = require("../controllers/canteenController")
 const {
     canteenLogin,
@@ -25,5 +26,6 @@ router.get("/getjwttoken", getCanteenJwtToken);
 router.post("/createfooditem", verifyJwt, authorizeCanteen, validate(canteenValidation.foodRegisterSchema), createFoodItem);
 router.get("/getmenu", verifyJwt, authorizeCanteen, getMenu);
 router.get("/getcanteen", verifyJwt, authorizeCanteen, getCanteen);
+router.get("/getAllTransactions", verifyJwt, authorizeCanteen, getAllTransaction);
 
 module.exports = router;

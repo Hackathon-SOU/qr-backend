@@ -31,7 +31,7 @@ function verifyJwt(req, res, next) {
     });
   } catch (error) {
     logger.error("Verify JWT catch error====> %o", error)
-    throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, error.message);
+    next(error);
   }
 };
 
@@ -57,13 +57,13 @@ async function authorizeParticpant(req, res, next) {
   let user = await userData.findOne({
     _id: participantId,
   });
-  req.userId = user._id;
   if (Boolean(user)) {
+    req.userId = user._id;
     logger.error("authorizeParticipant, Particpant found succesfully");
     next();
   } else {
     logger.error("authorizeParticipant, Particpant does not found");
-    throw new ApiError(httpStatus.UNAUTHORIZED, 'Oops, it seems you are not participant.');
+    next(new ApiError(httpStatus.UNAUTHORIZED, 'Oops, it seems you are not participant.'));
   }
 }
 
@@ -73,13 +73,13 @@ async function authorizeCanteen(req, res, next) {
   let canteen = await canteenData.findOne({
     _id: canteenId,
   });
-  req.canteenId = canteen._id;
   if (Boolean(canteen)) {
+    req.canteenId = canteen._id;
     logger.info("authorizeCanteen, Canteen found successfully");
     next();
   } else {
     logger.error("authorizeCanteen, Canteen does not found");
-    throw new ApiError(httpStatus.UNAUTHORIZED, 'Oops, it seems you are not part of IEEE.');
+    next(new ApiError(httpStatus.UNAUTHORIZED, 'Oops, it seems you are not part of IEEE.'));
   }
 }
 
