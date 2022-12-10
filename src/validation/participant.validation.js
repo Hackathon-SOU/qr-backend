@@ -1,7 +1,7 @@
 const joi = require('joi');
 
 const getUserDetailsSchema = {
-    body: joi.object().keys({
+    query: joi.object().keys({
         regId: joi.number().integer().min(10 ** 10).max(10 ** 11 - 1).required().messages({
             'number.base': `regId should be a type of 'number'`,
             'number.empty': `regId cannot be an empty field`,

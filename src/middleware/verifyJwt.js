@@ -12,6 +12,7 @@ const ApiError = require("../utils/ApiError");
 function verifyJwt(req, res, next) {
   try {
     let token;
+    logger.debug("req recieve===>", req.headers);
     if (req.headers.authorization == undefined || null == req.headers.authorization) {
       logger.error("Token is undefined or null");
       throw new ApiError(httpStatus.NOT_FOUND, 'Access Token not found');

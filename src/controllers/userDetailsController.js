@@ -10,7 +10,8 @@ const logger = require("../utils/logger");
 
 const getuserDetails = async (req, res, next) => {
     try {
-        const regId = req.body.regId;
+        res.append('Access-Control-Allow-Headers', 'Content-Type');
+        const regId = req.query.regId;
         logger.info("regID===> %s", regId);
         let resultUser = await userData.findOne({
             regId: regId

@@ -1,7 +1,7 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
-// const YAML = require('yamljs');
+const httpStatus = require('http-status');
 require("dotenv").config();
 const logger = require('./utils/logger');
 const path = require('path');
@@ -26,6 +26,10 @@ app.use(express.urlencoded({
 }));
 app.use(express.json());
 app.use(cors());
+app.use((req, res, next) => {
+    res.append('Access-Control-Allow-Headers', 'Content-Type');
+    next();
+});
 const mongodbString = process.env.DATABASE_URL;
 mongoose.connect(mongodbString);
 const database = mongoose.connection;
