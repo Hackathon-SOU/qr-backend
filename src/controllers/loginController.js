@@ -37,7 +37,7 @@ const adminRegister = async (req, res, next) => {
     if (error.keyPattern.email) {
       error = new ApiError(httpStatus.CONFLICT, "Duplicate Email was found");
     } else if (error.keyPattern.membershipId) {
-      error = new ApiError(httpStatus.CONFLICT, "Account for these Membership Id has already been created");
+      error = new ApiError(httpStatus.CONFLICT, "Duplicate Membership Id");
     }
     next(error);
   }
@@ -109,7 +109,8 @@ const adminLogin = async (req, res, next) => {
           process.env.REFRESHSECRET);
         res.status(200).send({
           accessToken: accessToken,
-          refreshToken: refreshToken
+          refreshToken: refreshToken,
+          role: admin.role,
         });
         logger.info(`Admin has been loggedIn Successfully `)
       }

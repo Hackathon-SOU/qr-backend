@@ -19,7 +19,7 @@ const {
 
 const ROOT_FOLDER = path.join(path.resolve(), '.');
 
-var whitelist = ['http://localhost:4000', 'https://qr-reg-web-app-ieee.web.app/']
+var whitelist = ['http://localhost:5000', 'https://qr-reg-web-app-ieee.web.app']
 var corsOptions = {
     origin: function (origin, callback) {
         if (whitelist.indexOf(origin) !== -1) {
@@ -34,8 +34,8 @@ app.use(express.urlencoded({
     extended: true
 }));
 app.use(express.json());
-app.use(cors(options));
-app.options(cors(options));
+app.use(cors(corsOptions));
+app.options(cors(corsOptions));
 app.use((req, res, next) => {
     res.append('Access-Control-Allow-Headers', 'Content-Type');
     next();
