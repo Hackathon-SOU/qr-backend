@@ -19,13 +19,23 @@ const {
 
 const ROOT_FOLDER = path.join(path.resolve(), '.');
 
-
+var whitelist = ['http://localhost:4000', 'https://qr-reg-web-app-ieee.web.app/']
+var corsOptions = {
+    origin: function (origin, callback) {
+        if (whitelist.indexOf(origin) !== -1) {
+            callback(null, true)
+        } else {
+            callback(new Error('Not allowed by CORS'))
+        }
+    }
+}
 
 app.use(express.urlencoded({
     extended: true
 }));
 app.use(express.json());
-app.use(cors());
+app.use(cors(options));
+app.options(cors(options));
 app.use((req, res, next) => {
     res.append('Access-Control-Allow-Headers', 'Content-Type');
     next();
