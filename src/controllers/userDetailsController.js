@@ -165,13 +165,13 @@ const uploadSheet = async (req, res, next) => {
     try {
         // Below code is to upload Sheet from    
         const eventId = req.query.eventId;
-        logger.info(eventId);
+        logger.info("eventId===> %s", eventId);
         let fileName = req.fileName;
-        logger.info("req.fileName===>", req.fileName);
+        logger.info("req.fileName===> %s", req.fileName);
         let filePath = path.join(path.resolve(), `./uploads/${fileName}`);
         logger.debug("path of upload sheet===>%o", filePath);
         var file = render.readFile(filePath);
-        logger.info("file========>%o", file);
+        // logger.info("file========>%o", file);
         const sheet = file.SheetNames;
         for (var i = 0; i < sheet.length; i++) {
             var sheetName = sheet[i];
