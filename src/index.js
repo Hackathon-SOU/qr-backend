@@ -35,12 +35,20 @@ app.use(express.urlencoded({
 }));
 app.use(express.json());
 app.use(cors(corsOptions));
+// app.use(cors());
 app.options(cors(corsOptions));
 app.use((req, res, next) => {
     res.append('Access-Control-Allow-Headers', 'Content-Type');
     next();
 });
-const mongodbString = process.env.DATABASE_URL;
+let mongodbString;
+if (process.env.ENVIORNMENT === "production") {
+    logger.info(process.env.ENVIORNMENT)
+    mongodbString = process.env.DATABASE_PROD_URL;
+} else {
+    logger.info("development");
+    mongodbString = process.env.DATABASE_DEV_URL;
+}
 mongoose.connect(mongodbString);
 const database = mongoose.connection;
 
