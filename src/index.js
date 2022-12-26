@@ -41,14 +41,14 @@ app.use((req, res, next) => {
     res.append('Access-Control-Allow-Headers', 'Content-Type');
     next();
 });
-let mongodbString = process.env.DATABASE_PROD_URL;
-// if (process.env.ENVIORNMENT === "production") {
-//     logger.info(process.env.ENVIORNMENT)
-//     mongodbString = process.env.DATABASE_PROD_URL;
-// } else {
-//     logger.info("development");
-//     mongodbString = process.env.DATABASE_DEV_URL;
-// }
+let mongodbString = process.env.DATABASE_DEV_URL;
+if (process.env.ENV === "production") {
+    logger.info(process.env.ENV)
+    mongodbString = process.env.DATABASE_PROD_URL;
+} else if (process.env.ENV === "development") {
+    logger.info("development");
+    mongodbString = process.env.DATABASE_DEV_URL;
+}
 mongoose.connect(mongodbString);
 const database = mongoose.connection;
 

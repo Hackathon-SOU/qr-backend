@@ -3,7 +3,8 @@ const express = require('express');
 
 const {
     createEvent,
-    getEvent
+    getEvent,
+    getEventReport
 } = require("../controllers/eventController")
 const {
     getuserDetails,
@@ -21,6 +22,7 @@ const {
 } = require("../controllers/loginController")
 const authValidation = require("../validation/auth.validation.js");
 const participantValidation = require("../validation/participant.validation.js");
+const eventValidation = require("../validation/event.validation.js");
 const canteenValidation = require("../validation/canteen.validation.js");
 const {
     getMenu,
@@ -51,6 +53,8 @@ router.get('/getuserdetails', verifyJwt, authorizeAdmin, validate(participantVal
 router.post('/singleuserdata', verifyJwt, validate(authValidation.userRegisterSchema), authorizeAdmin, singleUserData);
 
 router.put('/markpresence', verifyJwt, authorizeAdmin, validate(participantValidation.markPresenceSchema), markpresence);
+
+router.get('/geteventreport', verifyJwt, authorizeAdmin, validate(eventValidation.eventReportSchema), getEventReport);
 
 router.get('/totalabsent', verifyJwt, authorizeAdmin, totalAbsent);
 
