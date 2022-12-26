@@ -7,7 +7,6 @@ const path = require("path");
 
 const ApiError = require("../utils/ApiError");
 const logger = require("../utils/logger");
-
 const getuserDetails = async (req, res, next) => {
     try {
         res.append('Access-Control-Allow-Headers', 'Content-Type');
@@ -168,7 +167,7 @@ const uploadSheet = async (req, res, next) => {
         logger.info("eventId===> %s", eventId);
         let fileName = req.fileName;
         logger.info("req.fileName===> %s", req.fileName);
-        let filePath = path.join(path.resolve(), `./src/uploads/${fileName}`);
+        let filePath = path.join(path.resolve(), `./src/tmp/${fileName}`);
         logger.debug("path of upload sheet===>%o", filePath);
         var file = render.readFile(filePath);
         // logger.info("file========>%o", file);
@@ -250,7 +249,7 @@ const uploadSheet = async (req, res, next) => {
                     logger.info("file in folders===>%s", file);
                     if (file === deleteFile) {
                         logger.info("file deleted===>%s", deleteFile);
-                        fs.unlinkSync(`./src/uploads/${file}`, (err) => {
+                        fs.unlinkSync(`./src/tmp/${file}`, (err) => {
                             if (err) throw err;
                         });
                         break;
