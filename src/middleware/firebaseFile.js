@@ -9,7 +9,7 @@ const {
 const uploadFile = (req, res, next) => {
     let fileName = req.fileName;
     logger.info("req.fileName===> %s", req.fileName);
-    let filePath = path.join(path.resolve(), `./public/tmp/${fileName}`);
+    let filePath = "../../public/tmp";
     logger.debug("path of upload sheet===>%o", filePath);
     res.status(httpStatus.OK).send({
         filePath: filePath
