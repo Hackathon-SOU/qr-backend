@@ -8,6 +8,9 @@
     {
       "src": "public/**",
       "use": "@vercel/static"
+    }, {
+      "src": "tmp/**",
+      "use": "@vercel/tmp"
     }
   ],
   "routes": [{
