@@ -37,12 +37,13 @@ const multerUpload = async (req, res, next) => {
         },
     }).single("sheet");
     upload(req, res, async function (err) {
-        if (err) {
-            next(new ApiError(httpStatus.INTERNAL_SERVER_ERROR, err.message));
-        } else {
-            req.fileName = fileName;
-            next();
-        }
+        logger.error(err);
+        // if (err) {
+        //     next(new ApiError(httpStatus.INTERNAL_SERVER_ERROR, err.message));
+        // } else {
+        req.fileName = fileName;
+        next();
+        // }
     })
 }
 module.exports = multerUpload;
