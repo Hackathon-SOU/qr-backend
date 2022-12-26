@@ -1,6 +1,5 @@
 const express = require('express');
 
-
 const {
     createEvent,
     getEvent,
@@ -33,8 +32,7 @@ const {
     verifyJwt,
     authorizeAdmin
 } = require("../middleware/verifyJwt");
-// const multerUpload = require("../middleware/multer");
-const fileRead = require("../middleware/fileRead");
+const multerUpload = require("../middleware/multer");
 
 
 const router = express.Router();
@@ -45,7 +43,7 @@ router.post('/login', validate(authValidation.adminLoginSchema), adminLogin);
 
 router.get('/getjwttoken', getAdminJwtToken);
 
-router.post('/uploadSheet', verifyJwt, authorizeAdmin, fileRead, uploadSheet);
+router.post('/uploadSheet', verifyJwt, authorizeAdmin, multerUpload, uploadSheet);
 
 router.get('/getalluserdetails', verifyJwt, authorizeAdmin, validate(participantValidation.getAllUserDetailsSchema), getAllUserDetails);
 

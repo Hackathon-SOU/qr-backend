@@ -10,13 +10,7 @@ const multerUpload = async (req, res, next) => {
     let fileName = "";
     let storage = multer.diskStorage({
         destination: function (req, file, callback) {
-            // console.log(path.join(path.resolve(), "src/tmp/"));
-            fs.mkdir(path.join(path.resolve(), "/tmp/"), (err) => {
-                if (err) {
-                    logger.error("mkdir tmp %o", err);
-                }
-                callback(null, path.join(path.resolve(), "/tmp/"));
-            });
+            callback(null, "/tmp");
         },
         filename: function (req, file, callback) {
             fileName = file.fieldname + "-" + req.query.eventId + Date.now() + path.extname(file.originalname);
@@ -25,7 +19,6 @@ const multerUpload = async (req, res, next) => {
         },
     });
 
-    // below code is to read the added data to DB from file
     var upload = multer({
         storage: storage,
         fileFilter: function (req, file, callback) {
@@ -37,13 +30,12 @@ const multerUpload = async (req, res, next) => {
         },
     }).single("sheet");
     upload(req, res, async function (err) {
-        logger.error(err);
-        // if (err) {
-        //     next(new ApiError(httpStatus.INTERNAL_SERVER_ERROR, err.message));
-        // } else {
-        req.fileName = fileName;
-        next();
-        // }
+        if (err) {
+            next(new ApiError(httpStatus.INTERNAL_SERVER_ERROR, err.message));
+        } else {
+            req.fileName = fileName;
+            next();
+        }
     })
 }
 module.exports = multerUpload;
