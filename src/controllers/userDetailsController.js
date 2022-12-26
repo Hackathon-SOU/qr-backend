@@ -7,6 +7,7 @@ const path = require("path");
 
 const ApiError = require("../utils/ApiError");
 const logger = require("../utils/logger");
+
 const getuserDetails = async (req, res, next) => {
     try {
         res.append('Access-Control-Allow-Headers', 'Content-Type');
@@ -160,107 +161,111 @@ const totalAbsent = async (req, res, next) => {
     }
 };
 
-// const uploadSheet = async (req, res, next) => {
-//     try {
-//         // Below code is to upload Sheet from    
-//         const eventId = req.query.eventId;
-//         logger.info("eventId===> %s", eventId);
-//         var file = render.readFile(filePath);
-//         // logger.info("file========>%o", file);
-//         const sheet = file.SheetNames;
-//         for (var i = 0; i < sheet.length; i++) {
-//             var sheetName = sheet[i];
-//             const sheetData = render.utils.sheet_to_json(file.Sheets[sheetName]);
-//             let documentCount;
-//             let totalData;
-//             let sheetCount = 0;
-//             totalData = await userData.count({});
-//             logger.info("Total numOfparticpant user in db ====> %s", totalData);
-//             userData.deleteMany({
-//                 eventId: eventId
-//             }, async function (err, result) {
-//                 if (err) {
-//                     logger.error("uploadSheet, user data delete many error===> %o", err);
-//                 } else if (result) {
-//                     logger.info("%s - deleted docs of the event", result.deletedCount);
-//                     documentCount = result.deletedCount;
-//                     logger.info("%s totalCount", totalData);
-//                     logger.info("sheetLength ===> %s", sheetData.length);
-//                     let errorArray = [];
-//                     sheetData.forEach(async (a) => {
-//                         const data = new userData({
-//                             name: a.name,
-//                             email: a.email,
-//                             regId: Math.floor(a.regId),
-//                             seatNo: a.seatNo,
-//                             present: a.present,
-//                             eventId: eventId
-//                         });
-//                         data.save(async (error) => {
-//                             if (error) {
-//                                 if (error.code == 11000) {
-//                                     if (error.keyPattern.regId) {
-//                                         errorArray.push({
-//                                             error: `Duplicate ${a.regId} regId for participant ${a.name} in sheet`,
-//                                         });
-//                                         logger.error("uploadSheet, Duplicate regId in sheet, ==> %o", error);
-//                                     } else if (error.keyPattern.email) {
-//                                         errorArray.push({
-//                                             error: `Duplicate ${a.email} email for participant ${a.name} in sheet`,
-//                                         });
-//                                         logger.error("uploadSheet, Duplicate email in sheet==> %o", error);
-//                                     } else if (error.keyPattern.seatNo) {
-//                                         errorArray.push({
-//                                             error: `Seat no ${a.seatNo} can not allocate to particpant ${a.name} in sheet`,
-//                                         });
-//                                         logger.error("uploadSheet, Duplication seatNo in sheet==> %o", error);
+const uploadSheet = async (req, res, next) => {
+    try {
+        // Below code is to upload Sheet from    
+        const eventId = req.query.eventId;
+        logger.info("eventId===> %s", eventId);
+        let fileName = req.fileName;
+        logger.info("req.fileName===> %s", req.fileName);
+        let filePath = path.join(path.resolve(), `./uploads/${fileName}`);
+        logger.debug("path of upload sheet===>%o", filePath);
+        var file = render.readFile(filePath);
+        // logger.info("file========>%o", file);
+        const sheet = file.SheetNames;
+        for (var i = 0; i < sheet.length; i++) {
+            var sheetName = sheet[i];
+            const sheetData = render.utils.sheet_to_json(file.Sheets[sheetName]);
+            let documentCount;
+            let totalData;
+            let sheetCount = 0;
+            totalData = await userData.count({});
+            logger.info("Total numOfparticpant user in db ====> %s", totalData);
+            userData.deleteMany({
+                eventId: eventId
+            }, async function (err, result) {
+                if (err) {
+                    logger.error("uploadSheet, user data delete many error===> %o", err);
+                } else if (result) {
+                    logger.info("%s - deleted docs of the event", result.deletedCount);
+                    documentCount = result.deletedCount;
+                    logger.info("%s totalCount", totalData);
+                    logger.info("sheetLength ===> %s", sheetData.length);
+                    let errorArray = [];
+                    sheetData.forEach(async (a) => {
+                        const data = new userData({
+                            name: a.name,
+                            email: a.email,
+                            regId: Math.floor(a.regId),
+                            seatNo: a.seatNo,
+                            present: a.present,
+                            eventId: eventId
+                        });
+                        data.save(async (error) => {
+                            if (error) {
+                                if (error.code == 11000) {
+                                    if (error.keyPattern.regId) {
+                                        errorArray.push({
+                                            error: `Duplicate ${a.regId} regId for participant ${a.name} in sheet`,
+                                        });
+                                        logger.error("uploadSheet, Duplicate regId in sheet, ==> %o", error);
+                                    } else if (error.keyPattern.email) {
+                                        errorArray.push({
+                                            error: `Duplicate ${a.email} email for participant ${a.name} in sheet`,
+                                        });
+                                        logger.error("uploadSheet, Duplicate email in sheet==> %o", error);
+                                    } else if (error.keyPattern.seatNo) {
+                                        errorArray.push({
+                                            error: `Seat no ${a.seatNo} can not allocate to particpant ${a.name} in sheet`,
+                                        });
+                                        logger.error("uploadSheet, Duplication seatNo in sheet==> %o", error);
 
-//                                     }
-//                                 }
-//                                 sheetCount++;
-//                             } else {
-//                                 await logger.info("%s added", a.name);
-//                                 sheetCount++;
-//                                 // logger.info(count);
-//                                 await logger.info("sheetCount %s", sheetCount);
-//                             }
-//                             if (sheetCount == sheetData.length) {
-//                                 logger.info("ulpoadSheet, uploaded Successfully");
-//                                 deleteFile(fileName);
-//                                 res.status(200).send({
-//                                     message: "Sheet Uploaded Successfully, and Participants added in the Event",
-//                                     error: errorArray
-//                                 });
-//                             }
-//                         })
-//                     });
-//                 }
-//             });
-//         };
-//         // This below code is to delete All the files in the upload folder
-//         function deleteFile(deleteFile) {
-//             fs.readdir("./public/tmp", (err, files) => {
-//                 if (err) throw err;
-//                 for (const file of files) {
-//                     logger.info("file in folders===>%s", file);
-//                     if (file === deleteFile) {
-//                         logger.info("file deleted===>%s", deleteFile);
-//                         fs.unlinkSync(`./public/tmp/${file}`, (err) => {
-//                             if (err) throw err;
-//                         });
-//                         break;
-//                     }
-//                 }
-//             });
-//         }
-//     } catch (error) {
-//         logger.error("upload sheet catch err===> %o", error);
-//         res.status(500).send({
-//             messaage: "You have made a BAD request",
-//             errorMessage: error.message
-//         });
-//     }
-// };
+                                    }
+                                }
+                                sheetCount++;
+                            } else {
+                                await logger.info("%s added", a.name);
+                                sheetCount++;
+                                // logger.info(count);
+                                await logger.info("sheetCount %s", sheetCount);
+                            }
+                            if (sheetCount == sheetData.length) {
+                                logger.info("ulpoadSheet, uploaded Successfully");
+                                deleteFile(fileName);
+                                res.status(200).send({
+                                    message: "Sheet Uploaded Successfully, and Participants added in the Event",
+                                    error: errorArray
+                                });
+                            }
+                        })
+                    });
+                }
+            });
+        };
+        // This below code is to delete All the files in the upload folder
+        function deleteFile(deleteFile) {
+            fs.readdir("./uploads", (err, files) => {
+                if (err) throw err;
+                for (const file of files) {
+                    logger.info("file in folders===>%s", file);
+                    if (file === deleteFile) {
+                        logger.info("file deleted===>%s", deleteFile);
+                        fs.unlinkSync(`./uploads/${file}`, (err) => {
+                            if (err) throw err;
+                        });
+                        break;
+                    }
+                }
+            });
+        }
+    } catch (error) {
+        logger.error("upload sheet catch err===> %o", error);
+        res.status(500).send({
+            messaage: "You have made a BAD request",
+            errorMessage: error.message
+        });
+    }
+};
 
 module.exports = {
     getAllUserDetails,
@@ -268,5 +273,5 @@ module.exports = {
     markpresence,
     singleUserData,
     totalAbsent,
-    // uploadSheet,
+    uploadSheet,
 }
