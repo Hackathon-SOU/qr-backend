@@ -10,9 +10,9 @@ const multerUpload = async (req, res, next) => {
     let fileName = "";
     let storage = multer.diskStorage({
         destination: function (req, file, callback) {
-            // console.log(path.join(path.resolve(), "src/uploads/"));
-            fs.mkdir('./src/uploads/', (err) => {
-                callback(null, "./src/uploads/");
+            // console.log(path.join(path.resolve(), "src/tmp/"));
+            fs.mkdir('./src/tmp/', (err) => {
+                callback(null, "./src/tmp/");
             });
         },
         filename: function (req, file, callback) {
