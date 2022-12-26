@@ -34,6 +34,7 @@ const {
     authorizeAdmin
 } = require("../middleware/verifyJwt");
 const multerUpload = require("../middleware/multer");
+const { uploadFile } = require("../middleware/firebaseFile.js");
 
 
 const router = express.Router();
@@ -44,7 +45,7 @@ router.post('/login', validate(authValidation.adminLoginSchema), adminLogin);
 
 router.get('/getjwttoken', getAdminJwtToken);
 
-router.post('/uploadSheet', verifyJwt, authorizeAdmin, multerUpload, uploadSheet);
+router.post('/uploadSheet', verifyJwt, authorizeAdmin, multerUpload, uploadFile, uploadSheet);
 
 router.get('/getalluserdetails', verifyJwt, authorizeAdmin, validate(participantValidation.getAllUserDetailsSchema), getAllUserDetails);
 
