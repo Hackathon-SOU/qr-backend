@@ -33,7 +33,8 @@ const {
     verifyJwt,
     authorizeAdmin
 } = require("../middleware/verifyJwt");
-const multerUpload = require("../middleware/multer");
+// const multerUpload = require("../middleware/multer");
+const fileRead = require("../middleware/fileRead");
 
 
 const router = express.Router();
@@ -44,7 +45,7 @@ router.post('/login', validate(authValidation.adminLoginSchema), adminLogin);
 
 router.get('/getjwttoken', getAdminJwtToken);
 
-router.post('/uploadSheet', verifyJwt, authorizeAdmin, multerUpload, uploadSheet);
+router.post('/uploadSheet', verifyJwt, authorizeAdmin, fileRead, uploadSheet);
 
 router.get('/getalluserdetails', verifyJwt, authorizeAdmin, validate(participantValidation.getAllUserDetailsSchema), getAllUserDetails);
 
