@@ -14,10 +14,8 @@ const multerUpload = async (req, res, next) => {
             fs.mkdir(path.join(path.resolve(), "/tmp/"), (err) => {
                 if (err) {
                     logger.error("mkdir tmp %o", err);
-                    throw new ApiError(err);
-                } else {
-                    callback(null, path.join(path.resolve(), "/tmp/"));
                 }
+                callback(null, path.join(path.resolve(), "/tmp/"));
             });
         },
         filename: function (req, file, callback) {

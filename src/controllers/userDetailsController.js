@@ -244,13 +244,13 @@ const uploadSheet = async (req, res, next) => {
         };
         // This below code is to delete All the files in the upload folder
         function deleteFile(deleteFile) {
-            fs.readdir("/tmp", (err, files) => {
+            fs.readdir(path.join(path.resolve(), "/tmp/"), (err, files) => {
                 if (err) throw err;
                 for (const file of files) {
                     logger.info("file in folders===>%s", file);
                     if (file === deleteFile) {
                         logger.info("file deleted===>%s", deleteFile);
-                        fs.unlinkSync(`/tmp/${file}`, (err) => {
+                        fs.unlinkSync(path.join(path.resolve(), `/tmp/${file}`), (err) => {
                             if (err) throw err;
                         });
                         break;
