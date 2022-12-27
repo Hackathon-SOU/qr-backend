@@ -13,12 +13,11 @@ const multerUpload = async (req, res, next) => {
         destination: function (req, file, callback) {
 
             tmp.dir(function _tempDirCreated(err, dirPath, cleanupCallback) {
-                if (err) throw err;
+                if (err) {
+                    logger.debug(err);
+                }
 
                 console.log('Dir: ', dirPath);
-
-                // Manual cleanup
-                cleanupCallback();
                 req.dirPath = dirPath;
                 callback(null, dirPath);
             });
