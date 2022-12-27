@@ -168,7 +168,8 @@ const uploadSheet = async (req, res, next) => {
         logger.info("eventId===> %s", eventId);
         let fileName = req.fileName;
         logger.info("req.fileName===> %s", req.fileName);
-        let filePath = `/tmp/${fileName}`;
+        let filePath = `${req.dirPath}/${fileName}`;
+        // let filePath = `./tmp/${fileName}`;
         logger.debug("path of upload sheet===>%o", filePath);
         var file = render.readFile(filePath);
         // logger.info("file========>%o", file);

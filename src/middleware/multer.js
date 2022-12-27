@@ -1,3 +1,4 @@
+const tmp = require('tmp');
 const multer = require("multer");
 const path = require("path");
 const fs = require("fs");
@@ -10,7 +11,17 @@ const multerUpload = async (req, res, next) => {
     let fileName = "";
     let storage = multer.diskStorage({
         destination: function (req, file, callback) {
-            callback(null, "/tmp");
+
+            tmp.dir(function _tempDirCreated(err, dirPath, cleanupCallback) {
+                if (err) throw err;
+
+                console.log('Dir: ', dirPath);
+
+                // Manual cleanup
+                cleanupCallback();
+                req.dirPath = dirPath;
+                callback(null, dirPath);
+            });
         },
         filename: function (req, file, callback) {
             fileName = file.fieldname + "-" + req.query.eventId + Date.now() + path.extname(file.originalname);
