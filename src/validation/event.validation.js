@@ -1,7 +1,7 @@
 const joi = require('joi');
 
 const eventReportSchema = {
-    body: joi.object().keys({
+    query: joi.object().keys({
         eventId: joi.string().length(24).required().messages({
             'string.base': `eventId should be a type of 'string'`,
             'string.empty': `eventId cannot be an empty field`,

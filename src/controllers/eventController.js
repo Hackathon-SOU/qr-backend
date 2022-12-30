@@ -1,5 +1,6 @@
 const httpStatus = require('http-status');
 const xlsx = require('xlsx');
+const tmp = require('tmp');
 const path = require('path');
 const ApiError = require('../utils/ApiError');
 const eventData = require("../models/event");
@@ -53,8 +54,8 @@ const getEvent = async (req, res, next) => {
 
 const getEventReport = async (req, res, next) => {
     try {
-        console.log(req.body.eventId);
-        const eventId = req.body.eventId;
+        console.log(req.query.eventId);
+        const eventId = req.query.eventId;
         const data = await userData.find({
             eventId: eventId,
         }, {
@@ -62,8 +63,8 @@ const getEventReport = async (req, res, next) => {
             __v: 0,
             eventId: 0,
         });
-        let tmp = JSON.stringify(data);
-        let dataJson = JSON.parse(tmp);
+        let dataString = JSON.stringify(data);
+        let dataJson = JSON.parse(dataString);
         console.log("data fetched===> %o", dataJson);
         const ws = xlsx.utils.json_to_sheet(dataJson, {
             header: ["name", "regId", "email", "present", "points"]
@@ -73,9 +74,21 @@ const getEventReport = async (req, res, next) => {
         logger.info("workbook created");
         xlsx.utils.book_append_sheet(wb, ws, 'Report', true)
         logger.info("worksheet appended in workbook");
-        xlsx.writeFile(wb, './reports/report.export.xlsx')
-        logger.info("writing file");
-        res.status(200).sendFile(path.join(path.resolve(), '/reports/report.export.xlsx'))
+        tmp.file({
+            mode: 0o644,
+            prefix: 'prefix-',
+            postfix: '.xlsx'
+        }, function _tempFileCreated(err, filePath, fd, cleanupCallback) {
+            if (err) throw err;
+
+            console.log('File: ', filePath);
+            console.log('Filedescriptor: ', fd);
+
+            xlsx.writeFile(wb, `${filePath}`)
+            logger.info("writing file");
+            res.status(200).download(`${filePath}`);
+            cleanupCallback();
+        });
     } catch (error) {
         logger.error("get event report catch error ==> %o", error);
         next(error);
