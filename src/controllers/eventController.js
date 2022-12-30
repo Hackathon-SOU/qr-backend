@@ -1,3 +1,4 @@
+const mongoose = require("mongoose");
 const httpStatus = require('http-status');
 const xlsx = require('xlsx');
 const tmp = require('tmp');
@@ -94,8 +95,56 @@ const getEventReport = async (req, res, next) => {
         next(error);
     }
 }
+
+const deleteEvent = async (req, res, next) => {
+    let session = await mongoose.startSession();
+    try {
+        session.startTransaction({
+            readConcern: {
+                level: "snapshot"
+            },
+            writeConcern: {
+                w: "majority"
+            }
+        });
+
+        const opts = {
+            upsert: true,
+            new: true,
+            session: session
+        };
+        const eventId = req.body.eventId;
+
+        const userResult = await userData.deleteMany({
+            eventId: eventId
+        });
+        logger.debug("userResult ====> %o", userResult);
+        if (userResult.acknowledged === true) {
+            const eventResult = await eventData.deleteOne({
+                id: eventId
+            });
+            logger.debug("eventResult ==> %o", eventResult);
+            if (eventResult.acknowledged === true && eventResult.deletedCount === 1) {
+                res.status(httpStatus.OK).send({
+                    message: "Event Deleted Successfully"
+                });
+                await session.commitTransaction();
+                session.endSession();
+            } else {
+                next(new ApiError(httpStatus.CONFLICT, "This Event is not in the database"));
+            }
+        }
+
+    } catch (error) {
+        logger.error("delete event catch error =>", error);
+        await session.abortTransaction();
+        session.endSession();
+        next(error);
+    }
+}
 module.exports = {
     createEvent,
     getEvent,
-    getEventReport
+    getEventReport,
+    deleteEvent
 }

@@ -3,7 +3,8 @@ const express = require('express');
 const {
     createEvent,
     getEvent,
-    getEventReport
+    getEventReport,
+    deleteEvent
 } = require("../controllers/eventController")
 const {
     getuserDetails,
@@ -54,6 +55,8 @@ router.post('/singleuserdata', verifyJwt, validate(authValidation.userRegisterSc
 router.put('/markpresence', verifyJwt, authorizeAdmin, validate(participantValidation.markPresenceSchema), markpresence);
 
 router.get('/geteventreport', verifyJwt, authorizeAdmin, validate(eventValidation.eventReportSchema), getEventReport);
+
+router.delete('/deleteevent', verifyJwt, authorizeAdmin, validate(eventValidation.eventDeleteSchema), deleteEvent);
 
 router.get('/totalabsent', verifyJwt, authorizeAdmin, totalAbsent);
 
