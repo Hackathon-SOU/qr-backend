@@ -4,6 +4,9 @@ const httpStatus = require("http-status");
 
 const ApiError = require("../utils/ApiError");
 const volunteerData = require("../models/member");
+const {
+  sendRegisterAdminMail
+} = require("../services/sendMail.js");
 const userData = require("../models/user");
 const canteenData = require("../models/canteen");
 const logger = require("../utils/logger");
@@ -27,6 +30,7 @@ const adminRegister = async (req, res, next) => {
       name,
     });
     if (Boolean(data)) {
+      sendRegisterAdminMail(email, membershipId, req.body.password);
       res.status(200).send({
         message: "Account has been created"
       });

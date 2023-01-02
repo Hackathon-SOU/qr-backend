@@ -34,6 +34,10 @@ const {
     authorizeAdmin
 } = require("../middleware/verifyJwt");
 const multerUpload = require("../middleware/multer");
+const {
+    getAllMemberDetails,
+    deleteMemberAccount
+} = require('../controllers/memberController');
 
 
 const router = express.Router();
@@ -43,6 +47,10 @@ router.post('/signup', verifyJwt, validate(authValidation.adminRegisterSchema), 
 router.post('/login', validate(authValidation.adminLoginSchema), adminLogin);
 
 router.get('/getjwttoken', getAdminJwtToken);
+
+router.get('/getallmemberdetails', verifyJwt, authorizeAdmin, getAllMemberDetails);
+
+router.delete('/deletemember', verifyJwt, authorizeAdmin, deleteMemberAccount);
 
 router.post('/uploadSheet', verifyJwt, authorizeAdmin, multerUpload, uploadSheet);
 

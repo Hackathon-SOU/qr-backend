@@ -34,9 +34,8 @@ app.use(express.urlencoded({
     extended: true
 }));
 app.use(express.json());
-app.use(cors(corsOptions));
-// app.use(cors());
-app.options(cors(corsOptions));
+app.use(cors());
+// app.options(cors(corsOptions));
 app.use((req, res, next) => {
     res.append('Access-Control-Allow-Headers', 'Content-Type');
     next();

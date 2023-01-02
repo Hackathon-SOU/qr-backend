@@ -27,6 +27,8 @@ function verifyJwt(req, res, next) {
       } else {
         logger.info("JWT decoded succesfully");
         req.id = decoded.id;
+        req.membershipId = decoded.membershipId;
+        req.role = decoded.role;
         return next();
       }
     });

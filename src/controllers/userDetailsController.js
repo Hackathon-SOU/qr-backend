@@ -190,7 +190,6 @@ const uploadSheet = async (req, res, next) => {
                 } else if (result) {
                     logger.info("%s - deleted docs of the event", result.deletedCount);
                     documentCount = result.deletedCount;
-                    logger.info("%s totalCount", totalData);
                     logger.info("sheetLength ===> %s", sheetData.length);
                     sheetData.forEach(async (a) => {
                         const data = new userData({
@@ -218,7 +217,6 @@ const uploadSheet = async (req, res, next) => {
                                 }
                                 sheetCount++;
                             } else {
-                                await logger.info("%s added", a.name);
                                 sheetCount++;
                                 // logger.info(count);
                                 await logger.info("sheetCount %s", sheetCount);
@@ -228,7 +226,6 @@ const uploadSheet = async (req, res, next) => {
                                 deleteFile(fileName);
                                 res.status(200).send({
                                     message: "Sheet Uploaded Successfully, and Participants added in the Event",
-                                    error: errorArray
                                 });
                             }
                         })
