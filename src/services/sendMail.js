@@ -22,7 +22,6 @@ const sendRegisterAdminMail = async (adminMail, membershipId, password) => {
     try {
         mailOptions.to = adminMail;
         mailOptions.text = `Your Account for IEEE Qr App has been successfully created. Your MembershipId is ${membershipId} and password is ${password}`
-
         transporter.sendMail(mailOptions, function (error, info) {
             if (error) {
                 logger.error(error);

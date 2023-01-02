@@ -30,7 +30,7 @@ const adminRegister = async (req, res, next) => {
       name,
     });
     if (Boolean(data)) {
-      sendRegisterAdminMail(email, membershipId, req.body.password);
+      await sendRegisterAdminMail(email, membershipId, req.body.password);
       res.status(200).send({
         message: "Account has been created"
       });
