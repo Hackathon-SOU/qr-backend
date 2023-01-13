@@ -114,14 +114,14 @@ const deleteEvent = async (req, res, next) => {
             session: session
         };
         const eventId = req.body.eventId;
-
+        logger.debug("eventId %s", eventId);
         const userResult = await userData.deleteMany({
             eventId: eventId
         });
         logger.debug("userResult ====> %o", userResult);
         if (userResult.acknowledged === true) {
             const eventResult = await eventData.deleteOne({
-                id: eventId
+                _id: Object(eventId)
             });
             logger.debug("eventResult ==> %o", eventResult);
             if (eventResult.acknowledged === true && eventResult.deletedCount === 1) {
