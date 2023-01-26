@@ -38,7 +38,7 @@ const getuserDetails = async (req, res, next) => {
 
 const getAllUserDetails = async (req, res, next) => {
     try {
-        const eventId = req.body.eventId;
+        const eventId = req.query.eventId;
         const volunteerId = req.volunteerId;
         const eventFound = await eventData.findOne({
             id: eventId

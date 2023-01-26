@@ -45,7 +45,7 @@ async function authorizeAdmin(req, res, next) {
     _id: volunteerId,
   });
   if (Boolean(admin)) {
-    logger.error("authorizeAdmin, Admin found succesfully");
+    logger.debug("authorizeAdmin, Admin found succesfully");
     next();
   } else {
     res.status(403).send({
