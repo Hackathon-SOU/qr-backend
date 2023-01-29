@@ -18,7 +18,7 @@ const volunteerData = new mongoose.Schema({
   role: {
     type: String,
     required: true,
-    enum: ['admin', 'volunteer', 'execom']
+    enum: ['admin', 'volunteer', 'execom', 'super-admin']
   },
   name: {
     type: String,

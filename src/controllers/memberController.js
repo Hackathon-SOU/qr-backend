@@ -33,7 +33,7 @@ const deleteMemberAccount = async (req, res, next) => {
 const getAllMemberDetails = async (req, res, next) => {
     try {
         let data;
-        if (req.role === 'admin') {
+        if (req.role === 'admin' || req.role === 'super-admin') {
             data = await volunteerData.find({
                 membershipId: {
                     $ne: req.membershipId
