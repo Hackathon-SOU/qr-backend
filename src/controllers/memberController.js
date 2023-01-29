@@ -56,28 +56,27 @@ const getAllMemberDetails = async (req, res, next) => {
                 __v: 0,
                 password: 0
             });
+        } else {
+            data = await volunteerData.find({
+                role: {
+                    $nin: ["admin", "super-admin"]
+                },
+                membershipId: {
+                    $ne: req.membershipId
+                }
+            }, {
+                _id: 0,
+                __v: 0,
+                password: 0
+            });
         }
-    } else {
-        data = await volunteerData.find({
-            role: {
-                $nin: ["admin", "super-admin"]
-            },
-            membershipId: {
-                $ne: req.membershipId
-            }
-        }, {
-            _id: 0,
-            __v: 0,
-            password: 0
-        });
+        res.status(httpStatus.OK).send({
+            data
+        })
+    } catch (error) {
+        logger.error("getMemberDetails catch errror %o", error);
+        next(new ApiError(error));
     }
-    res.status(httpStatus.OK).send({
-        data
-    })
-} catch (error) {
-    logger.error("getMemberDetails catch errror %o", error);
-    next(new ApiError(error));
-}
 }
 
 module.exports = {

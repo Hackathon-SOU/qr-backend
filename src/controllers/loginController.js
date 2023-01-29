@@ -105,7 +105,7 @@ const adminLogin = async (req, res, next) => {
             membershipId: admin.membershipId,
           },
           process.env.ACCESSSECRET, {
-            expiresIn: 14400000
+            expiresIn: 60 * 60
           });
         let refreshToken = jwt.sign({
             membershipId: admin.membershipId,
