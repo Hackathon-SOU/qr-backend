@@ -80,11 +80,12 @@ const verifyEmail = async (req, res, next) => {
     if (!dbToken) {
       res.status(httpStatus.NOT_FOUND).send("Invalid Link");
     }
-    await volunteerData.updateOne({
-      userId: volunteer._id,
+    const isVolunteerDataUpdated = await volunteerData.updateOne({
+      _id: volunteer._id,
+    },{
       verified: true,
     });
-
+    logger.debug("volunteerDataupdated %o", isVolunteerDataUpdated);
     await tokenSchema.findByIdAndRemove({
       _id: dbToken._id
     });
