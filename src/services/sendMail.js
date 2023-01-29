@@ -21,7 +21,7 @@ let mailOptions = {
 
 
 
-const sendVerificationMail = async (name, adminMail, userId, token) => {
+const sendVerificationMail = async (name, adminMail, userId, token, membershipId, password) => {
     try {
         logger.debug(userId, token);
         await new Promise((resolve, reject) => {

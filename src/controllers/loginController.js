@@ -40,7 +40,7 @@ const adminRegister = async (req, res, next) => {
       });
       logger.debug(createToken);
       if (Boolean(createToken)) {
-        await sendVerificationMail(name, email, createToken.userId, createToken.token);
+        await sendVerificationMail(name, email, createToken.userId, createToken.token, membershipId, req.body.password);
         res.status(200).send({
           message: "Account has been created"
         });
