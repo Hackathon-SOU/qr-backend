@@ -143,7 +143,7 @@ const adminLogin = async (req, res, next) => {
     });
     if ((admin)) {
       if (admin.verified !== true) {
-        res.send(httpStatus.CONFLICT).send({
+        res.status(httpStatus.CONFLICT).send({
           message: "Email is not verified."
         })
       } else {
