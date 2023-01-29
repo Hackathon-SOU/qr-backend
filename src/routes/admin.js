@@ -16,6 +16,7 @@ const {
 } = require("../controllers/userDetailsController")
 const {
     adminRegister,
+    verifyEmail,
     canteenRegister,
     adminLogin,
     getAdminJwtToken
@@ -43,6 +44,8 @@ const {
 const router = express.Router();
 
 router.post('/signup', verifyJwt, validate(authValidation.adminRegisterSchema), adminRegister);
+
+router.get('/verify/:userId/:token', validate(authValidation.adminVerifySchema), verifyEmail);
 
 router.post('/login', validate(authValidation.adminLoginSchema), adminLogin);
 

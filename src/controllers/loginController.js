@@ -1,15 +1,19 @@
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const crypto = require("crypto");
 const httpStatus = require("http-status");
 
 const ApiError = require("../utils/ApiError");
 const volunteerData = require("../models/member");
 const {
-  sendRegisterAdminMail
+  sendRegisterAdminMail,
+  sendVerificationMail
 } = require("../services/sendMail.js");
 const userData = require("../models/user");
 const canteenData = require("../models/canteen");
+const tokenSchema = require("../models/verifytoken");
 const logger = require("../utils/logger");
+const user = require("../models/user");
 
 // Code for registering user
 const adminRegister = async (req, res, next) => {
@@ -30,11 +34,18 @@ const adminRegister = async (req, res, next) => {
       name,
     });
     if (Boolean(data)) {
-      await sendRegisterAdminMail(name, email, membershipId, req.body.password);
-      res.status(200).send({
-        message: "Account has been created"
+      let createToken = await tokenSchema.create({
+        userId: data._id,
+        token: crypto.randomBytes(32).toString("hex")
       });
-      logger.info("Admin account created Successfully");
+      logger.debug(createToken);
+      if (Boolean(createToken)) {
+        await sendVerificationMail(name, email, createToken.userId, createToken.token);
+        res.status(200).send({
+          message: "Account has been created"
+        });
+        logger.info("Admin account created Successfully");
+      }
     }
   } catch (error) {
     logger.error("Admin,  register catch error===> %o", error);
@@ -43,6 +54,44 @@ const adminRegister = async (req, res, next) => {
     } else if (error.keyPattern.membershipId) {
       error = new ApiError(httpStatus.CONFLICT, "Duplicate Membership Id");
     }
+    next(error);
+  }
+}
+
+const verifyEmail = async (req, res, next) => {
+  try {
+    const {
+      userId,
+      token
+    } = req.params;
+    logger.debug(userId, token);
+    const volunteer = await volunteerData.findOne({
+      _id: userId
+    });
+    logger.debug(volunteer._id);
+    if (!volunteer) {
+      res.status(httpStatus.NOT_FOUND).send("Invalid Link");
+    }
+    const dbToken = await tokenSchema.findOne({
+      userId: volunteer._id,
+      token: token
+    });
+    logger.debug(dbToken);
+    if (!dbToken) {
+      res.status(httpStatus.NOT_FOUND).send("Invalid Link");
+    }
+    await volunteerData.updateOne({
+      userId: volunteer._id,
+      verified: true,
+    });
+
+    await tokenSchema.findByIdAndRemove({
+      _id: dbToken._id
+    });
+
+    res.status(httpStatus.OK).send("Verified Email Successfully")
+  } catch (error) {
+    logger.error("verify Email errror===> %o", error);
     next(error);
   }
 }
@@ -357,6 +406,7 @@ const getCanteenJwtToken = async (req, res, next) => {
 
 module.exports = {
   adminRegister,
+  verifyEmail,
   adminLogin,
   getAdminJwtToken,
   canteenLogin,

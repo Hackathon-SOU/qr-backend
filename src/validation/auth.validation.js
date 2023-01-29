@@ -77,6 +77,21 @@ const userRegisterSchema = {
     })
 };
 
+const adminVerifySchema = {
+    params: joi.object().keys({
+        userId: joi.string().required().messages({
+            'string.base': `UserId should be a type of 'string'`,
+            'string.empty': `UserId cannot be an empty field`,
+            'any.required': `UserId is a required field`
+        }),
+        token: joi.string().required().messages({
+            'string.base': `Token should be a type of 'string'`,
+            'string.empty': `Token cannot be an empty field`,
+            'any.required': `Token is a required field`
+        }),
+    })
+};
+
 const canteenRegisterSchema = {
     body: joi.object().keys({
         email: joi.string().email().trim(true).required().messages({
@@ -198,6 +213,7 @@ const userLoginSchema = {
 
 module.exports = {
     adminRegisterSchema,
+    adminVerifySchema,
     userRegisterSchema,
     canteenRegisterSchema,
     eventRegisterSchema,
