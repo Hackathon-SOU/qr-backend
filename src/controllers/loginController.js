@@ -142,30 +142,36 @@ const adminLogin = async (req, res, next) => {
       membershipId: membershipId,
     });
     if ((admin)) {
-      let isPasswordMatch = await bcrypt.compare(
-        password,
-        admin.password);
-      if (!isPasswordMatch) {
-        throw new ApiError(httpStatus.UNAUTHORIZED, "The password does not match with the Membership Id");
+      if (admin.verified !== true) {
+        res.send(httpStatus.CONFLICT).send({
+          message: "Email is not verified."
+        })
       } else {
-        let accessToken = jwt.sign({
-            id: admin._id,
+        let isPasswordMatch = await bcrypt.compare(
+          password,
+          admin.password);
+        if (!isPasswordMatch) {
+          throw new ApiError(httpStatus.UNAUTHORIZED, "The password does not match with the Membership Id");
+        } else {
+          let accessToken = jwt.sign({
+              id: admin._id,
+              role: admin.role,
+              membershipId: admin.membershipId,
+            },
+            process.env.ACCESSSECRET, {
+              expiresIn: 60 * 60
+            });
+          let refreshToken = jwt.sign({
+              membershipId: admin.membershipId,
+            },
+            process.env.REFRESHSECRET);
+          res.status(200).send({
+            accessToken: accessToken,
+            refreshToken: refreshToken,
             role: admin.role,
-            membershipId: admin.membershipId,
-          },
-          process.env.ACCESSSECRET, {
-            expiresIn: 60 * 60
           });
-        let refreshToken = jwt.sign({
-            membershipId: admin.membershipId,
-          },
-          process.env.REFRESHSECRET);
-        res.status(200).send({
-          accessToken: accessToken,
-          refreshToken: refreshToken,
-          role: admin.role,
-        });
-        logger.info(`Admin has been loggedIn Successfully `)
+          logger.info(`Admin has been loggedIn Successfully `)
+        }
       }
     } else {
       throw new ApiError(httpStatus.UNAUTHORIZED, 'Wrong Membership Id');
