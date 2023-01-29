@@ -60,6 +60,5 @@ const sendVerificationMail = async (name, adminMail, userId, token) => {
 }
 
 module.exports = {
-    sendRegisterAdminMail,
     sendVerificationMail
 }
