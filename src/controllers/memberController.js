@@ -33,7 +33,7 @@ const deleteMemberAccount = async (req, res, next) => {
 const getAllMemberDetails = async (req, res, next) => {
     try {
         let data;
-        if (req.role === 'admin' || req.role === 'super-admin') {
+        if (req.role === 'super-admin') {
             data = await volunteerData.find({
                 membershipId: {
                     $ne: req.membershipId
@@ -43,10 +43,10 @@ const getAllMemberDetails = async (req, res, next) => {
                 __v: 0,
                 password: 0
             });
-        } else {
+        } else if (req.role === 'admin') {
             data = await volunteerData.find({
                 role: {
-                    $nin: ["admin"]
+                    $nin: ["super-admin"]
                 },
                 membershipId: {
                     $ne: req.membershipId
@@ -57,13 +57,27 @@ const getAllMemberDetails = async (req, res, next) => {
                 password: 0
             });
         }
-        res.status(httpStatus.OK).send({
-            data
-        })
-    } catch (error) {
-        logger.error("getMemberDetails catch errror %o", error);
-        next(new ApiError(error));
+    } else {
+        data = await volunteerData.find({
+            role: {
+                $nin: ["admin", "super-admin"]
+            },
+            membershipId: {
+                $ne: req.membershipId
+            }
+        }, {
+            _id: 0,
+            __v: 0,
+            password: 0
+        });
     }
+    res.status(httpStatus.OK).send({
+        data
+    })
+} catch (error) {
+    logger.error("getMemberDetails catch errror %o", error);
+    next(new ApiError(error));
+}
 }
 
 module.exports = {
