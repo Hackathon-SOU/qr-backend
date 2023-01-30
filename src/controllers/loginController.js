@@ -6,7 +6,7 @@ const httpStatus = require("http-status");
 const ApiError = require("../utils/ApiError");
 const volunteerData = require("../models/member");
 const {
-  sendRegisterAdminMail,
+  sendSuccessfulVerifiedMail,
   sendVerificationMail
 } = require("../services/sendMail.js");
 const userData = require("../models/user");
@@ -40,7 +40,7 @@ const adminRegister = async (req, res, next) => {
       });
       logger.debug(createToken);
       if (Boolean(createToken)) {
-        await sendVerificationMail(name, email, createToken.userId, createToken.token, membershipId, req.body.password);
+        await sendVerificationMail(name, email, createToken.userId, createToken.token);
         res.status(200).send({
           message: "Account has been created"
         });
@@ -82,14 +82,14 @@ const verifyEmail = async (req, res, next) => {
     }
     const isVolunteerDataUpdated = await volunteerData.updateOne({
       _id: volunteer._id,
-    },{
+    }, {
       verified: true,
     });
     logger.debug("volunteerDataupdated %o", isVolunteerDataUpdated);
     await tokenSchema.findByIdAndRemove({
       _id: dbToken._id
     });
-
+    await sendSuccessfulVerifiedMail(volunteer.name, volunteer.email);
     res.status(httpStatus.OK).send("Verified Email Successfully")
   } catch (error) {
     logger.error("verify Email errror===> %o", error);
