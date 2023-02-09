@@ -215,12 +215,10 @@ const uploadSheet = async (req, res, next) => {
 
                                     }
                                 }
-                                sheetCount++;
-                            } else {
-                                sheetCount++;
-                                // logger.info(count);
-                                await logger.info("sheetCount %s", sheetCount);
                             }
+                            sheetCount++;
+                            // logger.info(count);
+                            // logger.debug("save is working %s", sheetCount);
                             if (sheetCount == sheetData.length) {
                                 logger.info("ulpoadSheet, uploaded Successfully");
                                 deleteFile(fileName);
