@@ -192,17 +192,44 @@ const uploadSheet = async (req, res, next) => {
                     documentCount = result.deletedCount;
                     logger.info("sheetLength ===> %s", sheetData.length);
                     sheetData.forEach(async (a) => {
-                        a.regId = Math.floor(a.regId);
-                        a.eventId = eventId;
-                    });
-                    let insertParticpantDatas = await userData.insertMany(sheetData);
-                    if (insertParticpantDatas) {
-                        logger.info("ulpoadSheet, uploaded Successfully");
-                        deleteFile(fileName);
-                        res.status(200).send({
-                            message: "Sheet Uploaded Successfully, and Participants added in the Event",
+                        const data = new userData({
+                            name: a.name,
+                            email: a.email,
+                            regId: Math.floor(a.regId),
+                            seatNo: a.seatNo,
+                            present: a.present,
+                            eventId: eventId
                         });
-                    }
+                        data.save(async (error) => {
+                            if (error) {
+                                if (error.code == 11000) {
+                                    if (error.keyPattern.regId) {
+                                        logger.error("uploadSheet, Duplicate regId in sheet, ==> %o", error);
+                                        next(new ApiError(httpStatus.CONFLICT, `Duplicate ${a.regId} regId for participant ${a.name} in sheet`));
+                                    } else if (error.keyPattern.email) {
+                                        logger.error("uploadSheet, Duplicate email in sheet==> %o", error);
+                                        next(new ApiError(httpStatus.CONFLICT, `Duplicate ${a.email} email for participant ${a.name} in sheet`));
+                                    } else if (error.keyPattern.seatNo) {
+                                        logger.error("uploadSheet, Duplication seatNo in sheet==> %o", error);
+                                        next(new ApiError(httpStatus.CONFLICT, `Seat no ${a.seatNo} can not allocate to particpant ${a.name} in sheet`));
+
+                                    }
+                                }
+                                sheetCount++;
+                            } else {
+                                sheetCount++;
+                                // logger.info(count);
+                                await logger.info("sheetCount %s", sheetCount);
+                            }
+                            if (sheetCount == sheetData.length) {
+                                logger.info("ulpoadSheet, uploaded Successfully");
+                                deleteFile(fileName);
+                                res.status(200).send({
+                                    message: "Sheet Uploaded Successfully, and Participants added in the Event",
+                                });
+                            }
+                        })
+                    });
                 }
             });
         };
