@@ -15,7 +15,7 @@ function verifyJwt(req, res, next) {
     logger.debug("req recieve===>", req.headers);
     if (req.headers.authorization == undefined || null == req.headers.authorization) {
       logger.error("Token is undefined or null");
-      throw new ApiError(httpStatus.NOT_FOUND, 'Access Token not found');
+      throw new ApiError(httpStatus.UNAUTHORIZED, 'Access Token not found');
     } else if (req.headers.authorization.split(" ")[0] == "Bearer") {
       token = req.headers.authorization.split(" ")[1];
       logger.debug("Token found successfully");

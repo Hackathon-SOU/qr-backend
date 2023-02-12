@@ -177,62 +177,61 @@ const uploadSheet = async (req, res, next) => {
         for (var i = 0; i < sheet.length; i++) {
             var sheetName = sheet[i];
             const sheetData = render.utils.sheet_to_json(file.Sheets[sheetName]);
-            let documentCount;
+            // let documentCount;
             let totalData;
-            let sheetCount = 0;
+            // let sheetCount = 0;
             totalData = await userData.count({});
             logger.info("Total numOfparticpant user in db ====> %s", totalData);
             userData.deleteMany({
                 eventId: eventId
-            }, async function (err, result) {
+            }, async function (err) {
                 if (err) {
                     logger.error("uploadSheet, user data delete many error===> %o", err);
-                } else if (result) {
-                    logger.info("%s - deleted docs of the event", result.deletedCount);
-                    documentCount = result.deletedCount;
-                    logger.info("sheetLength ===> %s", sheetData.length);
-                    sheetData.forEach(async (a) => {
-                        const data = new userData({
-                            name: a.name,
-                            email: a.email,
-                            regId: Math.floor(a.regId),
-                            seatNo: a.seatNo,
-                            present: a.present,
-                            eventId: eventId
-                        });
-                        data.save(async (error) => {
-                            if (error) {
-                                if (error.code == 11000) {
-                                    if (error.keyPattern.regId) {
-                                        logger.error("uploadSheet, Duplicate regId in sheet, ==> %o", error);
-                                        next(new ApiError(httpStatus.CONFLICT, `Duplicate ${a.regId} regId for participant ${a.name} in sheet`));
-                                    } else if (error.keyPattern.email) {
-                                        logger.error("uploadSheet, Duplicate email in sheet==> %o", error);
-                                        next(new ApiError(httpStatus.CONFLICT, `Duplicate ${a.email} email for participant ${a.name} in sheet`));
-                                    } else if (error.keyPattern.seatNo) {
-                                        logger.error("uploadSheet, Duplication seatNo in sheet==> %o", error);
-                                        next(new ApiError(httpStatus.CONFLICT, `Seat no ${a.seatNo} can not allocate to particpant ${a.name} in sheet`));
-
-                                    }
-                                }
-                                sheetCount++;
-                            } else {
-                                sheetCount++;
-                                // logger.info(count);
-                                await logger.info("sheetCount %s", sheetCount);
-                            }
-                            if (sheetCount == sheetData.length) {
-                                logger.info("ulpoadSheet, uploaded Successfully");
-                                deleteFile(fileName);
-                                res.status(200).send({
-                                    message: "Sheet Uploaded Successfully, and Participants added in the Event",
-                                });
-                            }
-                        })
-                    });
+                } else {
+                    inserParticipantData();
                 }
             });
-        };
+
+            async function inserParticipantData() {
+                logger.info("sheetLength ===> %s", sheetData.length);
+                for (const participant of sheetData) {
+                    const data = new userData({
+                        name: participant.name,
+                        email: participant.email,
+                        regId: Math.floor(participant.regId),
+                        seatNo: participant.seatNo,
+                        present: participant.present,
+                        eventId: eventId
+                    });
+                    try {
+                        await data.save();
+                    } catch (error) {
+                        if (error.code == 11000) {
+                            if (error.keyPattern.regId) {
+                                logger.error("uploadSheet, Duplicate regId in sheet, ==> %o", error);
+                                await next(new ApiError(httpStatus.CONFLICT, `Duplicate ${participant.regId} regId for participant ${participant.name} in sheet`));
+                                return;
+                            } else if (error.keyPattern.email) {
+                                logger.error("uploadSheet, Duplicate email in sheet==> %o", error);
+                                await next(new ApiError(httpStatus.CONFLICT, `Duplicate ${participant.email} email for participant ${participant.name} in sheet`));
+                                return;
+                            } else if (error.keyPattern.seatNo) {
+                                logger.error("uploadSheet, Duplication seatNo in sheet==> %o", error);
+                                await next(new ApiError(httpStatus.CONFLICT, `Seat no ${participant.seatNo} can not allocate to particpant ${participant.name} in sheet`));
+                                return;
+                            }
+                        } else {
+                            throw error;
+                        }
+                    }
+                }
+                logger.info("ulpoadSheet, uploaded Successfully");
+                deleteFile(fileName);
+                res.status(200).send({
+                    message: "Sheet Uploaded Successfully, and Participants added in the Event",
+                });
+            }
+        }
         // This below code is to delete All the files in the upload folder
         function deleteFile(deleteFile) {
             fs.readdir(`${req.dirPath}`, (err, files) => {
@@ -250,6 +249,7 @@ const uploadSheet = async (req, res, next) => {
             });
         }
     } catch (error) {
+        console.log("upload error", error);
         logger.error("upload sheet catch err===> %o", error);
         if (error.code == 11000) {
             if (error.keyPattern.regId) {
