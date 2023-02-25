@@ -21,7 +21,7 @@ const ROOT_FOLDER = path.join(path.resolve(), '.');
 
 var whitelist = ['http://localhost:5000', 'https://qr-reg-web-app-ieee.web.app']
 var corsOptions = {
-    origin: function (origin, callback) {
+    origin: function(origin, callback) {
         if (whitelist.indexOf(origin) !== -1) {
             callback(null, true)
         } else {
@@ -38,6 +38,7 @@ app.use((req, res, next) => {
     res.append('Access-Control-Allow-Headers', 'Content-Type');
     next();
 });
+
 let mongodbString = process.env.DATABASE_DEV_URL;
 if (process.env.ENV === "production") {
     logger.info(process.env.ENV)

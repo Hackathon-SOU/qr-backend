@@ -5,7 +5,8 @@ const {
     getEvent,
     getEventReport,
     deleteEvent
-} = require("../controllers/eventController")
+} = require("../controllers/eventController");
+
 const {
     getuserDetails,
     getAllUserDetails,
@@ -13,31 +14,40 @@ const {
     markpresence,
     singleUserData,
     totalAbsent
-} = require("../controllers/userDetailsController")
+} = require("../controllers/userDetailsController");
+
 const {
     adminRegister,
     verifyEmail,
     canteenRegister,
     adminLogin,
     getAdminJwtToken
-} = require("../controllers/loginController")
+} = require("../controllers/loginController");
+
 const authValidation = require("../validation/auth.validation.js");
 const participantValidation = require("../validation/participant.validation.js");
 const eventValidation = require("../validation/event.validation.js");
 const canteenValidation = require("../validation/canteen.validation.js");
+
 const {
     getMenu,
     getCanteen
-} = require("../controllers/canteenController")
-const validate = require("../middleware/validation.js")
+} = require("../controllers/canteenController");
+
+const validate = require("../middleware/validation.js");
+
 const {
     verifyJwt,
     authorizeAdmin
 } = require("../middleware/verifyJwt");
+
 const multerUpload = require("../middleware/multer");
+
 const {
     getAllMemberDetails,
-    deleteMemberAccount
+    deleteMemberAccount,
+    updatePasswordOfMember,
+    forgotPasswordVerificationOfMember
 } = require('../controllers/memberController');
 
 
@@ -54,6 +64,10 @@ router.get('/getjwttoken', getAdminJwtToken);
 router.get('/getallmemberdetails', verifyJwt, authorizeAdmin, getAllMemberDetails);
 
 router.delete('/deletemember', verifyJwt, authorizeAdmin, deleteMemberAccount);
+
+router.post('/forgotPasswordverification', verifyJwt, authorizeAdmin, forgotPasswordVerificationOfMember);
+
+router.post('/updatepassword', verifyJwt, authorizeAdmin, updatePasswordOfMember);
 
 router.post('/uploadSheet', verifyJwt, authorizeAdmin, multerUpload, uploadSheet);
 
