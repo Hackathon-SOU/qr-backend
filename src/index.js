@@ -38,9 +38,9 @@ app.use((req, res, next) => {
 });
 let mongodbString = process.env.DATABASE_DEV_URL;
 if (process.env.ENV === "production") {
-  logger.info(process.env.ENV);
+  logger.info("production");
   mongodbString = process.env.DATABASE_PROD_URL;
-  app.options(cors(corsOptions));
+  app.use(cors(corsOptions));
 } else if (process.env.ENV === "development") {
   logger.info("development");
   mongodbString = process.env.DATABASE_DEV_URL;
