@@ -217,27 +217,31 @@ const uploadSheet = async (req, res, next) => {
       // let sheetCount = 0;
       totalData = await userData.count({});
       logger.info("Total numOfparticpant user in db ====> %s", totalData);
-      userData.deleteMany(
-        {
-          eventId: eventId,
-        },
-        async function (err) {
-          if (err) {
-            logger.error(
-              "uploadSheet, user data delete many error===> %o",
-              err
-            );
-          } else {
-            insertParticipantData();
-          }
-        }
-      );
 
+      async function deleteEventRegistrationByEventId(eventId) {
+        const registrations = await eventRegistration.find({ eventId });
+        console.log("registartions", registrations);
+        // Delete all the EventRegistration documents
+        const deletedEventReg = await eventRegistration.deleteMany({ eventId });
+        console.log("deletedEventReg", deletedEventReg);
+        // Remove the registration IDs from the events array of each User document
+        for (const registration of registrations) {
+          const { _id: userId } = registration;
+          console.log("userId", userId);
+          const deletedUserData = await userData.updateOne(
+            { _id: userId },
+            { $pull: { events: registration._id } }
+          );
+          console.log("deletedUserData", deletedUserData);
+        }
+      }
+      await deleteEventRegistrationByEventId(eventId);
+      insertParticipantData();
       async function insertParticipantData() {
         logger.info("sheetLength ===> %s", sheetData.length);
         for (const participant of sheetData) {
           try {
-            logger.debug("participant %o", participant);
+            console.log("participant", participant);
             const {
               "[__rowNum__]": rowNum,
               regId,
@@ -246,8 +250,6 @@ const uploadSheet = async (req, res, next) => {
               seatNo,
               present,
             } = participant;
-            logger.debug("participant seatNo %o", seatNo);
-
             const user = await userData.findOneAndUpdate(
               { email: email },
               {
@@ -275,10 +277,7 @@ const uploadSheet = async (req, res, next) => {
                   userId: user._id,
                   present: present,
                 };
-            const registration = await eventRegistration.create(
-              eventRegisterData
-            );
-            console.log("registration", registration);
+            await eventRegistration.create(eventRegisterData);
             logger.debug(`${rowNum} is added successfully`);
           } catch (error) {
             // logger.error(error);
