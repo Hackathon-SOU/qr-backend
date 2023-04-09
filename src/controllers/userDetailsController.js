@@ -115,7 +115,7 @@ const markpresence = async (req, res, next) => {
   try {
     const regId = req.body.regId;
     const present = req.body.present;
-    const response = await userData.updateOne(
+    const response = await eventRegistration.updateOne(
       {
         regId: regId,
       },
