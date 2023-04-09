@@ -9,21 +9,34 @@ const path = require("path");
 const ApiError = require("../utils/ApiError");
 const logger = require("../utils/logger");
 const { default: mongoose } = require("mongoose");
+const user = require("../models/user");
 
 const getuserDetails = async (req, res, next) => {
   try {
     res.append("Access-Control-Allow-Headers", "Content-Type");
     const regId = req.query.regId;
     logger.info("regID===> %s", regId);
-    let resultUser = await userData.findOne(
-      {
-        regId: regId,
-      },
-      {
-        _id: 0,
-        __v: 0,
-      }
-    );
+    let resultUser = await eventRegistration
+      .findOne(
+        {
+          regId: regId,
+        },
+        {
+          _id: 0,
+          __v: 0,
+          eventId: 0,
+        }
+      )
+      .populate("userId", { name: 1, email: 1, _id: 0 })
+      .then((user) => {
+        return {
+          regId: user.regId,
+          present: user.present,
+          name: user.userId.name,
+          email: user.userId.email,
+        };
+      });
+    console.log("data", resultUser);
     if (Boolean(resultUser)) {
       if (resultUser.present === true) {
         throw new ApiError(
@@ -54,15 +67,17 @@ const getAllUserDetails = async (req, res, next) => {
       id: eventId,
     });
     if (Boolean(eventFound)) {
-      const resultUsers = await userData.find(
-        {
-          eventId: eventId,
-        },
-        {
-          _id: 0,
-          __v: 0,
-        }
-      );
+      let resultUsers = await eventRegistration
+        .find(
+          {
+            eventId: eventId,
+          },
+          {
+            _id: 0,
+            __v: 0,
+          }
+        )
+        .populate("userId", { name: 1, email: 1, _id: 0 });
       if (Boolean(resultUsers)) {
         if (resultUsers.length == 0) {
           logger.info("No participant found with this event Id");
@@ -72,6 +87,14 @@ const getAllUserDetails = async (req, res, next) => {
           );
         } else {
           logger.info("Users fetched Succesfully");
+          resultUsers = resultUsers.map((user) => {
+            return {
+              regId: user.regId,
+              present: user.present,
+              name: user.userId.name,
+              email: user.userId.email,
+            };
+          });
           return res.status(200).send(resultUsers);
         }
       }
@@ -219,21 +242,9 @@ const uploadSheet = async (req, res, next) => {
       logger.info("Total numOfparticpant user in db ====> %s", totalData);
 
       async function deleteEventRegistrationByEventId(eventId) {
-        const registrations = await eventRegistration.find({ eventId });
-        console.log("registartions", registrations);
         // Delete all the EventRegistration documents
         const deletedEventReg = await eventRegistration.deleteMany({ eventId });
         console.log("deletedEventReg", deletedEventReg);
-        // Remove the registration IDs from the events array of each User document
-        for (const registration of registrations) {
-          const { _id: userId } = registration;
-          console.log("userId", userId);
-          const deletedUserData = await userData.updateOne(
-            { _id: userId },
-            { $pull: { events: registration._id } }
-          );
-          console.log("deletedUserData", deletedUserData);
-        }
       }
       await deleteEventRegistrationByEventId(eventId);
       insertParticipantData();
