@@ -237,71 +237,83 @@ const uploadSheet = async (req, res, next) => {
         logger.info("sheetLength ===> %s", sheetData.length);
         for (const participant of sheetData) {
           try {
-            const data = await userData.updateOne(
-              { email: participant.email },
+            logger.debug("participant %o", participant);
+            const {
+              "[__rowNum__]": rowNum,
+              regId,
+              email,
+              name,
+              seatNo,
+              present,
+            } = participant;
+            logger.debug("participant seatNo %o", seatNo);
+
+            const user = await userData.findOneAndUpdate(
+              { email: email },
               {
-                name: participant.name,
-                email: participant.email,
-                regId: Math.floor(participant.regId),
-                seatNo: participant.seatNo,
-                present: participant.present,
-                $addToSet: { eventIds: eventId },
+                $setOnInsert: {
+                  name: name,
+                },
               },
-              { upsert: true }
+              {
+                upsert: true,
+                new: true,
+              }
             );
-            logger.debug("data %O", JSON.stringify(data));
-            const validationForNewUserAndExistingUser =
-              data.modifiedCount === 1 || data.upsertedCount === 1;
-            const validationForDuplicateEvents =
-              data.modifiedCount === 0 && data.matchedCount === 1;
-            if (validationForNewUserAndExistingUser) {
-              logger.debug(`${participant.name} added successfully`);
-            }
-            if (validationForDuplicateEvents) {
-              throw new ApiError(
-                httpStatus.CONFLICT,
-                "Participant is already added into event"
-              );
-            }
+            console.log("user", user);
+            const eventRegisterData = seatNo
+              ? {
+                  eventId: eventId,
+                  regId: regId,
+                  userId: user._id,
+                  seatNo: seatNo,
+                  present: present,
+                }
+              : {
+                  eventId: eventId,
+                  regId: regId,
+                  userId: user._id,
+                  present: present,
+                };
+            const registration = await eventRegistration.create(
+              eventRegisterData
+            );
+            console.log("registration", registration);
+            logger.debug(`${rowNum} is added successfully`);
           } catch (error) {
+            // logger.error(error);
+            logger.error("error %o", error);
+            logger.error("error detail %o", error.keyPattern);
             if (error.code == 11000) {
-              if (error.keyPattern.regId) {
-                logger.error(
-                  "uploadSheet, Duplicate regId in sheet, ==> %o",
-                  error
-                );
-                await next(
-                  new ApiError(
-                    httpStatus.CONFLICT,
-                    `Duplicate ${participant.regId} regId for participant ${participant.name} in sheet`
-                  )
-                );
-                return;
-              } else if (error.keyPattern.email) {
+              if (Object.keys(error.keyPattern) == "userId") {
                 logger.error(
                   "uploadSheet, Duplicate email in sheet==> %o",
                   error
                 );
-                await next(
-                  new ApiError(
-                    httpStatus.CONFLICT,
-                    `Duplicate ${participant.email} email for participant ${participant.name} in sheet`
-                  )
+                error = new ApiError(
+                  httpStatus.CONFLICT,
+                  `Duplicate ${participant.email} email for participant ${participant.name} in sheet`
                 );
-                return;
-              } else if (error.keyPattern.seatNo) {
+              } else if (Object.keys(error.keyPattern) == "regId") {
+                logger.error(
+                  "uploadSheet, Duplicate regId in sheet, ==> %o",
+                  error
+                );
+                error = new ApiError(
+                  httpStatus.CONFLICT,
+                  `Duplicate ${participant.regId} regId for participant ${participant.name} in sheet`
+                );
+              } else if (Object.keys(error.keyPattern) == "seatNo") {
                 logger.error(
                   "uploadSheet, Duplication seatNo in sheet==> %o",
                   error
                 );
-                await next(
-                  new ApiError(
-                    httpStatus.CONFLICT,
-                    `Seat no ${participant.seatNo} can not allocate to particpant ${participant.name} in sheet`
-                  )
+                error = new ApiError(
+                  httpStatus.CONFLICT,
+                  `Seat no ${participant.seatNo} can not allocate to particpant ${participant.name} in sheet`
                 );
-                return;
               }
+              next(error);
             } else {
               throw error;
             }

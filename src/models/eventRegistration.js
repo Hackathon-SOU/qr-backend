@@ -13,13 +13,8 @@ const eventRegistration = new mongoose.Schema({
   },
   seatNo: {
     type: Number,
-    index: {
-      partialFilterExpression: {
-        seatNo: {
-          $type: "number",
-        },
-      },
-    },
+    unique: true,
+    sparse: true,
   },
 
   present: {
@@ -32,7 +27,10 @@ const eventRegistration = new mongoose.Schema({
     ref: "userData",
   },
 });
-eventRegistration.index({ eventId: 1, seatNo: 1 }, { unique: true });
+eventRegistration.index(
+  { eventId: 1, seatNo: 1 },
+  { unique: true, partialFilterExpression: { seatNo: { $ne: null, $ne: "" } } }
+);
 eventRegistration.index({ eventId: 1, userId: 1 }, { unique: true });
 
 module.exports = mongoose.model("eventRegistration", eventRegistration);
