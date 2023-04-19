@@ -40,7 +40,6 @@ let mongodbString = process.env.DATABASE_DEV_URL;
 if (process.env.ENV === "production") {
   logger.info("production");
   mongodbString = process.env.DATABASE_PROD_URL;
-  app.use(cors(corsOptions));
 } else if (process.env.ENV === "development") {
   logger.info("development");
   mongodbString = process.env.DATABASE_DEV_URL;
@@ -63,9 +62,20 @@ database.once("connected", () => {
 // app.use('/api/api-docs', swaggerUi.serve);
 // app.use('/api/api-docs', swaggerUi.setup(swaggerDocument, options));
 
-app.use("/api/admin", require("./routes/admin"));
-app.use("/api/canteen", require("./routes/canteen"));
-app.use("/api/participant", require("./routes/participant"));
+app.use("/api/admin/verify", cors(), require("./routes/public"));
+if (process.env.ENV === "production") {
+  app.use("/api/admin", cors(corsOptions), require("./routes/admin"));
+  app.use("/api/canteen", cors(corsOptions), require("./routes/canteen"));
+  app.use(
+    "/api/participant",
+    cors(corsOptions),
+    require("./routes/participant")
+  );
+} else {
+  app.use("/api/admin", require("./routes/admin"));
+  app.use("/api/canteen", require("./routes/canteen"));
+  app.use("/api/participant", require("./routes/participant"));
+}
 
 app.use((req, res, next) => {
   next(new ApiError(httpStatus.NOT_FOUND, "Not Found"));

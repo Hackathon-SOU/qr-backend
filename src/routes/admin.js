@@ -44,13 +44,6 @@ router.post(
   adminRegister
 );
 
-router.get(
-  "/verify/:userId/:token",
-  cors(),
-  validate(authValidation.adminVerifySchema),
-  verifyEmail
-);
-
 router.post("/login", validate(authValidation.adminLoginSchema), adminLogin);
 
 router.get("/getjwttoken", getAdminJwtToken);
