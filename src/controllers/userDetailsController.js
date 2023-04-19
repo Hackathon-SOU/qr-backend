@@ -1,25 +1,66 @@
 const userData = require("../models/user");
 const eventData = require("../models/event");
 const eventRegistration = require("../models/eventRegistration");
-const render = require("xlsx");
+const xlsx = require("xlsx");
+const tmp = require("tmp");
+
 const httpStatus = require("http-status");
 const fs = require("fs");
 const path = require("path");
 
 const ApiError = require("../utils/ApiError");
 const logger = require("../utils/logger");
-const { default: mongoose } = require("mongoose");
-const user = require("../models/user");
 
-const getAllParticipants = async (req, res, next) => {
+const getAllparticipantsList = async (req, res, next) => {
   try {
     const data = await userData.find({}, { _id: 0, __v: 0, points: 0 });
-    logger.debug("data", data);
     res.send({
       data: data,
     });
   } catch (error) {
     logger.error("catch getAllParticipants %o", error);
+  }
+};
+
+const downloadAllParticipantsList = async (req, res, next) => {
+  try {
+    const data = await userData.find({}, { _id: 0, __v: 0, points: 0 });
+    logger.debug("data", data);
+    let dataString = JSON.stringify(data);
+    let dataJson = JSON.parse(dataString);
+    console.log("data fetched===> %o", dataJson);
+    const ws = xlsx.utils.json_to_sheet(dataJson, {
+      header: ["name", "email"],
+    });
+    logger.info("worksheet created");
+    const wb = xlsx.utils.book_new();
+    logger.info("workbook created");
+    xlsx.utils.book_append_sheet(wb, ws, "Report", true);
+    logger.info("worksheet appended in workbook");
+    tmp.file(
+      {
+        mode: 0o644,
+        prefix: "prefix-",
+        postfix: ".xlsx",
+      },
+      function _tempFileCreated(err, filePath, fd, cleanupCallback) {
+        if (err) throw err;
+
+        console.log("File: ", filePath);
+        console.log("Filedescriptor: ", fd);
+
+        xlsx.writeFile(wb, `${filePath}`);
+        logger.info("writing file");
+        res.status(200).download(`${filePath}`);
+        cleanupCallback();
+      }
+    );
+    // res.send({
+    //   data: data,
+    // });
+  } catch (error) {
+    logger.error("catch downloadAllParticipantsData %o", error);
+    next(error);
   }
 };
 
@@ -241,12 +282,12 @@ const uploadSheet = async (req, res, next) => {
     let filePath = `${req.dirPath}/${fileName}`;
     // let filePath = `./tmp/${fileName}`;
     logger.debug("path of upload sheet===>%o", filePath);
-    var file = render.readFile(filePath);
+    var file = xlsx.readFile(filePath);
     // logger.info("file========>%o", file);
     const sheet = file.SheetNames;
     for (var i = 0; i < sheet.length; i++) {
       var sheetName = sheet[i];
-      const sheetData = render.utils.sheet_to_json(file.Sheets[sheetName]);
+      const sheetData = xlsx.utils.sheet_to_json(file.Sheets[sheetName]);
       // let documentCount;
       let totalData;
       // let sheetCount = 0;
@@ -410,5 +451,6 @@ module.exports = {
   singleUserData,
   totalAbsent,
   uploadSheet,
-  getAllParticipants,
+  getAllparticipantsList,
+  downloadAllParticipantsList,
 };
