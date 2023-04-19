@@ -7,15 +7,16 @@ const canteenData = require("../models/canteen");
 const logger = require("../utils/logger");
 const ApiError = require("../utils/ApiError");
 
-
-
 function verifyJwt(req, res, next) {
   try {
     let token;
     logger.debug("req recieve===>", req.headers);
-    if (req.headers.authorization == undefined || null == req.headers.authorization) {
+    if (
+      req.headers.authorization == undefined ||
+      null == req.headers.authorization
+    ) {
       logger.error("Token is undefined or null");
-      throw new ApiError(httpStatus.UNAUTHORIZED, 'Access Token not found');
+      throw new ApiError(httpStatus.UNAUTHORIZED, "Access Token not found");
     } else if (req.headers.authorization.split(" ")[0] == "Bearer") {
       token = req.headers.authorization.split(" ")[1];
       logger.debug("Token found successfully");
@@ -23,7 +24,7 @@ function verifyJwt(req, res, next) {
     jwt.verify(token, process.env.ACCESSSECRET, function (error, decoded) {
       if (error) {
         logger.error("JWT verify error===> %o", error);
-        throw new ApiError(httpStatus.UNAUTHORIZED, error.message)
+        throw new ApiError(httpStatus.UNAUTHORIZED, error.message);
       } else {
         logger.info("JWT decoded succesfully");
         req.id = decoded.id;
@@ -33,10 +34,10 @@ function verifyJwt(req, res, next) {
       }
     });
   } catch (error) {
-    logger.error("Verify JWT catch error====> %o", error)
+    logger.error("Verify JWT catch error====> %o", error);
     next(error);
   }
-};
+}
 
 async function authorizeAdmin(req, res, next) {
   const volunteerId = req.id;
@@ -49,7 +50,7 @@ async function authorizeAdmin(req, res, next) {
     next();
   } else {
     res.status(403).send({
-      message: "Oops, it seems you are not part of IEEE."
+      message: "Oops, it seems you are not part of IEEE.",
     });
     logger.error("authorizeAdmin, Admin does not found");
   }
@@ -66,10 +67,14 @@ async function authorizeParticpant(req, res, next) {
     next();
   } else {
     logger.error("authorizeParticipant, Particpant does not found");
-    next(new ApiError(httpStatus.UNAUTHORIZED, 'Oops, it seems you are not participant.'));
+    next(
+      new ApiError(
+        httpStatus.UNAUTHORIZED,
+        "Oops, it seems you are not participant."
+      )
+    );
   }
 }
-
 
 async function authorizeCanteen(req, res, next) {
   const canteenId = req.id;
@@ -82,7 +87,12 @@ async function authorizeCanteen(req, res, next) {
     next();
   } else {
     logger.error("authorizeCanteen, Canteen does not found");
-    next(new ApiError(httpStatus.UNAUTHORIZED, 'Oops, it seems you are not part of IEEE.'));
+    next(
+      new ApiError(
+        httpStatus.UNAUTHORIZED,
+        "Oops, it seems you are not part of IEEE."
+      )
+    );
   }
 }
 
@@ -90,5 +100,5 @@ module.exports = {
   verifyJwt,
   authorizeAdmin,
   authorizeParticpant,
-  authorizeCanteen
+  authorizeCanteen,
 };

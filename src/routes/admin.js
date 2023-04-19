@@ -14,6 +14,7 @@ const {
   markpresence,
   singleUserData,
   totalAbsent,
+  getAllParticipants,
 } = require("../controllers/userDetailsController");
 const {
   adminRegister,
@@ -72,6 +73,7 @@ router.get(
   validate(participantValidation.getAllUserDetailsSchema),
   getAllUserDetails
 );
+router.get("/allparticipants", verifyJwt, authorizeAdmin, getAllParticipants);
 
 router.get(
   "/getuserdetails",

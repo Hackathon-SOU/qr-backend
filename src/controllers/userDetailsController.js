@@ -11,6 +11,18 @@ const logger = require("../utils/logger");
 const { default: mongoose } = require("mongoose");
 const user = require("../models/user");
 
+const getAllParticipants = async (req, res, next) => {
+  try {
+    const data = await userData.find({}, { _id: 0, __v: 0, points: 0 });
+    logger.debug("data", data);
+    res.send({
+      data: data,
+    });
+  } catch (error) {
+    logger.error("catch getAllParticipants %o", error);
+  }
+};
+
 const getuserDetails = async (req, res, next) => {
   try {
     res.append("Access-Control-Allow-Headers", "Content-Type");
@@ -398,4 +410,5 @@ module.exports = {
   singleUserData,
   totalAbsent,
   uploadSheet,
+  getAllParticipants,
 };
