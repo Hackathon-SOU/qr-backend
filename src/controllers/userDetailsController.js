@@ -19,6 +19,7 @@ const getAllparticipantsList = async (req, res, next) => {
     });
   } catch (error) {
     logger.error("catch getAllParticipants %o", error);
+    next(error);
   }
 };
 
