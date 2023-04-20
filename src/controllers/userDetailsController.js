@@ -314,19 +314,59 @@ const uploadSheet = async (req, res, next) => {
               name,
               seatNo,
               present,
+              membershipId = undefined,
+              college = undefined,
+              sem = undefined,
+              branch = undefined,
             } = participant;
-            const user = await userData.findOneAndUpdate(
-              { email: email },
-              {
-                $setOnInsert: {
-                  name: name,
+            let user;
+            if (membershipId || college || sem || branch) {
+              user = await userData.findOneAndUpdate(
+                { email: email },
+                {
+                  $setOnInsert: {
+                    name: name,
+                  },
                 },
-              },
-              {
-                upsert: true,
-                new: true,
-              }
-            );
+                {
+                  upsert: true,
+                  new: true,
+                }
+              );
+            } else if (!membershipId) {
+              user = await userData.findOneAndUpdate(
+                { email: email },
+                {
+                  $setOnInsert: {
+                    name: name,
+                    college,
+                    sem,
+                    branch,
+                  },
+                },
+                {
+                  upsert: true,
+                  new: true,
+                }
+              );
+            } else {
+              user = await userData.findOneAndUpdate(
+                { email: email },
+                {
+                  $setOnInsert: {
+                    name: name,
+                    membershipId,
+                    college,
+                    sem,
+                    branch,
+                  },
+                },
+                {
+                  upsert: true,
+                  new: true,
+                }
+              );
+            }
             console.log("user", user);
             const eventRegisterData = seatNo
               ? {
@@ -378,6 +418,7 @@ const uploadSheet = async (req, res, next) => {
                 );
               }
               next(error);
+              break;
             } else {
               throw error;
             }
