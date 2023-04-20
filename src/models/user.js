@@ -11,11 +11,24 @@ const userData = new mongoose.Schema({
     required: true,
     // unique: true,
   },
+  membershipId: {
+    type: Number,
+    unique: true,
+    sparse: true,
+  },
+  college: {
+    type: String,
+  },
+  branch: {
+    type: String,
+  },
+  sem: {
+    type: Number,
+  },
   points: {
     type: Number,
     required: true,
     default: 100,
   },
 });
-
 module.exports = mongoose.model("userData", userData);
