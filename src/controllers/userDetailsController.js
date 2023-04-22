@@ -248,8 +248,9 @@ const updateOrInsertUserData = async (
   branch,
   sem
 ) => {
+  console.log(name, membershipId, college, branch, sem);
   let user;
-  if (!membershipId) {
+  if (!membershipId && college && sem && branch) {
     user = await userData.findOneAndUpdate(
       { email: email },
       {
@@ -265,7 +266,9 @@ const updateOrInsertUserData = async (
         new: true,
       }
     );
-  } else if (!membershipId || !college || !sem || !branch) {
+    logger.debug("user 269 %o", user);
+  }
+  if (!membershipId || !college || !sem || !branch) {
     user = await userData.findOneAndUpdate(
       { email: email },
       {
@@ -295,6 +298,7 @@ const updateOrInsertUserData = async (
         new: true,
       }
     );
+    console.log("user 300 %o", user);
   }
   const eventRegisterData = seatNo
     ? {
@@ -440,47 +444,23 @@ const uploadSheet = async (req, res, next) => {
       logger.error("uploadSheet, Duplicate email in sheet==> %o", error);
       error = new ApiError(
         httpStatus.CONFLICT,
-        `Duplicate ${participant.email} email for participant ${participant.name} in sheet`
+        `Duplicate ${error.keyValue.email} in sheet`
       );
       next(error);
     } else if (Object.keys(error.keyPattern) == "regId") {
       logger.error("uploadSheet, Duplicate regId in sheet, ==> %o", error);
       error = new ApiError(
         httpStatus.CONFLICT,
-        `Duplicate ${participant.regId} regId for participant ${participant.name} in sheet`
+        `Duplicate ${error.keyValue.regId} in sheet`
       );
       next(error);
     } else if (Object.keys(error.keyPattern) == "seatNo") {
       logger.error("uploadSheet, Duplication seatNo in sheet==> %o", error);
       error = new ApiError(
         httpStatus.CONFLICT,
-        `Seat no ${participant.seatNo} can not allocate to particpant ${participant.name} in sheet`
+        `Duplicate Seat no ${error.keyValue.seatNo} in sheet`
       );
       next(error);
-    } else if (error.keyPattern.regId) {
-      logger.error("uploadSheet, Duplicate regId in sheet, ==> %o", error);
-      next(
-        new ApiError(
-          httpStatus.CONFLICT,
-          `Duplicate ${a.regId} regId for participant ${a.name} in sheet`
-        )
-      );
-    } else if (error.keyPattern.email) {
-      logger.error("uploadSheet, Duplicate email in sheet==> %o", error);
-      next(
-        new ApiError(
-          httpStatus.CONFLICT,
-          `Duplicate ${a.email} email for participant ${a.name} in sheet`
-        )
-      );
-    } else if (error.keyPattern.seatNo) {
-      logger.error("uploadSheet, Duplication seatNo in sheet==> %o", error);
-      next(
-        new ApiError(
-          httpStatus.CONFLICT,
-          `Seat no ${a.seatNo} can not allocate to particpant ${a.name} in sheet`
-        )
-      );
     } else {
       res.status(500).send({
         messaage: "You have made a BAD request",
