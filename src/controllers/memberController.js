@@ -87,14 +87,22 @@ const getAllMemberDetails = async (req, res, next) => {
   }
 };
 
-// const getMemberDetails = async (req, res, next) => {
-//   try {
-
-//   } catch (error) {
-//     logger.error("get member details catch %o", error);
-//   }
-// };
+const getProfileDetails = async (req, res, next) => {
+  try {
+    const member = await volunteerData.findById(
+      { _id: req.id },
+      { _id: 0, __v: 0, verified: 0, password: 0 }
+    );
+    res.status(200).send({
+      data: member,
+    });
+  } catch (error) {
+    logger.error("get member details catch %o", error);
+    res.send(httpStatus.BAD_REQUEST, { message: error.message });
+  }
+};
 module.exports = {
   getAllMemberDetails,
   deleteMemberAccount,
+  getProfileDetails,
 };

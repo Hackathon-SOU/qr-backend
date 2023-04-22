@@ -35,6 +35,7 @@ const multerUpload = require("../middleware/multer");
 const {
   getAllMemberDetails,
   deleteMemberAccount,
+  getProfileDetails,
 } = require("../controllers/memberController");
 
 const router = express.Router();
@@ -80,6 +81,7 @@ router.get(
   authorizeAdmin,
   getAllparticipantsList
 );
+router.get("/getprofile", verifyJwt, authorizeAdmin, getProfileDetails);
 router.get(
   "/downloadallparticipantslist",
   verifyJwt,
