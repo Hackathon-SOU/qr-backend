@@ -71,21 +71,41 @@ const getEventReport = async (req, res, next) => {
           eventId: 0,
         }
       )
-      .populate("userId", { _id: 0, name: 1, email: 1 });
-    console.log("data", data);
+      .populate("userId", {
+        _id: 0,
+        name: 1,
+        email: 1,
+        membershipId: 1,
+        college: 1,
+        branch: 1,
+        sem: 1,
+      });
     data = data.map((user) => {
       return {
         regId: user.regId,
         present: user.present,
         name: user.userId.name,
         email: user.userId.email,
+        membershipId: user.userId.membershipId,
+        college: user.userId.college,
+        branch: user.userId.branch,
+        sem: user.userId.sem,
       };
     });
     let dataString = JSON.stringify(data);
     let dataJson = JSON.parse(dataString);
     console.log("data fetched===> %o", dataJson);
     const ws = xlsx.utils.json_to_sheet(dataJson, {
-      header: ["name", "regId", "email", "present", "points"],
+      header: [
+        "name",
+        "regId",
+        "email",
+        "membershipId",
+        "college",
+        "branch",
+        "sem",
+        "present",
+      ],
     });
     logger.info("worksheet created");
     const wb = xlsx.utils.book_new();
