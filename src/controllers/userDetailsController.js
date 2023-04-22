@@ -207,56 +207,6 @@ const markpresence = async (req, res, next) => {
   }
 };
 
-const singleUserData = async (req, res, next) => {
-  try {
-    const { name, email, regId, seatNo, present, eventId } = req.body;
-    const user = await userData.findOneAndUpdate(
-      { email },
-      {
-        $setOnInsert: {
-          name,
-        },
-      },
-      {
-        upsert: true,
-        new: true,
-      }
-    );
-    logger.debug("user %o", user._id);
-    const registration = await eventRegistration.create({
-      eventId: eventId,
-      regId: regId,
-      userId: user._id,
-      seatNo,
-      present,
-    });
-    console.log("registration", registration);
-    res.status(200).send({
-      message: "User Added Successfully",
-    });
-    return logger.info("Participant account created Successfully");
-  } catch (error) {
-    logger.error(error);
-    logger.error("error %o", Object.keys(error.metadata.keyPattern)[1]);
-    if (error.metadata.code == 11000) {
-      if (Object.keys(error.metadata.keyPattern)[1] == "userId") {
-        error = new ApiError(httpStatus.CONFLICT, "Duplicate Email Id found");
-      } else if (Object.keys(error.metadata.keyPattern) == "regId") {
-        error = new ApiError(
-          httpStatus.CONFLICT,
-          "You have already registered with this regId"
-        );
-      } else if (Object.keys(error.metadata.keyPattern)[1] == "seatNo") {
-        error = new ApiError(
-          httpStatus.CONFLICT,
-          "Oops this seat already reserved. Please Check your SeatNo"
-        );
-      }
-    }
-    next(error);
-  }
-};
-
 const totalAbsent = async (req, res, next) => {
   try {
     userData.count(
@@ -278,146 +228,206 @@ const totalAbsent = async (req, res, next) => {
   }
 };
 
+const updateOrInsertUserData = async (
+  eventId,
+  name,
+  email,
+  regId,
+  seatNo,
+  present,
+  membershipId,
+  college,
+  branch,
+  sem
+) => {
+  let user;
+  if (!membershipId) {
+    user = await userData.findOneAndUpdate(
+      { email: email },
+      {
+        $setOnInsert: {
+          name: name,
+          college,
+          sem,
+          branch,
+        },
+      },
+      {
+        upsert: true,
+        new: true,
+      }
+    );
+  } else if (!membershipId || !college || !sem || !branch) {
+    user = await userData.findOneAndUpdate(
+      { email: email },
+      {
+        $setOnInsert: {
+          name: name,
+        },
+      },
+      {
+        upsert: true,
+        new: true,
+      }
+    );
+  } else {
+    user = await userData.findOneAndUpdate(
+      { email: email },
+      {
+        $setOnInsert: {
+          name: name,
+          membershipId,
+          college,
+          sem,
+          branch,
+        },
+      },
+      {
+        upsert: true,
+        new: true,
+      }
+    );
+  }
+  const eventRegisterData = seatNo
+    ? {
+        eventId: eventId,
+        regId: regId,
+        userId: user._id,
+        seatNo: seatNo,
+        present: present,
+      }
+    : {
+        eventId: eventId,
+        regId: regId,
+        userId: user._id,
+        present: present,
+      };
+  await eventRegistration.create(eventRegisterData);
+};
+const singleUserData = async (req, res, next) => {
+  try {
+    const {
+      name,
+      email,
+      regId,
+      seatNo,
+      present,
+      eventId,
+      membershipId,
+      college,
+      branch,
+      sem,
+    } = req.body;
+
+    await updateOrInsertUserData(
+      eventId,
+      name,
+      email,
+      regId,
+      seatNo,
+      present,
+      membershipId,
+      college,
+      branch,
+      sem
+    );
+    res.status(200).send({
+      message: "User Added Successfully",
+    });
+    return logger.info("Participant account created Successfully");
+  } catch (error) {
+    logger.error(error);
+    if (error.metadata.code == 11000) {
+      if (Object.keys(error.metadata.keyPattern)[1] == "userId") {
+        error = new ApiError(httpStatus.CONFLICT, "Duplicate Email Id found");
+      } else if (Object.keys(error.metadata.keyPattern) == "regId") {
+        error = new ApiError(
+          httpStatus.CONFLICT,
+          "You have already registered with this regId"
+        );
+      } else if (Object.keys(error.metadata.keyPattern)[1] == "seatNo") {
+        error = new ApiError(
+          httpStatus.CONFLICT,
+          "Oops this seat already reserved. Please Check your SeatNo"
+        );
+      }
+    }
+    next(error);
+  }
+};
+
+const deleteFile = (req, deleteFile) => {
+  fs.readdir(`${req.dirPath}`, (err, files) => {
+    if (err) throw err;
+    for (const file of files) {
+      logger.info("file in folders===>%s", file);
+      if (file === deleteFile) {
+        logger.info("file deleted===>%s", deleteFile);
+        fs.unlinkSync(`${req.dirPath}/${file}`, (err) => {
+          if (err) throw err;
+        });
+        break;
+      }
+    }
+  });
+};
+const deleteEventRegistrationByEventId = async (eventId) => {
+  // Delete all the EventRegistration documents
+  const deletedEventReg = await eventRegistration.deleteMany({ eventId });
+  console.log("deletedEventReg", deletedEventReg);
+};
 const uploadSheet = async (req, res, next) => {
   try {
-    // Below code is to upload Sheet from
+    console.time();
     const eventId = req.query.eventId;
-    logger.info("eventId===> %s", eventId);
-    let fileName = req.fileName;
-    logger.info("req.fileName===> %s", req.fileName);
-    let filePath = `${req.dirPath}/${fileName}`;
-    // let filePath = `./tmp/${fileName}`;
-    logger.debug("path of upload sheet===>%o", filePath);
-    var file = xlsx.readFile(filePath);
-    // logger.info("file========>%o", file);
+    const fileName = req.fileName;
+    const filePath = `${req.dirPath}/${fileName}`;
+    const file = xlsx.readFile(filePath);
     const sheet = file.SheetNames;
-    for (var i = 0; i < sheet.length; i++) {
-      var sheetName = sheet[i];
+    await deleteEventRegistrationByEventId(eventId);
+    for (let i = 0; i < sheet.length; i++) {
+      const sheetName = sheet[i];
       const sheetData = xlsx.utils.sheet_to_json(file.Sheets[sheetName]);
-      // let documentCount;
       let totalData;
-      // let sheetCount = 0;
       totalData = await userData.count({});
       logger.info("Total numOfparticpant user in db ====> %s", totalData);
-
-      async function deleteEventRegistrationByEventId(eventId) {
-        // Delete all the EventRegistration documents
-        const deletedEventReg = await eventRegistration.deleteMany({ eventId });
-        console.log("deletedEventReg", deletedEventReg);
+      logger.info("sheetLength ===> %s", sheetData.length);
+      for (const participant of sheetData) {
+        const {
+          regId,
+          email,
+          name,
+          seatNo,
+          present,
+          membershipId = undefined,
+          college = undefined,
+          sem = undefined,
+          branch = undefined,
+        } = participant;
+        await updateOrInsertUserData(
+          eventId,
+          name,
+          email,
+          regId,
+          seatNo,
+          present,
+          membershipId,
+          college,
+          branch,
+          sem
+        );
       }
-      await deleteEventRegistrationByEventId(eventId);
-      insertParticipantData();
-      async function insertParticipantData() {
-        logger.info("sheetLength ===> %s", sheetData.length);
-        for (const participant of sheetData) {
-          console.log("participant", participant);
-          const {
-            "[__rowNum__]": rowNum,
-            regId,
-            email,
-            name,
-            seatNo,
-            present,
-            membershipId = undefined,
-            college = undefined,
-            sem = undefined,
-            branch = undefined,
-          } = participant;
-          let user;
-          console.log(name, membershipId, college, branch, sem);
-          if (!membershipId) {
-            user = await userData.findOneAndUpdate(
-              { email: email },
-              {
-                $setOnInsert: {
-                  name: name,
-                  college,
-                  sem,
-                  branch,
-                },
-              },
-              {
-                upsert: true,
-                new: true,
-              }
-            );
-          } else if (!membershipId || !college || !sem || !branch) {
-            user = await userData.findOneAndUpdate(
-              { email: email },
-              {
-                $setOnInsert: {
-                  name: name,
-                },
-              },
-              {
-                upsert: true,
-                new: true,
-              }
-            );
-          } else {
-            user = await userData.findOneAndUpdate(
-              { email: email },
-              {
-                $setOnInsert: {
-                  name: name,
-                  membershipId,
-                  college,
-                  sem,
-                  branch,
-                },
-              },
-              {
-                upsert: true,
-                new: true,
-              }
-            );
-          }
-          console.log("user", user);
-          const eventRegisterData = seatNo
-            ? {
-                eventId: eventId,
-                regId: regId,
-                userId: user._id,
-                seatNo: seatNo,
-                present: present,
-              }
-            : {
-                eventId: eventId,
-                regId: regId,
-                userId: user._id,
-                present: present,
-              };
-          await eventRegistration.create(eventRegisterData);
-          logger.debug(`${rowNum} is added successfully`);
-        }
-        logger.info("ulpoadSheet, uploaded Successfully");
-        deleteFile(fileName);
-        res.status(200).send({
-          message:
-            "Sheet Uploaded Successfully, and Participants added in the Event",
-        });
-      }
-    }
-    // This below code is to delete All the files in the upload folder
-    function deleteFile(deleteFile) {
-      fs.readdir(`${req.dirPath}`, (err, files) => {
-        if (err) throw err;
-        for (const file of files) {
-          logger.info("file in folders===>%s", file);
-          if (file === deleteFile) {
-            logger.info("file deleted===>%s", deleteFile);
-            fs.unlinkSync(`${req.dirPath}/${file}`, (err) => {
-              if (err) throw err;
-            });
-            break;
-          }
-        }
+      logger.info("ulpoadSheet, uploaded Successfully");
+      deleteFile(req, fileName);
+      res.status(200).send({
+        message:
+          "Sheet Uploaded Successfully, and Participants added in the Event",
       });
     }
+    console.timeEnd();
+    // This below code is to delete All the files in the upload folder
   } catch (error) {
-    console.log("upload error", error);
     logger.error("upload sheet catch err===> %o", error);
-    logger.error("error detail %o", error.keyPattern);
     if (Object.keys(error.keyPattern) == "userId") {
       logger.error("uploadSheet, Duplicate email in sheet==> %o", error);
       error = new ApiError(
