@@ -147,8 +147,13 @@ const getAllUserDetails = async (req, res, next) => {
               present: user.present,
               name: user.userId.name,
               email: user.userId.email,
+              membershipId: user.userId.membershipId,
+              college: user.userId.college,
+              branch: user.userId.branch,
+              sem: user.userId.sem,
             };
           });
+          console.log("resultUsers", resultUsers);
           return res.status(200).send(resultUsers);
         }
       }
@@ -305,124 +310,85 @@ const uploadSheet = async (req, res, next) => {
       async function insertParticipantData() {
         logger.info("sheetLength ===> %s", sheetData.length);
         for (const participant of sheetData) {
-          try {
-            console.log("participant", participant);
-            const {
-              "[__rowNum__]": rowNum,
-              regId,
-              email,
-              name,
-              seatNo,
-              present,
-              membershipId = undefined,
-              college = undefined,
-              sem = undefined,
-              branch = undefined,
-            } = participant;
-            let user;
-            if (membershipId || college || sem || branch) {
-              user = await userData.findOneAndUpdate(
-                { email: email },
-                {
-                  $setOnInsert: {
-                    name: name,
-                  },
+          console.log("participant", participant);
+          const {
+            "[__rowNum__]": rowNum,
+            regId,
+            email,
+            name,
+            seatNo,
+            present,
+            membershipId = undefined,
+            college = undefined,
+            sem = undefined,
+            branch = undefined,
+          } = participant;
+          let user;
+          console.log(name, membershipId, college, branch, sem);
+          if (!membershipId) {
+            user = await userData.findOneAndUpdate(
+              { email: email },
+              {
+                $setOnInsert: {
+                  name: name,
+                  college,
+                  sem,
+                  branch,
                 },
-                {
-                  upsert: true,
-                  new: true,
-                }
-              );
-            } else if (!membershipId) {
-              user = await userData.findOneAndUpdate(
-                { email: email },
-                {
-                  $setOnInsert: {
-                    name: name,
-                    college,
-                    sem,
-                    branch,
-                  },
-                },
-                {
-                  upsert: true,
-                  new: true,
-                }
-              );
-            } else {
-              user = await userData.findOneAndUpdate(
-                { email: email },
-                {
-                  $setOnInsert: {
-                    name: name,
-                    membershipId,
-                    college,
-                    sem,
-                    branch,
-                  },
-                },
-                {
-                  upsert: true,
-                  new: true,
-                }
-              );
-            }
-            console.log("user", user);
-            const eventRegisterData = seatNo
-              ? {
-                  eventId: eventId,
-                  regId: regId,
-                  userId: user._id,
-                  seatNo: seatNo,
-                  present: present,
-                }
-              : {
-                  eventId: eventId,
-                  regId: regId,
-                  userId: user._id,
-                  present: present,
-                };
-            await eventRegistration.create(eventRegisterData);
-            logger.debug(`${rowNum} is added successfully`);
-          } catch (error) {
-            // logger.error(error);
-            logger.error("error %o", error);
-            logger.error("error detail %o", error.keyPattern);
-            if (error.code == 11000) {
-              if (Object.keys(error.keyPattern) == "userId") {
-                logger.error(
-                  "uploadSheet, Duplicate email in sheet==> %o",
-                  error
-                );
-                error = new ApiError(
-                  httpStatus.CONFLICT,
-                  `Duplicate ${participant.email} email for participant ${participant.name} in sheet`
-                );
-              } else if (Object.keys(error.keyPattern) == "regId") {
-                logger.error(
-                  "uploadSheet, Duplicate regId in sheet, ==> %o",
-                  error
-                );
-                error = new ApiError(
-                  httpStatus.CONFLICT,
-                  `Duplicate ${participant.regId} regId for participant ${participant.name} in sheet`
-                );
-              } else if (Object.keys(error.keyPattern) == "seatNo") {
-                logger.error(
-                  "uploadSheet, Duplication seatNo in sheet==> %o",
-                  error
-                );
-                error = new ApiError(
-                  httpStatus.CONFLICT,
-                  `Seat no ${participant.seatNo} can not allocate to particpant ${participant.name} in sheet`
-                );
+              },
+              {
+                upsert: true,
+                new: true,
               }
-              next(error);
-              break;
-            } else {
-              throw error;
-            }
+            );
+          } else if (!membershipId || !college || !sem || !branch) {
+            user = await userData.findOneAndUpdate(
+              { email: email },
+              {
+                $setOnInsert: {
+                  name: name,
+                },
+              },
+              {
+                upsert: true,
+                new: true,
+              }
+            );
+          } else {
+            user = await userData.findOneAndUpdate(
+              { email: email },
+              {
+                $setOnInsert: {
+                  name: name,
+                  membershipId,
+                  college,
+                  sem,
+                  branch,
+                },
+              },
+              {
+                upsert: true,
+                new: true,
+              }
+            );
           }
+          console.log("user", user);
+          const eventRegisterData = seatNo
+            ? {
+                eventId: eventId,
+                regId: regId,
+                userId: user._id,
+                seatNo: seatNo,
+                present: present,
+              }
+            : {
+                eventId: eventId,
+                regId: regId,
+                userId: user._id,
+                present: present,
+              };
+          await eventRegistration.create(eventRegisterData);
+          logger.debug(`${rowNum} is added successfully`);
         }
         logger.info("ulpoadSheet, uploaded Successfully");
         deleteFile(fileName);
@@ -451,32 +417,52 @@ const uploadSheet = async (req, res, next) => {
   } catch (error) {
     console.log("upload error", error);
     logger.error("upload sheet catch err===> %o", error);
-    if (error.code == 11000) {
-      if (error.keyPattern.regId) {
-        logger.error("uploadSheet, Duplicate regId in sheet, ==> %o", error);
-        next(
-          new ApiError(
-            httpStatus.CONFLICT,
-            `Duplicate ${a.regId} regId for participant ${a.name} in sheet`
-          )
-        );
-      } else if (error.keyPattern.email) {
-        logger.error("uploadSheet, Duplicate email in sheet==> %o", error);
-        next(
-          new ApiError(
-            httpStatus.CONFLICT,
-            `Duplicate ${a.email} email for participant ${a.name} in sheet`
-          )
-        );
-      } else if (error.keyPattern.seatNo) {
-        logger.error("uploadSheet, Duplication seatNo in sheet==> %o", error);
-        next(
-          new ApiError(
-            httpStatus.CONFLICT,
-            `Seat no ${a.seatNo} can not allocate to particpant ${a.name} in sheet`
-          )
-        );
-      }
+    logger.error("error detail %o", error.keyPattern);
+    if (Object.keys(error.keyPattern) == "userId") {
+      logger.error("uploadSheet, Duplicate email in sheet==> %o", error);
+      error = new ApiError(
+        httpStatus.CONFLICT,
+        `Duplicate ${participant.email} email for participant ${participant.name} in sheet`
+      );
+      next(error);
+    } else if (Object.keys(error.keyPattern) == "regId") {
+      logger.error("uploadSheet, Duplicate regId in sheet, ==> %o", error);
+      error = new ApiError(
+        httpStatus.CONFLICT,
+        `Duplicate ${participant.regId} regId for participant ${participant.name} in sheet`
+      );
+      next(error);
+    } else if (Object.keys(error.keyPattern) == "seatNo") {
+      logger.error("uploadSheet, Duplication seatNo in sheet==> %o", error);
+      error = new ApiError(
+        httpStatus.CONFLICT,
+        `Seat no ${participant.seatNo} can not allocate to particpant ${participant.name} in sheet`
+      );
+      next(error);
+    } else if (error.keyPattern.regId) {
+      logger.error("uploadSheet, Duplicate regId in sheet, ==> %o", error);
+      next(
+        new ApiError(
+          httpStatus.CONFLICT,
+          `Duplicate ${a.regId} regId for participant ${a.name} in sheet`
+        )
+      );
+    } else if (error.keyPattern.email) {
+      logger.error("uploadSheet, Duplicate email in sheet==> %o", error);
+      next(
+        new ApiError(
+          httpStatus.CONFLICT,
+          `Duplicate ${a.email} email for participant ${a.name} in sheet`
+        )
+      );
+    } else if (error.keyPattern.seatNo) {
+      logger.error("uploadSheet, Duplication seatNo in sheet==> %o", error);
+      next(
+        new ApiError(
+          httpStatus.CONFLICT,
+          `Seat no ${a.seatNo} can not allocate to particpant ${a.name} in sheet`
+        )
+      );
     } else {
       res.status(500).send({
         messaage: "You have made a BAD request",
