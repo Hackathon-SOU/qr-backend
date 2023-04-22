@@ -131,7 +131,15 @@ const getAllUserDetails = async (req, res, next) => {
             __v: 0,
           }
         )
-        .populate("userId", { name: 1, email: 1, _id: 0 });
+        .populate("userId", {
+          name: 1,
+          email: 1,
+          _id: 0,
+          membershipId: 1,
+          college: 1,
+          branch: 1,
+          sem: 1,
+        });
       if (Boolean(resultUsers)) {
         if (resultUsers.length == 0) {
           logger.info("No participant found with this event Id");
