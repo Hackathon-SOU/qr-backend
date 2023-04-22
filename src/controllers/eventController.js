@@ -80,16 +80,27 @@ const getEventReport = async (req, res, next) => {
         branch: 1,
         sem: 1,
       });
-    data = data.map((user) => {
+
+    const count = await eventRegistration
+      .find({ eventId: eventId, present: true })
+      .count();
+    logger.debug("participant present ---- %s", count);
+    data = data.map((user, index) => {
+      if (index === 0) {
+        user.userId.totalPresent = count;
+        user.userId.totalAbsent = data.length - count;
+        console.log(user.userId.totalAbsent, user.userId.totalPresent);
+      }
       return {
-        regId: user.regId,
-        present: user.present,
-        name: user.userId.name,
-        email: user.userId.email,
-        membershipId: user.userId.membershipId,
-        college: user.userId.college,
-        branch: user.userId.branch,
-        sem: user.userId.sem,
+        RegId: user.regId,
+        Present: user.present,
+        Name: user.userId.name,
+        Email: user.userId.email,
+        MembershipId: user.userId.membershipId,
+        Branch: user.userId.branch,
+        Sem: user.userId.sem,
+        "Total-Present": user.userId.totalPresent,
+        "Total-Absent": user.userId.totalAbsent,
       };
     });
     let dataString = JSON.stringify(data);
@@ -97,14 +108,16 @@ const getEventReport = async (req, res, next) => {
     console.log("data fetched===> %o", dataJson);
     const ws = xlsx.utils.json_to_sheet(dataJson, {
       header: [
-        "name",
-        "regId",
-        "email",
-        "membershipId",
-        "college",
-        "branch",
-        "sem",
-        "present",
+        "Name",
+        "RegId",
+        "Email",
+        "MembershipId",
+        "College",
+        "Branch",
+        "Sem",
+        "Present",
+        "Total-Present",
+        "Total-Absent",
       ],
     });
     logger.info("worksheet created");
