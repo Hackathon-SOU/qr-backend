@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
 const volunteerData = new mongoose.Schema({
   password: {
@@ -18,16 +18,20 @@ const volunteerData = new mongoose.Schema({
   role: {
     type: String,
     required: true,
-    enum: ['admin', 'volunteer', 'execom', 'super-admin']
+    enum: ["admin", "volunteer", "execom", "super-admin"],
   },
-  name: {
+  firstName: {
     type: String,
-    required: true
+    required: true,
+  },
+  lastName: {
+    type: String,
+    required: true,
   },
   verified: {
     type: Boolean,
     default: false,
-  }
+  },
 });
 
 module.exports = mongoose.model("volunteerData", volunteerData);
