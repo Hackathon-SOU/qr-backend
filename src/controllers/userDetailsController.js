@@ -182,6 +182,27 @@ const markpresence = async (req, res, next) => {
   try {
     const regId = req.body.regId;
     const present = req.body.present;
+    const currentTime = Math.round(new Date().getTime() / 1000);
+    logger.debug("currentTime --- %s", currentTime);
+
+    const eventRegisterData = await eventRegistration
+      .findOne({ regId })
+      .populate("eventId");
+
+    const eventTime = await eventRegisterData.eventId.eventDate;
+
+    logger.debug("eventTime --- %s", eventTime + 2 * 60 * 60);
+
+    if (currentTime > eventTime + 2 * 60 * 60) {
+      return res.status(httpStatus.CONFLICT).send({
+        message: "Opps!, Attendance Timeout.",
+      });
+    } else if (currentTime < eventTime - 60 * 60) {
+      return res.status(httpStatus.CONFLICT).send({
+        message: "1-hour window for attendance",
+      });
+    }
+    logger.debug("it works till here");
     const response = await eventRegistration.updateOne(
       {
         regId: regId,
