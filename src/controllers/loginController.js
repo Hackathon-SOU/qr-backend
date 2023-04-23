@@ -19,7 +19,7 @@ const member = require("../models/member");
 // Code for registering user
 const adminRegister = async (req, res, next) => {
   try {
-    const { role, email, name, membershipId } = req.body;
+    const { role, email, firstName, lastName, membershipId } = req.body;
     let password = req.body.password;
     password = await bcrypt.hash(password, 10).then((hash) => hash);
     const data = await volunteerData.create({
@@ -27,7 +27,8 @@ const adminRegister = async (req, res, next) => {
       email,
       membershipId,
       role,
-      name,
+      firstName,
+      lastName,
     });
     if (Boolean(data)) {
       let createToken = await tokenSchema.create({
@@ -36,6 +37,7 @@ const adminRegister = async (req, res, next) => {
       });
       logger.debug(createToken);
       if (Boolean(createToken)) {
+        const name = `${firstName} ${lastName}`;
         await sendVerificationMail(
           name,
           email,
@@ -59,6 +61,32 @@ const adminRegister = async (req, res, next) => {
   }
 };
 
+const resetPassword = async (req, res, next) => {
+  try {
+    let { confirmPassword, updatePassword } = req.body;
+    logger.debug("confirmPassword %o", confirmPassword);
+    if (confirmPassword !== updatePassword) {
+      return res.sendStatus(httpStatus.CONFLICT).send({
+        message: "Confirm Password does not match.",
+      });
+    }
+    confirmPassword = await bcrypt
+      .hash(confirmPassword, 10)
+      .then((hash) => hash);
+    logger.debug("confirm Password %o", confirmPassword);
+    const passwordUpdate = await volunteerData.findByIdAndUpdate(
+      { _id: req.id },
+      { password: confirmPassword },
+      { new: true }
+    );
+
+    logger.debug("passwordupdate %o", passwordUpdate);
+    res.sendStatus(201);
+  } catch (error) {
+    logger.error("error catch resetPassword --- %o", error);
+    next(error);
+  }
+};
 const verifyEmail = async (req, res, next) => {
   try {
     const { userId, token } = req.params;
@@ -515,4 +543,5 @@ module.exports = {
   participantLogin,
   getParticipantJwtToken,
   canteenRegister,
+  resetPassword,
 };
