@@ -23,6 +23,7 @@ const {
   canteenRegister,
   adminLogin,
   getAdminJwtToken,
+  resetPassword,
 } = require("../controllers/loginController");
 const authValidation = require("../validation/auth.validation.js");
 const participantValidation = require("../validation/participant.validation.js");
@@ -36,6 +37,7 @@ const {
   getAllMemberDetails,
   deleteMemberAccount,
   getProfileDetails,
+  updateMemberDetails,
 } = require("../controllers/memberController");
 
 const router = express.Router();
@@ -48,6 +50,14 @@ router.post(
 );
 
 router.post("/login", validate(authValidation.adminLoginSchema), adminLogin);
+
+router.patch(
+  "/resetpassword",
+  verifyJwt,
+  authorizeAdmin,
+  validate(authValidation.resetPasswordAdminSchema),
+  resetPassword
+);
 
 router.get("/getjwttoken", getAdminJwtToken);
 
@@ -95,6 +105,13 @@ router.get(
   authorizeAdmin,
   validate(participantValidation.getUserDetailsSchema),
   getuserDetails
+);
+router.patch(
+  "/memberdetails",
+  verifyJwt,
+  authorizeAdmin,
+  validate(participantValidation.updateMemberDetailSchema),
+  updateMemberDetails
 );
 
 router.post(

@@ -101,8 +101,37 @@ const getProfileDetails = async (req, res, next) => {
     res.send(httpStatus.BAD_REQUEST, { message: error.message });
   }
 };
+
+const updateMemberDetails = async (req, res, next) => {
+  try {
+    const { firstName, lastName, email } = req.body;
+
+    const memberUpdate = await volunteerData.findByIdAndUpdate(
+      { _id: req.id },
+      {
+        $rename: {
+          name: "firstName",
+        },
+        $set: {
+          firstName,
+          lastName,
+          email,
+        },
+      },
+      { new: true }
+    );
+    logger.debug("memberUpdate %o", memberUpdate);
+    res.send({
+      data: memberUpdate,
+    });
+  } catch (error) {
+    logger.error("error %o", error);
+  }
+};
+
 module.exports = {
   getAllMemberDetails,
   deleteMemberAccount,
   getProfileDetails,
+  updateMemberDetails,
 };
