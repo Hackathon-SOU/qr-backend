@@ -21,12 +21,6 @@ const adminRegisterSchema = {
       "string.empty": `Email cannot be an empty field`,
       "any.required": `Email is a required field`,
     }),
-    password: joi.string().min(3).trim(true).required().messages({
-      "string.base": `Password should be a type of 'string'`,
-      "string.empty": `Password cannot be an empty field`,
-      "string.min": `Password cannot be less than 3 charachters`,
-      "any.required": `Password is a required field`,
-    }),
     role: joi
       .string()
       .required()
@@ -115,16 +109,34 @@ const userRegisterSchema = {
 };
 
 const adminVerifySchema = {
-  params: joi.object().keys({
-    userId: joi.string().required().messages({
-      "string.base": `UserId should be a type of 'string'`,
-      "string.empty": `UserId cannot be an empty field`,
-      "any.required": `UserId is a required field`,
+  body: joi.object().keys({
+    membershipId: joi
+      .number()
+      .integer()
+      .min(10 ** 7)
+      .max(10 ** 8 - 1)
+      .required()
+      .messages({
+        "number.base": `membershipId should be a type of 'number'`,
+        "number.empty": `membershipId cannot be an empty field`,
+        "number.min": `membershipId length should be equal to 8.`,
+        "number.max": `membershipId length should be equal to 8.`,
+        "any.required": `membershipId is a required field`,
+      }),
+    otpPassword: joi.string().required().messages({
+      "string.base": `OTP should be a type of 'string'`,
+      "string.empty": `OTP cannot be an empty field`,
+      "any.required": `OTP is a required field`,
     }),
-    token: joi.string().required().messages({
-      "string.base": `Token should be a type of 'string'`,
-      "string.empty": `Token cannot be an empty field`,
-      "any.required": `Token is a required field`,
+    newPassword: joi.string().required().messages({
+      "string.base": `New Password should be a type of 'string'`,
+      "string.empty": `NewPassword cannot be an empty field`,
+      "any.required": `New Password is a required field`,
+    }),
+    confirmPassword: joi.string().required().messages({
+      "string.base": `Confirm Password should be a type of 'string'`,
+      "string.empty": `Confirm Password cannot be an empty field`,
+      "any.required": `Confirm Password is a required field`,
     }),
   }),
 };

@@ -51,6 +51,8 @@ router.post(
 
 router.post("/login", validate(authValidation.adminLoginSchema), adminLogin);
 
+router.post("/verify", validate(authValidation.adminVerifySchema), verifyEmail);
+
 router.patch(
   "/resetpassword",
   verifyJwt,

@@ -20,10 +20,7 @@ const member = require("../models/member");
 const adminRegister = async (req, res, next) => {
   try {
     const { role, email, firstName, lastName, membershipId } = req.body;
-    let password = req.body.password;
-    password = await bcrypt.hash(password, 10).then((hash) => hash);
     const data = await volunteerData.create({
-      password,
       email,
       membershipId,
       role,
@@ -33,7 +30,7 @@ const adminRegister = async (req, res, next) => {
     if (Boolean(data)) {
       let createToken = await tokenSchema.create({
         userId: data._id,
-        token: crypto.randomBytes(32).toString("hex"),
+        token: crypto.randomBytes(2).toString("hex"),
       });
       logger.debug(createToken);
       if (Boolean(createToken)) {
@@ -41,7 +38,6 @@ const adminRegister = async (req, res, next) => {
         await sendVerificationMail(
           name,
           email,
-          createToken.userId,
           createToken.token
         );
         res.status(200).send({
@@ -89,29 +85,40 @@ const resetPassword = async (req, res, next) => {
 };
 const verifyEmail = async (req, res, next) => {
   try {
-    const { userId, token } = req.params;
-    logger.debug(userId, token);
+    const { membershipId, otpPassword, newPassword, confirmPassword } = req.body;
+    if(newPassword !== confirmPassword){
+      res.status(httpStatus.CONFLICT).send({
+        message: "Passwords does not match"
+      })
+    }
+    logger.debug("membershipId %o", membershipId);
     const volunteer = await volunteerData.findOne({
-      _id: userId,
+      membershipId: membershipId,
     });
-    logger.debug(volunteer._id);
+    logger.debug(volunteer);
     if (!volunteer) {
-      res.status(httpStatus.NOT_FOUND).send("Invalid Link");
+      res.status(httpStatus.NOT_FOUND).send({
+        message: "Incorrect MembershipId"
+      });
     }
     const dbToken = await tokenSchema.findOne({
       userId: volunteer._id,
-      token: token,
+      token: otpPassword,
     });
     logger.debug(dbToken);
     if (!dbToken) {
-      res.status(httpStatus.NOT_FOUND).send("Invalid Link");
+      res.status(httpStatus.NOT_FOUND).send({
+        message:"Incorrect OTP"
+      });
     }
+    const password = await bcrypt.hash(newPassword, 10).then((hash) => hash);
     const isVolunteerDataUpdated = await volunteerData.updateOne(
       {
         _id: volunteer._id,
       },
       {
         verified: true,
+        password: password
       }
     );
     logger.debug("volunteerDataupdated %o", isVolunteerDataUpdated);
@@ -119,7 +126,29 @@ const verifyEmail = async (req, res, next) => {
       _id: dbToken._id,
     });
     await sendSuccessfulVerifiedMail(volunteer.name, volunteer.email);
-    res.status(httpStatus.OK).send("Verified Email Successfully");
+    const accessToken = jwt.sign(
+      {
+        id: volunteer._id,
+        role: volunteer.role,
+        membershipId: volunteer.membershipId,
+      },
+      process.env.ACCESSSECRET,
+      {
+        expiresIn: 60 * 60,
+      }
+    );
+    const refreshToken = jwt.sign(
+      {
+        membershipId: volunteer.membershipId,
+      },
+      process.env.REFRESHSECRET
+    );
+    res.status(httpStatus.OK).send({
+      message: "Verified Email Successfully",
+      accessToken: accessToken,
+      refreshToken: refreshToken,
+      role: volunteer.role
+    });
   } catch (error) {
     logger.error("verify Email errror===> %o", error);
     next(error);
@@ -165,7 +194,7 @@ const canteenRegister = async (req, res, next) => {
 const adminLogin = async (req, res, next) => {
   try {
     const membershipId = req.body.membershipId;
-    const password = req.body.password;
+    const password =  req.body.password;
     const admin = await volunteerData.findOne({
       membershipId: membershipId,
     });
@@ -182,7 +211,7 @@ const adminLogin = async (req, res, next) => {
             "The password does not match with the Membership Id"
           );
         } else {
-          let accessToken = jwt.sign(
+          const accessToken = jwt.sign(
             {
               id: admin._id,
               role: admin.role,
@@ -193,7 +222,7 @@ const adminLogin = async (req, res, next) => {
               expiresIn: 60 * 60,
             }
           );
-          let refreshToken = jwt.sign(
+          const refreshToken = jwt.sign(
             {
               membershipId: admin.membershipId,
             },

@@ -4,7 +4,7 @@ const ejs = require("ejs");
 require("dotenv").config();
 const logger = require("../utils/logger");
 
-
+const verifyLink = process.env.ENV === "development" ? process.env.VERIFYLINKDEV : process.env.VERIFYLINKPROD;
 let transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
@@ -23,10 +23,9 @@ let mailOptions = {
 
 
 
-const sendVerificationMail = async (name, adminMail, userId, token) => {
+const sendVerificationMail = async (name, adminMail, password) => {
     try {
-        logger.debug("%s %o",
-            userId, token);
+        logger.debug("%s",password);
         await new Promise((resolve, reject) => {
             // verify connection configuration
             transporter.verify(function (error, success) {
@@ -42,7 +41,8 @@ const sendVerificationMail = async (name, adminMail, userId, token) => {
         mailOptions.to = adminMail;
         await ejs.renderFile(path.join(path.resolve(), 'src/templates/verifyEmail.ejs'), {
             userName: name,
-            verifyLink: `${process.env.API_URL}/admin/verify/${userId}/${token}`
+            password: password,
+            verifyLink: verifyLink
         }).then(result => {
             mailOptions.html = result;
         });

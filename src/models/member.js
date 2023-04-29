@@ -3,7 +3,6 @@ const mongoose = require("mongoose");
 const volunteerData = new mongoose.Schema({
   password: {
     type: String,
-    required: true,
   },
   membershipId: {
     type: Number,
