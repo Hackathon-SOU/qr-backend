@@ -10,7 +10,6 @@ const ApiError = require("../utils/ApiError");
 function verifyJwt(req, res, next) {
   try {
     let token;
-    logger.debug("req recieve===>", req.headers);
     if (
       req.headers.authorization == undefined ||
       null == req.headers.authorization

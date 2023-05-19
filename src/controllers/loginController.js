@@ -1,4 +1,5 @@
 const bcrypt = require("bcryptjs");
+const cookie = require("cookie");
 const jwt = require("jsonwebtoken");
 const crypto = require("crypto");
 const httpStatus = require("http-status");
@@ -16,6 +17,11 @@ const logger = require("../utils/logger");
 const user = require("../models/user");
 const member = require("../models/member");
 
+const cookieOptions = {
+  httOnly: true,
+  secure: false,
+  sameSite: "strict",
+};
 // Code for registering user
 const adminRegister = async (req, res, next) => {
   try {
@@ -35,11 +41,7 @@ const adminRegister = async (req, res, next) => {
       logger.debug(createToken);
       if (Boolean(createToken)) {
         const name = `${firstName} ${lastName}`;
-        await sendVerificationMail(
-          name,
-          email,
-          createToken.token
-        );
+        await sendVerificationMail(name, email, createToken.token);
         res.status(200).send({
           message: "Account has been created",
         });
@@ -85,11 +87,12 @@ const resetPassword = async (req, res, next) => {
 };
 const verifyEmail = async (req, res, next) => {
   try {
-    const { membershipId, otpPassword, newPassword, confirmPassword } = req.body;
-    if(newPassword !== confirmPassword){
+    const { membershipId, otpPassword, newPassword, confirmPassword } =
+      req.body;
+    if (newPassword !== confirmPassword) {
       res.status(httpStatus.CONFLICT).send({
-        message: "Passwords does not match"
-      })
+        message: "Passwords does not match",
+      });
     }
     logger.debug("membershipId %o", membershipId);
     const volunteer = await volunteerData.findOne({
@@ -98,7 +101,7 @@ const verifyEmail = async (req, res, next) => {
     logger.debug(volunteer);
     if (!volunteer) {
       res.status(httpStatus.NOT_FOUND).send({
-        message: "Incorrect MembershipId"
+        message: "Incorrect MembershipId",
       });
     }
     const dbToken = await tokenSchema.findOne({
@@ -108,7 +111,7 @@ const verifyEmail = async (req, res, next) => {
     logger.debug(dbToken);
     if (!dbToken) {
       res.status(httpStatus.NOT_FOUND).send({
-        message:"Incorrect OTP"
+        message: "Incorrect OTP",
       });
     }
     const password = await bcrypt.hash(newPassword, 10).then((hash) => hash);
@@ -118,7 +121,7 @@ const verifyEmail = async (req, res, next) => {
       },
       {
         verified: true,
-        password: password
+        password: password,
       }
     );
     logger.debug("volunteerDataupdated %o", isVolunteerDataUpdated);
@@ -147,7 +150,7 @@ const verifyEmail = async (req, res, next) => {
       message: "Verified Email Successfully",
       accessToken: accessToken,
       refreshToken: refreshToken,
-      role: volunteer.role
+      role: volunteer.role,
     });
   } catch (error) {
     logger.error("verify Email errror===> %o", error);
@@ -194,7 +197,7 @@ const canteenRegister = async (req, res, next) => {
 const adminLogin = async (req, res, next) => {
   try {
     const membershipId = req.body.membershipId;
-    const password =  req.body.password;
+    const password = req.body.password;
     const admin = await volunteerData.findOne({
       membershipId: membershipId,
     });
@@ -228,6 +231,8 @@ const adminLogin = async (req, res, next) => {
             },
             process.env.REFRESHSECRET
           );
+          res.cookie("accessToken", accessToken, cookieOptions);
+          res.set("withCredentials", true);
           res.status(200).send({
             accessToken: accessToken,
             refreshToken: refreshToken,

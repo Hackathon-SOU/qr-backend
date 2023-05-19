@@ -1,5 +1,6 @@
 const express = require("express");
 const mongoose = require("mongoose");
+const cookieParser = require("cookie-parser");
 const cors = require("cors");
 const httpStatus = require("http-status");
 require("dotenv").config();
@@ -24,6 +25,7 @@ var corsOptions = {
       callback(new Error("Not allowed by CORS"));
     }
   },
+  credentials: true,
 };
 
 app.use(
@@ -31,6 +33,7 @@ app.use(
     extended: true,
   })
 );
+app.use(cookieParser());
 app.use(express.json());
 app.use((req, res, next) => {
   res.append("Access-Control-Allow-Headers", "Content-Type");
@@ -43,7 +46,12 @@ if (process.env.ENV === "production") {
 } else if (process.env.ENV === "development") {
   logger.info("development");
   mongodbString = process.env.DATABASE_DEV_URL;
-  app.use(cors());
+  app.use(
+    cors({
+      origin: "http://localhost:5000",
+      credentials: true,
+    })
+  );
 }
 mongoose.connect(mongodbString);
 const database = mongoose.connection;

@@ -89,6 +89,7 @@ const getAllMemberDetails = async (req, res, next) => {
 
 const getProfileDetails = async (req, res, next) => {
   try {
+    console.log("req.headers.cookies", req.headers.cookie);
     const member = await volunteerData.findById(
       { _id: req.id },
       { _id: 0, __v: 0, verified: 0, password: 0 }
