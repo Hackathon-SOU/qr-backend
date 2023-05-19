@@ -20,7 +20,7 @@ const member = require("../models/member");
 const cookieOptions = {
   httOnly: true,
   secure: false,
-  sameSite: "strict",
+  // sameSite: "strict",
 };
 // Code for registering user
 const adminRegister = async (req, res, next) => {
