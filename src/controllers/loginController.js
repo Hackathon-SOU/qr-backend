@@ -19,7 +19,7 @@ const member = require("../models/member");
 
 const cookieOptions = {
   httOnly: true,
-  secure: false,
+  secure: true,
   sameSite: "none",
 };
 // Code for registering user
