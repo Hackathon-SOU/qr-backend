@@ -24,6 +24,7 @@ const {
   adminLogin,
   getAdminJwtToken,
   resetPassword,
+  checkAuth,
 } = require("../controllers/loginController");
 const authValidation = require("../validation/auth.validation.js");
 const participantValidation = require("../validation/participant.validation.js");
@@ -42,6 +43,7 @@ const {
 
 const router = express.Router();
 
+router.get("/check-auth", checkAuth);
 router.post(
   "/signup",
   verifyJwt,

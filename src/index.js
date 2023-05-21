@@ -65,7 +65,6 @@ database.once("connected", () => {
 // app.use('/api/api-docs', swaggerUi.serve);
 // app.use('/api/api-docs', swaggerUi.setup(swaggerDocument, options));
 
-// app.use("/api/admin/verify", cors(corsOptions), require("./routes/public"));
 if (process.env.ENV === "production") {
   app.use("/api/admin", cors(corsOptions), require("./routes/admin"));
   app.use("/api/canteen", cors(corsOptions), require("./routes/canteen"));

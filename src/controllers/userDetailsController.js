@@ -29,7 +29,6 @@ const downloadAllParticipantsList = async (req, res, next) => {
     logger.debug("data", data);
     let dataString = JSON.stringify(data);
     let dataJson = JSON.parse(dataString);
-    console.log("data fetched===> %o", dataJson);
     const ws = xlsx.utils.json_to_sheet(dataJson, {
       header: ["name", "email"],
     });
@@ -82,7 +81,6 @@ const getuserDetails = async (req, res, next) => {
         }
       )
       .populate("userId", { name: 1, email: 1, _id: 0 });
-    console.log("resultUser", resultUser);
     if (!resultUser) {
       throw new ApiError(
         httpStatus.NOT_FOUND,
@@ -95,7 +93,6 @@ const getuserDetails = async (req, res, next) => {
       name: resultUser.userId.name,
       email: resultUser.userId.email,
     };
-    console.log("data", resultUser);
     if (resultUser.present === true) {
       throw new ApiError(
         httpStatus.FORBIDDEN,
@@ -163,7 +160,6 @@ const getAllUserDetails = async (req, res, next) => {
             sem: user.userId.sem,
           };
         });
-        console.log("resultUsers", resultUsers);
         return res.status(200).send(resultUsers);
       }
     }
@@ -264,7 +260,6 @@ const updateOrInsertUserData = async (
   branch,
   sem
 ) => {
-  console.log(name, membershipId, college, branch, sem);
   let user;
   if (!membershipId && college && sem && branch) {
     user = await userData.findOneAndUpdate(
@@ -402,7 +397,6 @@ const deleteFile = (req, deleteFile) => {
 const deleteEventRegistrationByEventId = async (eventId) => {
   // Delete all the EventRegistration documents
   const deletedEventReg = await eventRegistration.deleteMany({ eventId });
-  console.log("deletedEventReg", deletedEventReg);
 };
 const uploadSheet = async (req, res, next) => {
   try {
@@ -416,7 +410,6 @@ const uploadSheet = async (req, res, next) => {
     for (let i = 0; i < sheet.length; i++) {
       const sheetName = sheet[i];
       const sheetData = xlsx.utils.sheet_to_json(file.Sheets[sheetName]);
-      console.log("data", sheetData[0]);
       let totalData;
       totalData = await userData.count({});
       logger.info("Total numOfparticpant user in db ====> %s", totalData);

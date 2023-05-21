@@ -58,7 +58,6 @@ const getEvent = async (req, res, next) => {
 
 const getEventReport = async (req, res, next) => {
   try {
-    console.log(req.query.eventId);
     const eventId = req.query.eventId;
     let data = await eventRegistration
       .find(
@@ -89,7 +88,6 @@ const getEventReport = async (req, res, next) => {
       if (index === 0) {
         user.userId.totalPresent = count;
         user.userId.totalAbsent = data.length - count;
-        console.log(user.userId.totalAbsent, user.userId.totalPresent);
       }
       return {
         RegId: user.regId,
@@ -105,7 +103,6 @@ const getEventReport = async (req, res, next) => {
     });
     let dataString = JSON.stringify(data);
     let dataJson = JSON.parse(dataString);
-    console.log("data fetched===> %o", dataJson);
     const ws = xlsx.utils.json_to_sheet(dataJson, {
       header: [
         "Name",

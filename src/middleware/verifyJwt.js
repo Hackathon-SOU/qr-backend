@@ -17,7 +17,6 @@ const getAdminJwtToken = async (req, res, next) => {
   try {
     const cookies = req.headers.cookie.split("; ");
     const refreshToken = cookies[0].split("=")[1];
-    console.log("refreshToken", refreshToken);
     if (!refreshToken)
       throw new ApiError(
         httpStatus.NOT_FOUND,
@@ -91,7 +90,6 @@ function verifyJwt(req, res, next) {
 
 async function authorizeAdmin(req, res, next) {
   const volunteerId = req.id;
-  console.log("volunteerId==>", volunteerId);
   let admin = await volunteerData.findOne({
     _id: volunteerId,
   });
