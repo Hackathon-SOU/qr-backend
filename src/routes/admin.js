@@ -61,7 +61,7 @@ router.patch(
   resetPassword
 );
 
-router.get("/getjwttoken", getAdminJwtToken);
+// router.get("/getjwttoken", getAdminJwtToken);
 
 router.get(
   "/getallmemberdetails",

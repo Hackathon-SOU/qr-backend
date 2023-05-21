@@ -90,27 +90,27 @@ const verifyEmail = async (req, res, next) => {
     const { membershipId, otpPassword, newPassword, confirmPassword } =
       req.body;
     if (newPassword !== confirmPassword) {
-      res.status(httpStatus.CONFLICT).send({
+      return res.status(httpStatus.CONFLICT).send({
         message: "Passwords does not match",
       });
     }
     logger.debug("membershipId %o", membershipId);
     const volunteer = await volunteerData.findOne({
-      membershipId: membershipId,
+      membershipId: +membershipId,
     });
-    logger.debug(volunteer);
-    if (!volunteer) {
-      res.status(httpStatus.NOT_FOUND).send({
+    logger.debug("volunteer %o", volunteer === null);
+    if (!volunteer || volunteer === null)
+      return res.status(httpStatus.CONFLICT).send({
         message: "Incorrect MembershipId",
       });
-    }
+    logger.debug("volunteer 2 ----- %o", volunteer);
     const dbToken = await tokenSchema.findOne({
       userId: volunteer._id,
       token: otpPassword,
     });
     logger.debug(dbToken);
     if (!dbToken) {
-      res.status(httpStatus.NOT_FOUND).send({
+      return res.status(httpStatus.NOT_FOUND).send({
         message: "Incorrect OTP",
       });
     }
@@ -146,10 +146,11 @@ const verifyEmail = async (req, res, next) => {
       },
       process.env.REFRESHSECRET
     );
-    res.status(httpStatus.OK).send({
+    res.cookie("refreshToken", refreshToken, cookieOptions);
+    res.cookie("accessToken", accessToken, cookieOptions);
+    res.set("withCredentials", true);
+    return res.status(httpStatus.OK).send({
       message: "Verified Email Successfully",
-      accessToken: accessToken,
-      refreshToken: refreshToken,
       role: volunteer.role,
     });
   } catch (error) {
@@ -201,48 +202,43 @@ const adminLogin = async (req, res, next) => {
     const admin = await volunteerData.findOne({
       membershipId: membershipId,
     });
-    if (admin) {
-      if (admin.verified !== true) {
-        res.status(httpStatus.CONFLICT).send({
-          message: "Email is not verified.",
-        });
-      } else {
-        let isPasswordMatch = await bcrypt.compare(password, admin.password);
-        if (!isPasswordMatch) {
-          throw new ApiError(
-            httpStatus.UNAUTHORIZED,
-            "The password does not match with the Membership Id"
-          );
-        } else {
-          const accessToken = jwt.sign(
-            {
-              id: admin._id,
-              role: admin.role,
-              membershipId: admin.membershipId,
-            },
-            process.env.ACCESSSECRET,
-            {
-              expiresIn: 60 * 60,
-            }
-          );
-          const refreshToken = jwt.sign(
-            {
-              membershipId: admin.membershipId,
-            },
-            process.env.REFRESHSECRET
-          );
-          res.cookie("accessToken", accessToken, cookieOptions);
-          res.set("withCredentials", true);
-          res.status(200).send({
-            accessToken: accessToken,
-            refreshToken: refreshToken,
-            role: admin.role,
-          });
-          logger.info(`Admin has been loggedIn Successfully `);
-        }
-      }
+    if (!admin)
+      throw new ApiError(httpStatus.UNAUTHORIZED, "Account not created");
+    if (admin.verified !== true) {
+      res.status(httpStatus.CONFLICT).send({
+        message: "Email is not verified.",
+      });
     } else {
-      throw new ApiError(httpStatus.UNAUTHORIZED, "Wrong Membership Id");
+      let isPasswordMatch = await bcrypt.compare(password, admin.password);
+      if (!isPasswordMatch) {
+        throw new ApiError(httpStatus.UNAUTHORIZED, "Password is incorrect");
+      } else {
+        const accessToken = jwt.sign(
+          {
+            id: admin._id,
+            role: admin.role,
+            membershipId: admin.membershipId,
+          },
+          process.env.ACCESSSECRET,
+          {
+            expiresIn: 5,
+          }
+        );
+        const refreshToken = jwt.sign(
+          {
+            membershipId: admin.membershipId,
+          },
+          process.env.REFRESHSECRET
+        );
+        res.cookie("refreshToken", refreshToken, cookieOptions);
+        res.cookie("accessToken", accessToken, cookieOptions);
+        res.set("withCredentials", true);
+        res.status(200).send({
+          role: admin.role,
+          membershipId: admin.membershipId,
+        });
+        logger.info(`Admin has been loggedIn Successfully `);
+      }
     }
   } catch (error) {
     logger.error("Admin login catch error===> %o", error);
@@ -343,82 +339,6 @@ const participantLogin = async (req, res, next) => {
 };
 
 // get JWT token from Refresh token
-
-const getAdminJwtToken = async (req, res, next) => {
-  try {
-    console.log("req.body", req.query);
-    const membershipId = req.query.membershipId;
-    logger.debug("membershipId %s", membershipId);
-    let refreshToken;
-    if (
-      req.headers.authorization == undefined ||
-      null == req.headers.authorization
-    ) {
-      throw new ApiError(
-        httpStatus.NOT_FOUND,
-        "Refresh Token are undefined or null"
-      );
-    } else if (
-      req.headers.authorization &&
-      req.headers.authorization.split(" ")[0] === "Bearer"
-    ) {
-      refreshToken = req.headers.authorization.split(" ")[1];
-      if (
-        membershipId == undefined ||
-        membershipId == 0 ||
-        membershipId.length == 0
-      ) {
-        throw new ApiError(
-          httpStatus.NOT_FOUND,
-          "MembershipId are undefined or null"
-        );
-      } else {
-        jwt.verify(
-          refreshToken,
-          process.env.REFRESHSECRET,
-          async function (error, decoded) {
-            if (error) {
-              error = new ApiError(httpStatus.UNAUTHORIZED, error.message);
-              next(error);
-            } else {
-              if (decoded.membershipId == membershipId) {
-                const admin = await volunteerData.findOne({
-                  membershipId: membershipId,
-                });
-                let accessToken = jwt.sign(
-                  {
-                    id: admin._id,
-                    role: admin.role,
-                    membershipId: admin.membershipId,
-                  },
-                  process.env.ACCESSSECRET,
-                  {
-                    expiresIn: 60 * 60,
-                  }
-                );
-                res.status(200).send({
-                  accessToken: accessToken,
-                  refreshToken: refreshToken,
-                });
-                logger.info("Admin Refresh token generated Successfully");
-              } else {
-                next(
-                  new ApiError(
-                    httpStatus.UNAUTHORIZED,
-                    "You membership Id does not matched with token"
-                  )
-                );
-              }
-            }
-          }
-        );
-      }
-    }
-  } catch (error) {
-    logger.error("Admin refresh jwt token catch error==> %o", error);
-    next(error);
-  }
-};
 
 const getParticipantJwtToken = async (req, res, next) => {
   try {
@@ -571,7 +491,6 @@ module.exports = {
   adminRegister,
   verifyEmail,
   adminLogin,
-  getAdminJwtToken,
   canteenLogin,
   getCanteenJwtToken,
   participantLogin,
