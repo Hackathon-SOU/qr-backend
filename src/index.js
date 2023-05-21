@@ -46,12 +46,7 @@ if (process.env.ENV === "production") {
 } else if (process.env.ENV === "development") {
   logger.info("development");
   mongodbString = process.env.DATABASE_DEV_URL;
-  app.use(
-    cors({
-      origin: "http://localhost:5000",
-      credentials: true,
-    })
-  );
+  app.use(cors(corsOptions));
 }
 mongoose.connect(mongodbString);
 const database = mongoose.connection;
@@ -70,7 +65,7 @@ database.once("connected", () => {
 // app.use('/api/api-docs', swaggerUi.serve);
 // app.use('/api/api-docs', swaggerUi.setup(swaggerDocument, options));
 
-app.use("/api/admin/verify", cors(), require("./routes/public"));
+// app.use("/api/admin/verify", cors(corsOptions), require("./routes/public"));
 if (process.env.ENV === "production") {
   app.use("/api/admin", cors(corsOptions), require("./routes/admin"));
   app.use("/api/canteen", cors(corsOptions), require("./routes/canteen"));

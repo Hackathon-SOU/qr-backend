@@ -81,31 +81,29 @@ const getuserDetails = async (req, res, next) => {
           eventId: 0,
         }
       )
-      .populate("userId", { name: 1, email: 1, _id: 0 })
-      .then((user) => {
-        return {
-          regId: user.regId,
-          present: user.present,
-          name: user.userId.name,
-          email: user.userId.email,
-        };
-      });
-    console.log("data", resultUser);
-    if (Boolean(resultUser)) {
-      if (resultUser.present === true) {
-        throw new ApiError(
-          httpStatus.FORBIDDEN,
-          "The person is already marked present. Please check your Registration Id."
-        );
-      } else {
-        logger.info("The particpant value fetched successfully");
-        return res.status(200).send(resultUser);
-      }
-    } else {
+      .populate("userId", { name: 1, email: 1, _id: 0 });
+    console.log("resultUser", resultUser);
+    if (!resultUser) {
       throw new ApiError(
         httpStatus.NOT_FOUND,
         "Oops, No participant found with this regId"
       );
+    }
+    resultUser = {
+      regId: resultUser.regId,
+      present: resultUser.present,
+      name: resultUser.userId.name,
+      email: resultUser.userId.email,
+    };
+    console.log("data", resultUser);
+    if (resultUser.present === true) {
+      throw new ApiError(
+        httpStatus.FORBIDDEN,
+        "The person is already marked present. Please check your Registration Id."
+      );
+    } else {
+      logger.info("The particpant value fetched successfully");
+      return res.status(200).send(resultUser);
     }
   } catch (error) {
     logger.error("Get user details catch error====> %o", error);
@@ -140,37 +138,34 @@ const getAllUserDetails = async (req, res, next) => {
           branch: 1,
           sem: 1,
         });
-      if (Boolean(resultUsers)) {
-        if (resultUsers.length == 0) {
-          logger.info("No participant found with this event Id");
-          throw new ApiError(
-            httpStatus.NOT_FOUND,
-            "No participant found. Please add participant in your event"
-          );
-        } else {
-          logger.info("Users fetched Succesfully");
-          resultUsers = resultUsers.map((user) => {
-            return {
-              regId: user.regId,
-              present: user.present,
-              name: user.userId.name,
-              email: user.userId.email,
-              membershipId: user.userId.membershipId,
-              college: user.userId.college,
-              branch: user.userId.branch,
-              sem: user.userId.sem,
-            };
-          });
-          console.log("resultUsers", resultUsers);
-          return res.status(200).send(resultUsers);
-        }
+      if (!resultUsers)
+        throw new ApiError(
+          httpStatus.NOT_FOUND,
+          "No event is found with this eventId"
+        );
+      if (resultUsers.length == 0) {
+        logger.info("No participant found with this event Id");
+        throw new ApiError(
+          httpStatus.NOT_FOUND,
+          "No participant found. Please add participant in your event"
+        );
+      } else {
+        logger.info("Users fetched Succesfully");
+        resultUsers = resultUsers.map((user) => {
+          return {
+            regId: user.regId,
+            present: user.present,
+            name: user.userId.name,
+            email: user.userId.email,
+            membershipId: user.userId.membershipId,
+            college: user.userId.college,
+            branch: user.userId.branch,
+            sem: user.userId.sem,
+          };
+        });
+        console.log("resultUsers", resultUsers);
+        return res.status(200).send(resultUsers);
       }
-    } else {
-      logger.info("No participant found with event Id");
-      throw new ApiError(
-        httpStatus.NOT_FOUND,
-        "No event is found with this eventId"
-      );
     }
   } catch (error) {
     logger.error("Get all participant catch error==> %o", error);
@@ -421,6 +416,7 @@ const uploadSheet = async (req, res, next) => {
     for (let i = 0; i < sheet.length; i++) {
       const sheetName = sheet[i];
       const sheetData = xlsx.utils.sheet_to_json(file.Sheets[sheetName]);
+      console.log("data", sheetData[0]);
       let totalData;
       totalData = await userData.count({});
       logger.info("Total numOfparticpant user in db ====> %s", totalData);
