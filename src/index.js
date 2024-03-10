@@ -16,7 +16,11 @@ const { errorConverter, errorHandler } = require("./middleware/error");
 
 const ROOT_FOLDER = path.join(path.resolve(), ".");
 
-var whitelist = ["http://localhost:5000", "https://eventpad.live"];
+var whitelist = [
+  "http://localhost:5000",
+  "https://eventpad.live",
+  "https://eventpad.web.app",
+];
 var corsOptions = {
   origin: function (origin, callback) {
     if (whitelist.indexOf(origin) !== -1) {
